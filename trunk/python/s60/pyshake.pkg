@@ -1,0 +1,10 @@
+&EN
+#{"pyshake"},(0xA00015D7),1,0,0, TYPE=SA
+%{"Vendor-EN"}
+:"Vendor"
+[0x101F7961], 0, 0, 0, {"S60ProductID"}
+"..\pyshake.py"-"c:\resource\pyshake.py"
+"..\pyshake_packets.py"-"c:\resource\pyshake_packets.py"
+"..\pyshake_serial_s60.py"-"c:\resource\pyshake_serial_s60.py"
+"..\pyshake_constants.py"-"c:\resource\pyshake_constants.py"
+
