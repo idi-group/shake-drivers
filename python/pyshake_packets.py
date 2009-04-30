@@ -60,7 +60,7 @@ class shake_sensor_data:
 		self.direction = 0
 		self.hrbpm = 0
 		self.tid = ""
-		self.accseq, self.gyrseq, self.magseq, self.hdgseq, self.cap0seq, self.cap1seq, self.ana0seq, self.ana1seq = 0,0,0,0,0,0,0,0
+		self.accseq, self.gyrseq, self.magseq, self.headingseq, self.cap0seq, self.cap1seq, self.ana0seq, self.ana1seq = 0,0,0,0,0,0,0,0
 		self.timestamps = [0,0,0,0,0,0,0,0]
 
 # equivalent to the shake_device_private structure in the C driver, although not really private
