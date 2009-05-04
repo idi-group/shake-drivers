@@ -24,7 +24,7 @@
 #include "shake_thread.h"
 #include "shake_mulaw.h"
 
-#include "shake_common.h"
+#include "shake_registers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,10 +38,6 @@ extern "C" {
 #define SK6_HEADER_LEN		4	// "$pid," == 4 chars
 #define SK6_RAW_HEADER_LEN	3
 #define SK6_PACKET_ID_LEN		3
-
-/* common terminator for all SK6 packets (CR, LF) */
-#define SK6_TERMINATOR_LEN 2
-static char* sk6_terminator = "\r\n"; 
 
 /* packet types */
 enum sk6_packet_types {

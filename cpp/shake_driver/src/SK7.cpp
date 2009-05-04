@@ -591,17 +591,8 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 					case 4:
 						t = SHAKE_NAV_CENTRE;
 						break;
-					case 5: 
-						t = SK7_CS0_UPPER;
-						break;
-					case 6:
-						t = SK7_CS0_LOWER;
-						break;
-					case 7: 
-						t = SK7_CS1_UPPER;
-						break;
-					case 8:
-						t = SK7_CS1_LOWER;
+					default:
+						t = SK7_CS0_UPPER + (srps->data[0] - SK7_DATA_CU0);
 						break;
 				}
 				devpriv->lastevent = t;

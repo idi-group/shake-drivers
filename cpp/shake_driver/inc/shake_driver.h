@@ -716,14 +716,14 @@ SHAKE_API int shake_logging_packets_read(shake_device* sh);
 *	These functions allow you to easily get/set the values of the various configuration registers
 *	on a SHAKE device */
 
-/** Read the NV_REG_POWER1 register, which controls power to the various sensors on the device. 
+/** Read the SHAKE_NV_REG_POWER1 register, which controls power to the various sensors on the device. 
 *	The value returned will be a combination of the values from the ::shake_power1 enumeration.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value pointer to an unsigned char variable which will receive the contents of the register 
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_power_state(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_POWER1 register, which controls power to the various sensors on the device. 
+/** Write the SHAKE_NV_REG_POWER1 register, which controls power to the various sensors on the device. 
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value to write into the register (should be a combination of the values from the ::shake_power1 enumeration)
 *		For example, to power on the accelerometer and magnetometer (disabling everything else), the value should be:
@@ -731,14 +731,14 @@ SHAKE_API int shake_read_power_state(shake_device* sh, unsigned char* value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_power_state(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_POWER2 register, which enables/disables capacitive switch thresholds and event output.
+/** Read the SHAKE_NV_REG_POWER2 register, which enables/disables capacitive switch thresholds and event output.
 *	The value returned will be a combination of the values from the ::shake_power2 enumeration.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value pointer to an unsigned char variable which will receive the contents of the register 
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_power_state_2(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_POWER2 register, which enables/disables capacitive switch thresholds and event output.
+/** Write the SHAKE_NV_REG_POWER2 register, which enables/disables capacitive switch thresholds and event output.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value to write into the register (should be a combination of the values from the ::shake_power2 enumeration)
 *		For example, to enable upper and lower thresholds for cap switch 0, plus event packet output, the value
@@ -746,7 +746,7 @@ SHAKE_API int shake_read_power_state_2(shake_device* sh, unsigned char* value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_power_state_2(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_ACC_CONFIG register, which configures a couple of aspects of the accelerometer.
+/** Read the SHAKE_NV_REG_ACC_CONFIG register, which configures a couple of aspects of the accelerometer.
 *	The first bit in the returned value indicates the accelerometer range:
 *	- if 0, the range is +/- 2g
 *	- if 1, the range is +/- 6g
@@ -759,7 +759,7 @@ SHAKE_API int shake_write_power_state_2(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_acc_config(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_ACC_CONFIG register, which configures a couple of aspects of the accelerometer.
+/** Write the SHAKE_NV_REG_ACC_CONFIG register, which configures a couple of aspects of the accelerometer.
 *	The first bit of \a value controls the accelerometer range:
 *		- if 0, the range is +/- 2g
 *		- if 1, the range is +/- 6g
@@ -772,7 +772,7 @@ SHAKE_API int shake_read_acc_config(shake_device* sh, unsigned char* value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_acc_config(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_DATAFMT register, which configures the output data format from the SHAKE.
+/** Read the SHAKE_NV_REG_DATAFMT register, which configures the output data format from the SHAKE.
 *	If set, the first bit of the returned value indicates that checksums will be attached to ASCII data packets.
 *
 *	If set, the second bit indicates that output will be in raw (binary) mode, if not set, output is ASCII.
@@ -783,7 +783,7 @@ SHAKE_API int shake_write_acc_config(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_data_format(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_DATAFMT register, which configures the output data format from the SHAKE.
+/** Write the SHAKE_NV_REG_DATAFMT register, which configures the output data format from the SHAKE.
 *	If set, the first bit of \a value enables checksums for ASCII data packets. If not set, checksums are disabled.
 *
 *	If set, the second bit indicates that output will be in raw (binary) mode. If not set, output is ASCII.
@@ -794,7 +794,7 @@ SHAKE_API int shake_read_data_format(shake_device* sh, unsigned char* value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_data_format(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CALIB_BYPASS register, which can be used to obtain uncalibrated data from selected sensors.
+/** Read the SHAKE_NV_REG_CALIB_BYPASS register, which can be used to obtain uncalibrated data from selected sensors.
 *	The value returned will be a combination of the values from the ::shake_bypass_sensor_calib enumeration. If 
 *	the bit for a particular sensor is set, it means uncalibrated output is enabled.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -802,7 +802,7 @@ SHAKE_API int shake_write_data_format(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_calib_bypass(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CALIB_BYPASS register, which can be used to obtain uncalibrated data from selected sensors.
+/** Write the SHAKE_NV_REG_CALIB_BYPASS register, which can be used to obtain uncalibrated data from selected sensors.
 *	The value to write should be a combination of the values from the ::shake_bypass_sensor_calib enumeration. If 
 *	the bit for a particular sensor is set, it means uncalibrated output will be enabled.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -810,7 +810,7 @@ SHAKE_API int shake_read_calib_bypass(shake_device* sh, unsigned char* value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_calib_bypass(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CX_CALIB_BYPASS register, which can be used to disable the cross axes calibration for
+/** Read the SHAKE_NV_REG_CX_CALIB_BYPASS register, which can be used to disable the cross axes calibration for
 *	sensors with multiple degrees of freedom (accelerometer, gyro, magnetometer).
 *	The value returned will be a combination of the values from the ::shake_cx_bypass_sensor_calib enumeration. If 
 *	the bit for a particular sensor is set, it means uncalibrated output is enabled.
@@ -819,7 +819,7 @@ SHAKE_API int shake_write_calib_bypass(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_cx_bypass(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CX_CALIB_BYPASS register, which can be used to disable the cross axes calibration for
+/** Write the SHAKE_NV_REG_CX_CALIB_BYPASS register, which can be used to disable the cross axes calibration for
 *	sensors with multiple degrees of freedom (accelerometer, gyro, magnetometer).
 *	The value to write will be a combination of the values from the ::shake_cx_bypass_sensor_calib enumeration. If 
 *	the bit for a particular sensor is set, it means uncalibrated output will be enabled.
@@ -828,7 +828,7 @@ SHAKE_API int shake_read_cx_bypass(shake_device* sh, unsigned char* value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_cx_bypass(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_TEMP_COMPENSATION register, which indicates the state of temperature compensation for sensor output.
+/** Read the SHAKE_NV_REG_TEMP_COMPENSATION register, which indicates the state of temperature compensation for sensor output.
 *	Currently only gyroscope compensation is possible
 *	@warning This might not be working yet.
 *	The 2nd bit in the register is currently the only one used - if set, gyro temperature compensation is enabled.
@@ -837,7 +837,7 @@ SHAKE_API int shake_write_cx_bypass(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_temp_compensation(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_TEMP_COMPENSATION register, which controls the state of temperature compensation for sensor output.
+/** Write the SHAKE_NV_REG_TEMP_COMPENSATION register, which controls the state of temperature compensation for sensor output.
 *	Currently only gyroscope compensation is possible
 *	@warning This might not be working yet.
 *	The 2nd bit in the register is currently the only one used - if set, gyro temperature compensation is enabled.
@@ -846,7 +846,7 @@ SHAKE_API int shake_read_temp_compensation(shake_device* sh, unsigned char* valu
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_temp_compensation(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_STREAM_DISABLE register, which can be used to disable the streaming of data packets for selected sensors.
+/** Read the SHAKE_NV_REG_STREAM_DISABLE register, which can be used to disable the streaming of data packets for selected sensors.
 *	The value returned will be a combination of the values from the ::shake_stream_disable enumeration. If 
 *	the bit for a particular sensor is set, it means data streaming is DISABLED for that sensor (even if sample rate above 0).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -854,7 +854,7 @@ SHAKE_API int shake_write_temp_compensation(shake_device* sh, unsigned char valu
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_packet_streaming(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_STREAM_DISABLE register, which can be used to disable the streaming of data packets for selected sensors.
+/** Write the SHAKE_NV_REG_STREAM_DISABLE register, which can be used to disable the streaming of data packets for selected sensors.
 *	The value to write should be a combination of the values from the ::shake_stream_disable enumeration. If 
 *	the bit for a particular sensor is set, it means data streaming will be DISABLED for that sensor (even if sample rate above 0).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -862,7 +862,7 @@ SHAKE_API int shake_read_packet_streaming(shake_device* sh, unsigned char* value
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_packet_streaming(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_AUDIO_CONFIG register, which can be used to configure the audio functionality on SHAKEs with
+/** Read the SHAKE_NV_REG_AUDIO_CONFIG register, which can be used to configure the audio functionality on SHAKEs with
 *	supported hardware. 
 *	The value returned will be a combination of the values from the ::shake_audio_config enumeration.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -870,7 +870,7 @@ SHAKE_API int shake_write_packet_streaming(shake_device* sh, unsigned char value
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_audio_config(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_AUDIO_CONFIG register, which can be used to configure the audio functionality on SHAKEs with
+/** Write the SHAKE_NV_REG_AUDIO_CONFIG register, which can be used to configure the audio functionality on SHAKEs with
 *	supported hardware. 
 *	The value to write should be a combination of the values from the ::shake_audio_config enumeration. 
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -903,38 +903,48 @@ SHAKE_API int shake_write_midi_note(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_midi_waveform(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS0_INC register, which contains the increasing threshold value for capacitive switch 0.
+/** Read the SHAKE_NV_REG_CS0_INC register, which contains the increasing threshold value for capacitive switch 0.
+*
+*	SK6 only.
 *	The value returned will be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value pointer to an unsigned char variable which will receive the contents of the register 
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
-SHAKE_API int shake_read_cs0_inc(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs0_inc(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS0_INC register, which contains the increasing threshold value for capacitive switch 0.
+/** Write the SHAKE_NV_REG_CS0_INC register, which contains the increasing threshold value for capacitive switch 0.
+*
+*	SK6 only.
 *	The value for the threshold should be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value the threshold value (must be greater than the decreasing threshold!)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_write_cs0_dec() */
-SHAKE_API int shake_write_cs0_inc(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs0_inc(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS0_DEC register, which contains the decreasing threshold value for capacitive switch 0.
+/** Read the SHAKE_NV_REG_CS0_DEC register, which contains the decreasing threshold value for capacitive switch 0.
+*
+*	SK6 only.
 *	The value returned will be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value pointer to an unsigned char variable which will receive the contents of the register.
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
-SHAKE_API int shake_read_cs0_dec(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs0_dec(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS0_DEC register, which contains the decreasing threshold value for capacitive switch 0.
+/** Write the SHAKE_NV_REG_CS0_DEC register, which contains the decreasing threshold value for capacitive switch 0.
+*
+*	SK6 only.
 *	The value for the threshold should be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value the threshold value (must be less than the increasing threshold!)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR
 *	@see shake_write_cs0_inc() */
-SHAKE_API int shake_write_cs0_dec(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs0_dec(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS0_INC_PROFILE register, which contains the number of the vibration profile to play when
+/** Read the SHAKE_NV_REG_CS0_INC_PROFILE register, which contains the number of the vibration profile to play when
 *	the increasing threshold on capacitive switch 0 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -942,10 +952,12 @@ SHAKE_API int shake_write_cs0_dec(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2() */
-SHAKE_API int shake_read_cs0_inc_profile(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs0_inc_profile(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS0_INC_PROFILE register, which controls the number of the vibration profile to play when
+/** Write the SHAKE_NV_REG_CS0_INC_PROFILE register, which controls the number of the vibration profile to play when
 *	the increasing threshold on capacitive switch 0 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -953,10 +965,12 @@ SHAKE_API int shake_read_cs0_inc_profile(shake_device* sh, unsigned char* value)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2() */
-SHAKE_API int shake_write_cs0_inc_profile(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs0_inc_profile(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS0_DEC_PROFILE register, which contains the number of the vibration profile to play when
+/** Read the SHAKE_NV_REG_CS0_DEC_PROFILE register, which contains the number of the vibration profile to play when
 *	the decreasing threshold on capacitive switch 0 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -964,10 +978,12 @@ SHAKE_API int shake_write_cs0_inc_profile(shake_device* sh, unsigned char value)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2()*/
-SHAKE_API int shake_read_cs0_dec_profile(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs0_dec_profile(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS0_DEC_PROFILE register, which controls the number of the vibration profile to play when
+/** Write the SHAKE_NV_REG_CS0_DEC_PROFILE register, which controls the number of the vibration profile to play when
 *	the decreasing threshold on capacitive switch 0 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -975,40 +991,50 @@ SHAKE_API int shake_read_cs0_dec_profile(shake_device* sh, unsigned char* value)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2() */
-SHAKE_API int shake_write_cs0_dec_profile(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs0_dec_profile(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS1_INC register, which contains the increasing threshold value for capacitive switch 1.
+/** Read the SHAKE_NV_REG_CS1_INC register, which contains the increasing threshold value for capacitive switch 1.
+*
+*	SK6 only.
 *	The value returned will be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value pointer to an unsigned char variable which will receive the contents of the register 
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
-SHAKE_API int shake_read_cs1_inc(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs1_inc(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS1_INC register, which contains the decreasing threshold value for capacitive switch 1.
+/** Write the SHAKE_NV_REG_CS1_INC register, which contains the decreasing threshold value for capacitive switch 1.
+*
+*	SK6 only.
 *	The value for the threshold should be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value the threshold value (must be less than the increasing threshold!)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR
 *	@see shake_write_cs1_dec() */
-SHAKE_API int shake_write_cs1_inc(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs1_inc(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS1_DEC register, which contains the decreasing threshold value for capacitive switch 1.
+/** Read the SHAKE_NV_REG_CS1_DEC register, which contains the decreasing threshold value for capacitive switch 1.
+*
+*	SK6 only.
 *	The value returned will be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value pointer to an unsigned char variable which will receive the contents of the register 
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
-SHAKE_API int shake_read_cs1_dec(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs1_dec(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS1_DEC register, which contains the increasing threshold value for capacitive switch 1.
+/** Write the SHAKE_NV_REG_CS1_DEC register, which contains the increasing threshold value for capacitive switch 1.
+*
+*	SK6 only.
 *	The value for the threshold should be in the range 0-255 (the same range as the normal output from the sensor).
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value the threshold value (must be less than the increasing threshold!)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR
 *	@see shake_write_cs1_inc() */
-SHAKE_API int shake_write_cs1_dec(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs1_dec(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS1_INC_PROFILE register, which contains the number of the vibration profile to play when
+/** Read the SHAKE_NV_REG_CS1_INC_PROFILE register, which contains the number of the vibration profile to play when
 *	the increasing threshold on capacitive switch 1 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -1016,10 +1042,12 @@ SHAKE_API int shake_write_cs1_dec(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2()*/
-SHAKE_API int shake_read_cs1_inc_profile(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs1_inc_profile(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS1_INC_PROFILE register, which controls the number of the vibration profile to play when
+/** Write the SHAKE_NV_REG_CS1_INC_PROFILE register, which controls the number of the vibration profile to play when
 *	the increasing threshold on capacitive switch 1 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -1027,10 +1055,12 @@ SHAKE_API int shake_read_cs1_inc_profile(shake_device* sh, unsigned char* value)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2() */
-SHAKE_API int shake_write_cs1_inc_profile(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs1_inc_profile(shake_device* sh, unsigned char value);
 
-/** Read the NV_REG_CS1_DEC_PROFILE register, which contains the number of the vibration profile to play when
+/** Read the SHAKE_NV_REG_CS1_DEC_PROFILE register, which contains the number of the vibration profile to play when
 *	the decreasing threshold on capacitive switch 1 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -1038,10 +1068,12 @@ SHAKE_API int shake_write_cs1_inc_profile(shake_device* sh, unsigned char value)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2()*/
-SHAKE_API int shake_read_cs1_dec_profile(shake_device* sh, unsigned char* value);
+SHAKE_API int sk6_read_cs1_dec_profile(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_CS1_DEC_PROFILE register, which controls the number of the vibration profile to play when
+/** Write the SHAKE_NV_REG_CS1_DEC_PROFILE register, which controls the number of the vibration profile to play when
 *	the increasing threshold on capacitive switch 1 is triggered.
+*
+*	SK6 only.
 *	The value returned will be in the range 1-255, and indicates the address of the vibration profile uploaded
 *	using shake_upload_vib_sample(). If 0, no sample is currently set to play.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -1049,41 +1081,73 @@ SHAKE_API int shake_read_cs1_dec_profile(shake_device* sh, unsigned char* value)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR 
 *	@see shake_read_power_state_2()
 *	@see shake_write_power_state_2() */
-SHAKE_API int shake_write_cs1_dec_profile(shake_device* sh, unsigned char value);
+SHAKE_API int sk6_write_cs1_dec_profile(shake_device* sh, unsigned char value);
 
 /**	This function allows you to read all 8 registers related to capacitive switch thresholds in a single operation.
+*
+*	SK6 only.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param values pointer to an 8 element array, which will be populated with the values from each of the 8
 *	registers in the following order:
-*	- NV_REG_CS0_INC			(cap switch 0, increasing threshold)
-*	- NV_REG_CS0_DEC			(cap switch 0, decreasing threshold)
-*	- NV_REG_CS0_INC_PROFILE	(cap switch 0, increasing threshold vib profile)
-*	- NV_REG_CS0_DEC_PROFILE	(cap switch 0, decreasing threshold vib profile)
-*	- NV_REG_CS1_INC			(cap switch 1, increasing threshold)
-*	- NV_REG_CS1_DEC			(cap switch 1, decreasing threshold)
-*	- NV_REG_CS1_INC_PROFILE	(cap switch 1, increasing threshold vib profile)
-*	- NV_REG_CS1_DEC_PROFILE	(cap switch 1, decreasing threshold vib profile)
+*	- SK6_NV_REG_CS0_INC			(cap switch 0, increasing threshold)
+*	- SK6_NV_REG_CS0_DEC			(cap switch 0, decreasing threshold)
+*	- SK6_NV_REG_CS0_INC_PROFILE	(cap switch 0, increasing threshold vib profile)
+*	- SK6_NV_REG_CS0_DEC_PROFILE	(cap switch 0, decreasing threshold vib profile)
+*	- SK6_NV_REG_CS1_INC			(cap switch 1, increasing threshold)
+*	- SK6_NV_REG_CS1_DEC			(cap switch 1, decreasing threshold)
+*	- SK6_NV_REG_CS1_INC_PROFILE	(cap switch 1, increasing threshold vib profile)
+*	- SK6_NV_REG_CS1_DEC_PROFILE	(cap switch 1, decreasing threshold vib profile)
 * 
 *	@return SHAKE_SUCCESS or SHAKE_ERROR
 */
-SHAKE_API int shake_read_cap_thresholds(shake_device* sh, unsigned char* values);
+SHAKE_API int sk6_read_cap_thresholds(shake_device* sh, unsigned char* values);
 
 /**	This function allows you to write all 8 registers related to capacitive switch thresholds in a single operation.
+*
+*	SK6 only.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
-*	@param values pointer to an 8 element array, which will be populated with the values from each of the 8
+*	@param values pointer to an 8 element array, which should be populated with the values for each of the 8
 *	registers in the following order:
-*	- NV_REG_CS0_INC			(cap switch 0, increasing threshold)
-*	- NV_REG_CS0_DEC			(cap switch 0, decreasing threshold)
-*	- NV_REG_CS0_INC_PROFILE	(cap switch 0, increasing threshold vib profile)
-*	- NV_REG_CS0_DEC_PROFILE	(cap switch 0, decreasing threshold vib profile)
-*	- NV_REG_CS1_INC			(cap switch 1, increasing threshold)
-*	- NV_REG_CS1_DEC			(cap switch 1, decreasing threshold)
-*	- NV_REG_CS1_INC_PROFILE	(cap switch 1, increasing threshold vib profile)
-*	- NV_REG_CS1_DEC_PROFILE	(cap switch 1, decreasing threshold vib profile)
+*	- SK6_NV_REG_CS0_INC			(cap switch 0, increasing threshold)
+*	- SK6_NV_REG_CS0_DEC			(cap switch 0, decreasing threshold)
+*	- SK6_NV_REG_CS0_INC_PROFILE	(cap switch 0, increasing threshold vib profile)
+*	- SK6_NV_REG_CS0_DEC_PROFILE	(cap switch 0, decreasing threshold vib profile)
+*	- SK6_NV_REG_CS1_INC			(cap switch 1, increasing threshold)
+*	- SK6_NV_REG_CS1_DEC			(cap switch 1, decreasing threshold)
+*	- SK6_NV_REG_CS1_INC_PROFILE	(cap switch 1, increasing threshold vib profile)
+*	- SK6_NV_REG_CS1_DEC_PROFILE	(cap switch 1, decreasing threshold vib profile)
 *	
 *	@return SHAKE_SUCCESS or SHAKE_ERROR
 */
-SHAKE_API int shake_write_cap_thresholds(shake_device* sh, unsigned char* values);
+SHAKE_API int sk6_write_cap_thresholds(shake_device* sh, unsigned char* values);
+
+/**	This function allows you to read all 4 registers related to capacitive switch thresholds in a single operation.
+*
+*	SK7 only.
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param values pointer to a 4 element array, which will be populated with the values from each of the 4 relevant
+*	registers in the following order:
+*	- SK7_NV_REG_CAP_INC			(increasing threshold)
+*	- SK7_NV_REG_CAP_DEC			(decreasing threshold)
+*	- SK7_NV_REG_CAP_INC_PROFILE	(increasing threshold vib profile)
+*	- SK7_NV_REG_CAP_DEC_PROFILE	(decreasing threshold vib profile)
+*	@return SHAKE_SUCCESS or SHAKE_ERROR
+*/
+SHAKE_API int sk7_read_cap_thresholds(shake_device* sh, unsigned char* values);
+
+/**	This function allows you to write all 4 registers related to capacitive switch thresholds in a single operation.
+*
+*	SK7 only.
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param values pointer to a 4 element array, which should be populated with the values for each of the 4
+*	registers in the following order:
+*	- SK7_NV_REG_CAP_INC			(increasing threshold)
+*	- SK7_NV_REG_CAP_DEC			(decreasing threshold)
+*	- SK7_NV_REG_CAP_INC_PROFILE	(increasing threshold vib profile)
+*	- SK7_NV_REG_CAP_DEC_PROFILE	(decreasing threshold vib profile)
+*	@return SHAKE_SUCCESS or SHAKE_ERROR
+*/
+SHAKE_API int sk7_write_cap_thresholds(shake_device* sh, unsigned char* values);
 
 /** Reads the various registers which control the output sample rate for each sensor.
 *	Each sensor has a an output sample rate range between 0 and some maximum, which is given by the
@@ -1141,7 +1205,7 @@ SHAKE_API int shake_read_digital_filter(shake_device* sh, int sensor_id, unsigne
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_digital_filter(shake_device* sh, int sensor_id, unsigned char value);
 
-/** Read the value of the NV_REG_SHAKING_CONFIG register, which controls the state of the
+/** Read the value of the SHAKE_NV_REG_SHAKING_CONFIG register, which controls the state of the
 *	shaking detection algorithm in firmware >= 2.01.
 *
 *	The value returned by the function will be zero, or a combination of values from the ::shake_shaking_configuration enumeration.
@@ -1151,7 +1215,7 @@ SHAKE_API int shake_write_digital_filter(shake_device* sh, int sensor_id, unsign
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_shaking_config(shake_device* sh, unsigned char* value);
 
-/** Write a value into the NV_REG_SHAKING_CONFIG register, which allows you to configure the state of the
+/** Write a value into the SHAKE_NV_REG_SHAKING_CONFIG register, which allows you to configure the state of the
 *	shaking detection algorithm in firmware >= 2.01.
 *
 *	Using this register, you can separately enable/disable the shaking detection algorithm, the direction detection 
@@ -1165,7 +1229,7 @@ SHAKE_API int shake_read_shaking_config(shake_device* sh, unsigned char* value);
 */
 SHAKE_API int shake_write_shaking_config(shake_device* sh, unsigned char value);
 
-/** Reads the value of the NV_REG_SHAKING_ACCEL_THRESHOLD register.
+/** Reads the value of the SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD register.
 *
 *	This register controls the minimum peak acceleration below which shaking events will not be triggered.
 *
@@ -1176,7 +1240,7 @@ SHAKE_API int shake_write_shaking_config(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_shaking_accel_threshold(shake_device* sh, unsigned char* value);
 
-/** Writes a value into the NV_REG_SHAKING_ACCEL_THRESHOLD register.
+/** Writes a value into the SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD register.
 *
 *	This register controls the minimum peak acceleration below which shaking events will not be triggered.
 *
@@ -1187,7 +1251,7 @@ SHAKE_API int shake_read_shaking_accel_threshold(shake_device* sh, unsigned char
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_shaking_accel_threshold(shake_device* sh, unsigned char value);
 
-/** Reads the value of the NV_REG_SHAKING_HOLDOFF_TIME register.
+/** Reads the value of the SHAKE_NV_REG_SHAKING_HOLDOFF_TIME register.
 *
 *	This register controls the hold-off time that the detection algorithm will wait after an acceleration
 *	peak before beginning to look for the next peak.
@@ -1199,7 +1263,7 @@ SHAKE_API int shake_write_shaking_accel_threshold(shake_device* sh, unsigned cha
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_shaking_holdoff_time(shake_device* sh, unsigned char* value);
 
-/** Writes a value into the NV_REG_SHAKING_HOLDOFF_TIME register.
+/** Writes a value into the SHAKE_NV_REG_SHAKING_HOLDOFF_TIME register.
 *
 *	This register controls the hold-off time that the detection algorithm will wait after an acceleration
 *	peak before beginning to look for the next peak.
@@ -1211,7 +1275,7 @@ SHAKE_API int shake_read_shaking_holdoff_time(shake_device* sh, unsigned char* v
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_shaking_holdoff_time(shake_device* sh, unsigned char value);
 
-/** Reads the value of the NV_REG_SHAKING_VIBRATION_PROFILE register.
+/** Reads the value of the SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE register.
 *
 *	This register controls the vibration profile that will be activated when a shaking event is triggered (assuming
 *	the vibration control flag is enabled, see the shake_write_shaking_config() function).
@@ -1223,7 +1287,7 @@ SHAKE_API int shake_write_shaking_holdoff_time(shake_device* sh, unsigned char v
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_shaking_vibration_profile(shake_device* sh, unsigned char* value);
 
-/** Writes a value into the NV_REG_SHAKING_VIBRATION_PROFILE register.
+/** Writes a value into the SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE register.
 *
 *	This register controls the vibration profile that will be activated when a shaking event is triggered (assuming
 *	the vibration control flag is enabled, see the shake_write_shaking_config() function).
@@ -1235,7 +1299,7 @@ SHAKE_API int shake_read_shaking_vibration_profile(shake_device* sh, unsigned ch
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_shaking_vibration_profile(shake_device* sh, unsigned char value);
 
-/** Reads the value of the NV_REG_SHAKING_HPF_CONSTANT register.
+/** Reads the value of the SHAKE_NV_REG_SHAKING_HPF_CONSTANT register.
 *
 *	This register controls the high pass filter length in the detection algorithm. The higher this value is,
 *	the more sensitive the algorithm will be to very low frequency movements.
@@ -1247,7 +1311,7 @@ SHAKE_API int shake_write_shaking_vibration_profile(shake_device* sh, unsigned c
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_shaking_hpf_constant(shake_device* sh, unsigned char* value);
 
-/** Writes a value into the NV_REG_SHAKING_HPF_CONSTANT register.
+/** Writes a value into the SHAKE_NV_REG_SHAKING_HPF_CONSTANT register.
 *
 *	This register controls the high pass filter length in the detection algorithm. The higher this value is,
 *	the more sensitive the algorithm will be to very low frequency movements.
@@ -1259,7 +1323,7 @@ SHAKE_API int shake_read_shaking_hpf_constant(shake_device* sh, unsigned char* v
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_shaking_hpf_constant(shake_device* sh, unsigned char value);
 
-/** Reads the value of the NV_REG_SHAKING_LPF_CONSTANT register.
+/** Reads the value of the SHAKE_NV_REG_SHAKING_LPF_CONSTANT register.
 *
 *	This register controls the low pass filter length in the detection algorithm. The higher this value is,
 *	the less susceptible the algorithm will be to higher frequency vibration.
@@ -1271,7 +1335,7 @@ SHAKE_API int shake_write_shaking_hpf_constant(shake_device* sh, unsigned char v
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_shaking_lpf_constant(shake_device* sh, unsigned char* value);
 
-/** Writes a value into the NV_REG_SHAKING_LPF_CONSTANT register.
+/** Writes a value into the SHAKE_NV_REG_SHAKING_LPF_CONSTANT register.
 *
 *	This register controls the low pass filter length in the detection algorithm. The higher this value is,
 *	the less susceptible the algorithm will be to higher frequency vibration.
@@ -1299,7 +1363,7 @@ SHAKE_API int shake_write_shaking_lpf_constant(shake_device* sh, unsigned char v
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_reset_shaking_detection(shake_device* sh);
 
-/**	Reads the value of the NV_REG_HEART_RATE_CONFIG register.
+/**	Reads the value of the SHAKE_NV_REG_HEART_RATE_CONFIG register.
 *
 *	This register controls the configuration of the heart rate monitor installed in some SHAKEs.
 *
@@ -1311,7 +1375,7 @@ SHAKE_API int shake_reset_shaking_detection(shake_device* sh);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_heart_rate_config(shake_device* sh, unsigned char* value);
 
-/** Writes a value into the NV_REG_HEART_RATE_CONFIG register.
+/** Writes a value into the SHAKE_NV_REG_HEART_RATE_CONFIG register.
 *
 *	This register controls the configuration of the heart rate monitor installed in some SHAKEs.
 *
@@ -1451,7 +1515,7 @@ SHAKE_API int shake_read_power_status(shake_device* sh, unsigned char* value);
 *	@return a value between 0-64 on success, SHAKE_ERROR on error */
 SHAKE_API float shake_read_temperature(shake_device* sh);
 
-/** Read the NV_REG_EXPANSION_CONFIG register, which controls power to the various sensors on the
+/** Read the SHAKE_NV_REG_EXPANSION_CONFIG register, which controls power to the various sensors on the
 *	E01 expansion module.
 *
 *	The value returned will be a combination of the values from the ::shake_expansion_configuration enumeration.
@@ -1460,7 +1524,7 @@ SHAKE_API float shake_read_temperature(shake_device* sh);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_expansion_config(shake_device* sh, unsigned char* value);
 
-/** Write the NV_REG_EXPANSION_CONFIG register, which controls power to the various sensors 
+/** Write the SHAKE_NV_REG_EXPANSION_CONFIG register, which controls power to the various sensors 
 *	E01 expansion module.
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -1468,7 +1532,7 @@ SHAKE_API int shake_read_expansion_config(shake_device* sh, unsigned char* value
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_expansion_config(shake_device* sh, unsigned char value);
 
-/**	Read the NV_REG_RFID_CONFIG register, which controls the RFID expansion module settings.
+/**	Read the SHAKE_NV_REG_RFID_CONFIG register, which controls the RFID expansion module settings.
 *
 *	The value returned will be a combination of the values from the ::shake_rfid_config enumeration.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -1476,14 +1540,14 @@ SHAKE_API int shake_write_expansion_config(shake_device* sh, unsigned char value
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_rfid_config(shake_device* sh, unsigned char* value);
 
-/**	Write the NV_REG_RFID_CONFIG register, which controls the RFID expansion module settings.
+/**	Write the SHAKE_NV_REG_RFID_CONFIG register, which controls the RFID expansion module settings.
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value to write into the register (should be a combination of the values from the ::shake_rfid_config enumeration)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_rfid_config(shake_device* sh, unsigned char value);
 
-/**	Read the NV_REG_RFID_FREQUENCY register, which controls the RFID autoscan frequency
+/**	Read the SHAKE_NV_REG_RFID_FREQUENCY register, which controls the RFID autoscan frequency
 *
 *	The value returned will be between SHAKE_RFID_AUTOSCAN_MIN_FREQ and SHAKE_RFID_AUTOSCAN_MAX_FREQ
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -1491,7 +1555,7 @@ SHAKE_API int shake_write_rfid_config(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_read_rfid_scan_freq(shake_device* sh, unsigned char* value);
 
-/**	Write the NV_REG_RFID_FREQUENCY register, which controls the RFID autoscan frequency
+/**	Write the SHAKE_NV_REG_RFID_FREQUENCY register, which controls the RFID autoscan frequency
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value to write into the register (between SHAKE_RFID_AUTOSCAN_MIN_FREQ and SHAKE_RFID_AUTOSCAN_MAX_FREQ)
@@ -1510,7 +1574,7 @@ SHAKE_API int shake_write_rfid_scan_freq(shake_device* sh, unsigned char value);
 *	the other register specific functions).
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
-*	@param addr the register address (use one of the NV_REG/VO_REG constants from shake_registers.h)
+*	@param addr the register address (use one of the SHAKE_NV_REG/VO_REG constants from shake_registers.h)
 *	@param value pointer to an unsigned char variable which will receive the contents of the register 
 *	
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
@@ -1522,7 +1586,7 @@ SHAKE_API int shake_read(shake_device* sh, int addr, unsigned char* value);
 *	the other register specific functions).
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
-*	@param addr the register address (use one of the NV_REG/VO_REG constants from shake_registers.h)
+*	@param addr the register address (use one of the SHAKE_NV_REG/VO_REG constants from shake_registers.h)
 *	@param value the value that will be placed into the register (note that the range
 *		of values is dependent on the selected register, see user manual for details)
 * 

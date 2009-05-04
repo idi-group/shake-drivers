@@ -88,8 +88,6 @@ void* shake_read_thread(void *shakedev) {
 	dev = (shake_device*)shakedev;
 	devpriv = (shake_device_private*)dev->priv;
 
-	char* info_header = "\nSHA";
-
 	/* loop while thread hasn't been told to exit */
 	while(!devpriv->rthread_done) {
 		memset(packetbuf, 0, 256);
@@ -452,7 +450,7 @@ SHAKE_API char* shake_info_module_name(int module) {
 	}
 	for(i=SK7_MODULE_NONE;i<SK7_MODULE_LAST;i++) {
 		if(module == i)
-			return SK7_modules[i];
+			return SK7_modules[i-SK7_MODULE_NONE];
 	}
 	return unknown_module;
 }
@@ -748,107 +746,107 @@ SHAKE_API int shake_write_acc_config(shake_device* sh, unsigned char value) {
 	return shake_write(sh, SHAKE_NV_REG_ACC_CONFIG, value);
 }
 
-SHAKE_API int shake_read_cs0_inc(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs0_inc(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS0_INC, value);
+	return shake_read(sh, SK6_NV_REG_CS0_INC, value);
 }
 
-SHAKE_API int shake_write_cs0_inc(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs0_inc(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS0_INC, value);
+	return shake_write(sh, SK6_NV_REG_CS0_INC, value);
 }
 
-SHAKE_API int shake_read_cs0_dec(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs0_dec(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS0_DEC, value);
+	return shake_read(sh, SK6_NV_REG_CS0_DEC, value);
 }
 
-SHAKE_API int shake_write_cs0_dec(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs0_dec(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS0_DEC, value);
+	return shake_write(sh, SK6_NV_REG_CS0_DEC, value);
 }
 
-SHAKE_API int shake_read_cs0_inc_profile(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs0_inc_profile(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS0_INC_PROFILE, value);
+	return shake_read(sh, SK6_NV_REG_CS0_INC_PROFILE, value);
 }
 
-SHAKE_API int shake_write_cs0_inc_profile(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs0_inc_profile(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS0_INC_PROFILE, value);
+	return shake_write(sh, SK6_NV_REG_CS0_INC_PROFILE, value);
 }
 
-SHAKE_API int shake_read_cs0_dec_profile(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs0_dec_profile(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS0_DEC_PROFILE, value);
+	return shake_read(sh, SK6_NV_REG_CS0_DEC_PROFILE, value);
 }
 
-SHAKE_API int shake_write_cs0_dec_profile(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs0_dec_profile(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS0_DEC_PROFILE, value);
+	return shake_write(sh, SK6_NV_REG_CS0_DEC_PROFILE, value);
 }
 
-SHAKE_API int shake_read_cs1_inc(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs1_inc(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS1_INC, value);
+	return shake_read(sh, SK6_NV_REG_CS1_INC, value);
 }
 
-SHAKE_API int shake_write_cs1_inc(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs1_inc(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS1_INC, value);
+	return shake_write(sh, SK6_NV_REG_CS1_INC, value);
 }
 
-SHAKE_API int shake_read_cs1_dec(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs1_dec(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS1_DEC, value);
+	return shake_read(sh, SK6_NV_REG_CS1_DEC, value);
 }
 
-SHAKE_API int shake_write_cs1_dec(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs1_dec(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS1_DEC, value);
+	return shake_write(sh, SK6_NV_REG_CS1_DEC, value);
 }
 
-SHAKE_API int shake_read_cs1_inc_profile(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs1_inc_profile(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS1_INC_PROFILE, value);
+	return shake_read(sh, SK6_NV_REG_CS1_INC_PROFILE, value);
 }
 
-SHAKE_API int shake_write_cs1_inc_profile(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs1_inc_profile(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS1_INC_PROFILE, value);
+	return shake_write(sh, SK6_NV_REG_CS1_INC_PROFILE, value);
 }
 
-SHAKE_API int shake_read_cs1_dec_profile(shake_device* sh, unsigned char* value) {
+SHAKE_API int sk6_read_cs1_dec_profile(shake_device* sh, unsigned char* value) {
 	if(!sh || !value) return SHAKE_ERROR;
 
-	return shake_read(sh, SHAKE_NV_REG_CS1_DEC_PROFILE, value);
+	return shake_read(sh, SK6_NV_REG_CS1_DEC_PROFILE, value);
 }
 
-SHAKE_API int shake_write_cs1_dec_profile(shake_device* sh, unsigned char value) {
+SHAKE_API int sk6_write_cs1_dec_profile(shake_device* sh, unsigned char value) {
 	if(!sh) return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_NV_REG_CS1_DEC_PROFILE, value);
+	return shake_write(sh, SK6_NV_REG_CS1_DEC_PROFILE, value);
 }
 
-SHAKE_API int shake_read_cap_thresholds(shake_device* sh, unsigned char* values) {
+SHAKE_API int sk6_read_cap_thresholds(shake_device* sh, unsigned char* values) {
 	if(!sh || !values) return SHAKE_ERROR;
 
 	int reg, offset;
-	for(reg = SHAKE_NV_REG_CS0_INC, offset = 0; reg <= SHAKE_NV_REG_CS1_DEC_PROFILE; reg++, offset++) {
+	for(reg = SK6_NV_REG_CS0_INC, offset = 0; reg <= SK6_NV_REG_CS1_DEC_PROFILE; reg++, offset++) {
 		if(shake_read(sh, reg, values + offset) == SHAKE_ERROR)
 			return SHAKE_ERROR;
 	}
@@ -856,11 +854,35 @@ SHAKE_API int shake_read_cap_thresholds(shake_device* sh, unsigned char* values)
 	return SHAKE_SUCCESS;
 }
 
-SHAKE_API int shake_write_cap_thresholds(shake_device* sh, unsigned char* values) {
+SHAKE_API int sk6_write_cap_thresholds(shake_device* sh, unsigned char* values) {
 	if(!sh || !values) return SHAKE_ERROR;
 
 	int reg, offset;
-	for(reg = SHAKE_NV_REG_CS0_INC, offset = 0; reg <= SHAKE_NV_REG_CS1_DEC_PROFILE; reg++, offset++) {
+	for(reg = SK6_NV_REG_CS0_INC, offset = 0; reg <= SK6_NV_REG_CS1_DEC_PROFILE; reg++, offset++) {
+		if(shake_write(sh, reg, values[offset]) == SHAKE_ERROR)
+			return SHAKE_ERROR;
+	}
+
+	return SHAKE_SUCCESS;
+}
+
+SHAKE_API int sk7_read_cap_thresholds(shake_device* sh, unsigned char* values) {
+	if(!sh || !values) return SHAKE_ERROR;
+
+	int reg, offset;
+	for(reg = SK7_NV_REG_CAP_INC, offset = 0; reg <= SK7_NV_REG_CAP_DEC_PROFILE; reg++, offset++) {
+		if(shake_read(sh, reg, values + offset) == SHAKE_ERROR)
+			return SHAKE_ERROR;
+	}
+
+	return SHAKE_SUCCESS;
+}
+
+SHAKE_API int sk7_write_cap_thresholds(shake_device* sh, unsigned char* values) {
+	if(!sh || !values) return SHAKE_ERROR;
+
+	int reg, offset;
+	for(reg = SK7_NV_REG_CAP_INC, offset = 0; reg <= SK7_NV_REG_CAP_DEC_PROFILE; reg++, offset++) {
 		if(shake_write(sh, reg, values[offset]) == SHAKE_ERROR)
 			return SHAKE_ERROR;
 	}
