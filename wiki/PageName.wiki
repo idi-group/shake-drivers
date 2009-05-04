@@ -1,6 +1,0 @@
-#summary Table of contents (sidebar)
- * [WikiHomepage Wiki homepage]
-
- * [Examples Example code]
- * [Demos Demo applications]
- * [Faq SHAKE FAQ]
