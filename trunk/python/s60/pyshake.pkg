@@ -4,7 +4,11 @@
 :"Vendor"
 [0x101F7961], 0, 0, 0, {"S60ProductID"}
 "..\pyshake.py"-"c:\resource\pyshake.py"
-"..\pyshake_packets.py"-"c:\resource\pyshake_packets.py"
 "..\pyshake_serial_s60.py"-"c:\resource\pyshake_serial_s60.py"
 "..\pyshake_constants.py"-"c:\resource\pyshake_constants.py"
+"..\pyshake_sk_common.py"-"c:\resource\pyshake_sk_common.py"
+"..\pyshake_sk6.py"-"c:\resource\pyshake_sk6.py"
+"..\pyshake_sk7.py"-"c:\resource\pyshake_sk7.py"
+"..\pyshake_sk6_constants.py"-"c:\resource\pyshake_sk6_constants.py"
+"..\pyshake_sk7_constants.py"-"c:\resource\pyshake_sk7_constants.py"
 
