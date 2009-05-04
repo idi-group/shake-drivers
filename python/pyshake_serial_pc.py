@@ -31,16 +31,16 @@ class serial_port(base_serial_port):
 	def __init__(self, bt_addr):
 		self.target = bt_addr
 		self.connected = False
-        
 		self.port = None 
 
-	def open(self):
+	def open(self, baud=230400):
 		if self.connected:
 			return False
 			
 		# open port with parameters required for the SHAKE
+		# SK7 requires rate 460800, SK6 requires 230400
 		try:
-			self.port = serial.Serial(self.target, baudrate=230400, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
+			self.port = serial.Serial(self.target, baudrate=baud, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
 		except:
 			print "exception opening port"
 			return False
