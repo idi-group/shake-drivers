@@ -24,6 +24,17 @@
 #ifndef _SHAKE_REGISTERS_
 #define _SHAKE_REGISTERS_
 
+/**	SHAKE power control bits
+*	@see shake_read_power_state()
+*	@see shake_write_power_state() */
+#define SHAKE_POWER_CAP		= 0x01
+#define SHAKE_POWER_ACC		= 0x02
+#define SHAKE_POWER_GYRO	= 0x04
+#define SHAKE_POWER_VIB		= 0x08
+#define SHAKE_POWER_MAG		= 0x10
+#define SHAKE_POWER_TEMP	= 0x20
+#define SHAKE_POWER_ANALOG	= 0x40
+#define SHAKE_POWER_NAV		= 0x80
 
 /**	SHAKE sensor listing. 
 *	@see shake_read_sample_rate()
@@ -276,21 +287,30 @@ enum shake_logging_state {
 #define SHAKE_NV_REG_EXPANSION_CONFIG	0x0026
 
 /**	Increasing threshold for capacitive switch 0 */
-#define SHAKE_NV_REG_CS0_INC			0x0028
+#define SK6_NV_REG_CS0_INC			0x0028
 /**	Decreasing threshold for capacitive switch 0 */
-#define SHAKE_NV_REG_CS0_DEC			0x0029
+#define SK6_NV_REG_CS0_DEC			0x0029
 /**	Increasing threshold vibration profile for capacitive switch 0 */
-#define SHAKE_NV_REG_CS0_INC_PROFILE	0x002A
+#define SK6_NV_REG_CS0_INC_PROFILE	0x002A
 /**	Decreasing threshold vibration profile for capacitive switch 0 */
-#define SHAKE_NV_REG_CS0_DEC_PROFILE	0x002B
+#define SK6_NV_REG_CS0_DEC_PROFILE	0x002B
 /**	Increasing threshold for capacitive switch 1 */
-#define SHAKE_NV_REG_CS1_INC			0x002C
+#define SK6_NV_REG_CS1_INC			0x002C
 /**	Decreasing threshold for capacitive switch 1 */
-#define SHAKE_NV_REG_CS1_DEC			0x002D
+#define SK6_NV_REG_CS1_DEC			0x002D
 /**	Increasing threshold vibration profile for capacitive switch 1 */
-#define SHAKE_NV_REG_CS1_INC_PROFILE	0x002E
+#define SK6_NV_REG_CS1_INC_PROFILE	0x002E
 /**	Decreasing threshold vibration profile for capacitive switch 1 */
-#define SHAKE_NV_REG_CS1_DEC_PROFILE	0x002F
+#define SK6_NV_REG_CS1_DEC_PROFILE	0x002F
+
+/**	(SK7) Increasing threshold for capacitive switches */
+#define SK7_NV_REG_CAP_INC			0x0028
+/**	(SK7) Decreasing threshold for capacitive switches */
+#define SK7_NV_REG_CAP_DEC			0x0029
+/**	(SK7) Increasing threshold vibration profile for capacitive switches */
+#define SK7_NV_REG_CAP_INC_PROFILE	0x002A
+/**	(SK7) Decreasing threshold vibration profile for capacitive switches */
+#define SK7_NV_REG_CAP_DEC_PROFILE	0x002B
 
 /** Shaking detection configuration register */
 #define SHAKE_NV_REG_SHAKING_CONFIG	0x0030

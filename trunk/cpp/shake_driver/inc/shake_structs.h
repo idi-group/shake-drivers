@@ -22,7 +22,7 @@
 
 #include "shake_platform.h"
 #include "shake_thread.h"
-#include "shake_common.h"
+#include "shake_registers.h"
 
 /* holds pointer to and data about BT serial port being used */
 typedef struct {

@@ -24,7 +24,7 @@
 #include "shake_thread.h"
 #include "shake_mulaw.h"
 
-#include "shake_common.h"
+#include "shake_registers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,15 +33,12 @@ extern "C" {
 #define SK7_DEFAULT_CHECKSUM 0x00
 
 #define SK7_MAX_PACKET_SIZE 	64
-#define SK7_NUM_PACKET_TYPES	59
+#define SK7_NUM_PACKET_TYPES	57
 
 #define SK7_HEADER_LEN		4	// "$pid," == 4 chars
 #define SK7_RAW_HEADER_LEN	3
 #define SK7_PACKET_ID_LEN		3
 
-/* common terminator for all SK7 packets (CR, LF) */
-#define SK7_TERMINATOR_LEN 2
-static char* sk7_terminator = "\r\n"; 
 
 /* packet types */
 enum sk7_packet_types {

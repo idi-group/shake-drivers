@@ -35,7 +35,7 @@ typedef struct {
 	short hr_bpm;
 
 	/* sequence numbers from the various types of data packets */
-	unsigned char internal_timestamps[8]; //accseq, gyrseq, magseq, hdgseq, cap0seq, cap1seq, ana0seq, ana1seq;
+	unsigned char internal_timestamps[8]; 
 	unsigned char sk6seq, hrseq;
 	unsigned short sk7seq;
 
