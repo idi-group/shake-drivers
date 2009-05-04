@@ -68,26 +68,87 @@ SHAKE_HEART_RATE_EVENT = 11
 ## Event produced when an RFID tag is detected
 SHAKE_RFID_TID_EVENT = 12
 
+## Capacitive sensor 0 upper threshold reached (SK7 only) 
+SK7_CS0_UPPER = 13
+## Capacitive sensor 0 lower threshold reached (SK7 only) 	
+SK7_CS0_LOWER = 14
+##	Capacitive sensor 1 upper threshold reached (SK7 only) 
+SK7_CS1_UPPER = 15
+## Capacitive sensor 1 lower threshold reached (SK7 only) 
+SK7_CS1_LOWER = 16
+##	Capacitive sensor 2 upper threshold reached (SK7 only) 
+SK7_CS2_UPPER = 17
+## Capacitive sensor 2 lower threshold reached (SK7 only) 
+SK7_CS2_LOWER = 18
+##	Capacitive sensor 3 upper threshold reached (SK7 only) 
+SK7_CS3_UPPER = 19
+## Capacitive sensor 3 lower threshold reached (SK7 only) 
+SK7_CS3_LOWER = 20
+##	Capacitive sensor 4 upper threshold reached (SK7 only) 
+SK7_CS4_UPPER = 21
+## Capacitive sensor 4 lower threshold reached (SK7 only) 
+SK7_CS4_LOWER = 22
+##	Capacitive sensor 5 upper threshold reached (SK7 only) 
+SK7_CS5_UPPER = 23
+## Capacitive sensor 5 lower threshold reached (SK7 only) 
+SK7_CS5_LOWER = 24
+##	Capacitive sensor 6 upper threshold reached (SK7 only) 	
+SK7_CS6_UPPER = 25
+## Capacitive sensor 6 lower threshold reached (SK7 only) 		
+SK7_CS6_LOWER = 26
+##	Capacitive sensor 7 upper threshold reached (SK7 only) 	
+SK7_CS7_UPPER = 27
+## Capacitive sensor 7 lower threshold reached (SK7 only) 
+SK7_CS7_LOWER = 28
+##	Capacitive sensor 8 upper threshold reached (SK7 only) 
+SK7_CS8_UPPER = 29
+## Capacitive sensor 8 lower threshold reached (SK7 only) 
+SK7_CS8_LOWER = 30
+##	Capacitive sensor 9 upper threshold reached (SK7 only) 
+SK7_CS9_UPPER = 31
+## Capacitive sensor 9 lower threshold reached (SK7 only) 
+SK7_CS9_LOWER = 32
+##	Capacitive sensor 10 upper threshold reached (SK7 only) 
+SK7_CSA_UPPER = 33
+## Capacitive sensor 10 lower threshold reached (SK7 only) 
+SK7_CSA_LOWER = 34
+##	Capacitive sensor 11 upper threshold reached (SK7 only) 
+SK7_CSB_UPPER = 35
+## Capacitive sensor 11 lower threshold reached (SK7 only) 
+SK7_CSB_LOWER = 36
+
 ## Return values for info_module_slot1 and info_module_slot2 functions
 
+###############
+## SK6 modules
+###############
 ## No module installed
-SHAKE_MODULE_NONE = 0
+SK6_MODULE_NONE = 0
 ## slot 1 : G-01 gyro module
-SHAKE_MODULE_GYRO1 = 1,		
+SK6_MODULE_GYRO1 = 1,		
 ## slot 1 : G-02 gyro module
-SHAKE_MODULE_GYRO2 = 2			
+SK6_MODULE_GYRO2 = 2			
 ## slot 1 : RFID module
-SHAKE_MODULE_RFID = 3
+SK6_MODULE_RFID = 3
 ## slot 2 : audio module
-SHAKE_MODULE_AUDIO = 4
+SK6_MODULE_AUDIO = 4
 ## slot 2 : external vibration module
-SHAKE_MODULE_EXTVIB = 5
+SK6_MODULE_EXTVIB = 5
 ## slot 2 : USB module
-SHAKE_MODULE_USB = 6
+SK6_MODULE_USB = 6
 ## slot 2 : STANE
-SHAKE_MODULE_EXPANSION = 7
+SK6_MODULE_EXPANSION = 7
+SK6_MODULE_LAST = 8
 
-## Contents of NV_REG_POWER1 register will be a combination of these values
+###############
+## SK7 modules
+###############
+## No module installed
+SK7_MODULE_NONE = SK6_MODULE_LAST + 1
+# TODO
+
+
+## Contents of SHAKE_NV_REG_POWER1 register will be a combination of these values
 SHAKE_POWER_CAP = 0x01
 SHAKE_POWER_ACC = 0x02
 SHAKE_POWER_GYRO = 0x04
@@ -97,7 +158,7 @@ SHAKE_POWER_TEMP = 0x20
 SHAKE_POWER_ANALOG = 0x40
 SHAKE_POWER_NAV = 0x80
 
-## Contents of NV_REG_POWER2 register will be a combination of these values
+## Contents of SHAKE_NV_REG_POWER2 register will be a combination of these values
 SHAKE_POWER_CS0_INC	=	0x01
 SHAKE_POWER_CS0_DEC	=	0x02
 SHAKE_POWER_CS1_INC	=	0x04
@@ -115,27 +176,6 @@ SHAKE_SENSOR_CAP1 = 5
 SHAKE_SENSOR_ANA0 = 6
 SHAKE_SENSOR_ANA1 = 7
 
-## Maximum sample rates for each sensor, for use with read/write_sample_rate functions
-SHAKE_ACC_MAX_RATE = 0xFF
-SHAKE_GYRO_MAX_RATE = 0xFF
-SHAKE_MAG_MAX_RATE = 0xFF
-SHAKE_HEADING_MAX_RATE = 0xFF
-SHAKE_CAP0_MAX_RATE = 0xFF
-SHAKE_CAP1_MAX_RATE = 0xFF
-SHAKE_ANA0_MAX_RATE = 0xFF
-SHAKE_ANA1_MAX_RATE = 0xFF
-
-## When calling the write_packet_request function, the value you use should be a combination
-## of these values
-SHAKE_REQ_ACC = 0x01
-SHAKE_REQ_GYRO = 0x02
-SHAKE_REQ_MAG = 0x04
-SHAKE_REQ_HEADING = 0x08
-SHAKE_REQ_CAP0 = 0x10
-SHAKE_REQ_CAP1 = 0x20
-SHAKE_REQ_ANA0 = 0x40
-SHAKE_REQ_ANA1 = 0x80
-
 ## SHAKE vibrotactile channels
 SHAKE_VIB_MAIN = 0
 SHAKE_VIB_LEFT = 1
@@ -146,40 +186,7 @@ SHAKE_VIB_SAMPLE_MAX_LENGTH = 32
 ## Highest address you can use to store a sample in memory
 SHAKE_VIB_PROFILE_MAX = 0xFF
 
-## Calibration modes for the different sensors
-SHAKE_CALIB_MAG = 0x02
-SHAKE_CALIB_ACC = 0x04
-SHAKE_CALIB_GYRO = 0x08
-SHAKE_CALIB_TEMP = 0x10
-SHAKE_CALIB_BATTERY = 0x20
-SHAKE_CALIB_CAP = 0x40
-SHAKE_CALIB_ANALOG = 0x80
-
-## The contents of the NV_REG_CALIB_BYPASS register should be a combination of these values
-SHAKE_BYPASS_ACC = 0x01
-SHAKE_BYPASS_GYRO = 0x02
-SHAKE_BYPASS_MAG = 0x04
-SHAKE_BYPASS_CAP0 = 0x10
-SHAKE_BYPASS_CAP1 = 0x20
-SHAKE_BYPASS_ANA0 = 0x40
-SHAKE_BYPASS_ANA1 = 0x80
-
-## THe contents of the NV_REG_CX_CALIB_BYPASS register should be a combination of these values
-SHAKE_CX_BYPASS_ACC = 0x01
-SHAKE_CX_BYPASS_GYRO = 0x02
-SHAKE_CX_BYPASS_MAG = 0x04
-
-## The contents of the NV_REG_STREAM_DISABLE register should be a combination of these values
-SHAKE_STREAM_ACC = 0x01
-SHAKE_STREAM_GYRO = 0x02
-SHAKE_STREAM_MAG = 0x04
-SHAKE_STREAM_HEADING = 0x08
-SHAKE_STREAM_CAP0 = 0x10
-SHAKE_STREAM_CAP1 = 0x20
-SHAKE_STREAM_ANA0 = 0x40
-SHAKE_STREAM_ANA1 = 0x80
-
-## The contents of the VO_REG_PWRSTA register will be a combination of these values
+## The contents of the SHAKE_VO_REG_PWRSTA register will be a combination of these values
 SHAKE_EXT_POWER = 0x01
 SHAKE_BAT_CHARGING = 0x02
 SHAKE_BAT_FULL = 0x04
@@ -191,36 +198,36 @@ SHAKE_BATTERY_MAX = 0xFF
 SHAKE_TEMP_MIN = 0x00
 SHAKE_TEMP_MAX = 0x40
 
-## When writing to the VO_REG_LOGGING_CTRL register, use one of these values as the parameter
+## When writing to the SHAKE_VO_REG_LOGGING_CTRL register, use one of these values as the parameter
 SHAKE_LOGGING_PLAY	=	0x01
 SHAKE_LOGGING_PAUSE	=	0x02
 SHAKE_LOGGING_STOP	=	0x03
 SHAKE_LOGGING_RECORD =	0x04
 SHAKE_LOGGING_RESET	=	0x05
 
-## The contents of the VO_REG_LOGGING_STATUS register should be a combination of these values 
+## The contents of the SHAKE_VO_REG_LOGGING_STATUS register should be a combination of these values 
 SHAKE_LOGGING_RECORDING	=	0x01
 SHAKE_LOGGING_PLAYING	=	0x02
 SHAKE_LOGGING_MEMORYFULL =	0x04
 
-## The contents of the NV_REG_SHAKING_CONFIG register should be a combination of zero or more of these values
+## The contents of the SHAKE_NV_REG_SHAKING_CONFIG register should be a combination of zero or more of these values
 SHAKE_SHAKING_DETECTION = 0x01
 SHAKE_SHAKING_DIRECTION_DETECTION = 0x02
 SHAKE_SHAKING_VIBRATION = 0x04
 
-## The contents of the NV_REG_AUDIO_CONFIG register should be a combination of zero or more of these values
+## The contents of the SHAKE_NV_REG_AUDIO_CONFIG register should be a combination of zero or more of these values
 SHAKE_AUDIO_SAMPLING = 0x01
 SHAKE_AUDIO_PLAYBACK = 0x02
 SHAKE_AUDIO_EXTERNAL_MIC = 0x04
 SHAKE_AUDIO_WAVE_PLAYBACK = 0x08
 SHAKE_AUDIO_SAMPLE_PLAYBACK = 0x10
 
-## The contents of the NV_REG_HEART_RATE_CONFIG register should be a combination of zero or more of these values
+## The contents of the SHAKE_NV_REG_HEART_RATE_CONFIG register should be a combination of zero or more of these values
 SHAKE_HEART_RATE_MONITORING = 0x01,
 SHAKE_HEART_RATE_VISUAL_PULSE = 0x02
 SHAKE_HEART_RATE_VIB_PULSE = 0x04
 
-## The contents of the NV_REG_EXPANSION_CONFIG register should be a combination of zero or more of these values
+## The contents of the SHAKE_NV_REG_EXPANSION_CONFIG register should be a combination of zero or more of these values
 SHAKE_EXPANSION_CONTACT_MIC = 0x02
 SHAKE_EXPANSION_GP_OUTPUTS = 0x04
 SHAKE_EXPANSION_VIB_POWER = 0x08
@@ -228,7 +235,7 @@ SHAKE_EXPANSION_VIB_POWER = 0x08
 ## RFID TID tag length
 SHAKE_RFID_TAG_LENGTH = 32
 
-## The contents of the NV_REG_RFID_CONFIG register should be a combination of zero or more of these values
+## The contents of the SHAKE_NV_REG_RFID_CONFIG register should be a combination of zero or more of these values
 SHAKE_RFID_POWER_ON 	= 0x01
 SHAKE_RFID_VISUAL_FEEDBACK = 0x02
 SHAKE_RFID_AUTO_SCAN 	= 0x04
@@ -242,18 +249,18 @@ SHAKE_AUDIO_SAMPLE_RATE = 7200
 ## (decoded) SHAKE audio sample size in bits
 SHAKE_AUDIO_SAMPLE_SIZE = 16
 
-## Writing this value into VO_REG_MIDI_AMPLITUDE mutes the synthesiser
+## Writing this value into SHAKE_VO_REG_MIDI_AMPLITUDE mutes the synthesiser
 SHAKE_MIDI_AMPLITUDE_MUTE = 0x00
 
 ## Minimum and maximum values for the synthesiser volume
 SHAKE_MIDI_AMPLITUDE_MIN = 0x01
 SHAKE_MIDI_AMPLITUDE_MAX = 0xFF
 
-## Minimum and maximum values for the VO_REG_MIDI_NOTE register
+## Minimum and maximum values for the SHAKE_VO_REG_MIDI_NOTE register
 SHAKE_MIDI_NOTE_MIN = 0x21
 SHAKE_MIDI_NOTE_MAX = 0x69
 
-## If writing into the VO_REG_MIDI_WAVEFORM register, the value to write should be one of the following 
+## If writing into the SHAKE_VO_REG_MIDI_WAVEFORM register, the value to write should be one of the following 
 SHAKE_MIDI_WAVEFORM_SINE = 0x00
 SHAKE_MIDI_WAVEFORM_SQUARE = 0x01
 SHAKE_MIDI_WAVEFORM_TRIANGLE = 0x02
@@ -275,77 +282,81 @@ SHAKE_UPLOAD_MIN_PAGE = 0
 SHAKE_UPLOAD_MAX_PAGE = 7999
 
 ## Non volatile register addresses
-NV_REG_POWER1 = 0x0000
-NV_REG_POWER2 = 0x0001
-NV_REG_DATAFMT = 0x0002
-NV_REG_ACC_CONFIG = 0x0004
-NV_REG_CALIB_BYPASS = 0x0006
-NV_REG_CX_CALIB_BYPASS = 0x0007
-NV_REG_ACCOUT = 0x0008
-NV_REG_GYROUT = 0x0009
-NV_REG_MAGOUT = 0x000A
-NV_REG_HEDOUT = 0x000B
-NV_REG_CAP0OUT = 0x000C
-NV_REG_CAP1OUT = 0x000D
-NV_REG_ANA0OUT = 0x000E
-NV_REG_ANA1OUT = 0x000F
-NV_REG_TEMP_COMPENSATION = 0x0010
-NV_REG_STREAM_DISABLE = 0x0012
-NV_REG_DIGFIL_ACC = 0x0014
-NV_REG_DIGFIL_GYR = 0x0015
-NV_REG_DIGFIL_MAG = 0x0016
-NV_REG_DIGFIL_HED = 0x0017
-NV_REG_DIGFIL_CAP0 = 0x0018
-NV_REG_DIGFIL_CAP1 = 0x0019
-NV_REG_DIGFIL_ANA0 = 0x001A
-NV_REG_DIGFIL_ANA1 = 0x001B
-NV_REG_AUDIO_CONFIG = 0x001E
-NV_REG_EXPANSION_CONFIG = 0x026
-NV_REG_CS0_INC = 0x0028
-NV_REG_CS0_DEC = 0x0029
-NV_REG_CS0_INC_PROFILE = 0x002A
-NV_REG_CS0_DEC_PROFILE = 0x002B
-NV_REG_CS1_INC = 0x002C
-NV_REG_CS1_DEC = 0x002D
-NV_REG_CS1_INC_PROFILE = 0x002E
-NV_REG_CS1_DEC_PROFILE = 0x002F
-NV_REG_SHAKING_CONFIG = 0x0030
-NV_REG_SHAKING_ACCEL_THRESHOLD = 0x0032
-NV_REG_SHAKING_HOLDOFF_TIME = 0x0033
-NV_REG_SHAKING_VIBRATION_PROFILE = 0x0034
-NV_REG_SHAKING_HPF_CONSTANT = 0x0035
-NV_REG_SHAKING_LPF_CONSTANT = 0x0036
-NV_REG_LOGGING_PKT_LSB = 0x0038
-NV_REG_LOGGING_PKT_MSB = 0x0039
-NV_REG_HEART_RATE_CONFIG = 0x003A
-NV_REG_RFID_CONFIG = 0x003C
-NV_REG_RFID_FREQUENCY = 0x003D
+SHAKE_NV_REG_POWER1 = 0x0000
+SHAKE_NV_REG_POWER2 = 0x0001
+SHAKE_NV_REG_DATAFMT = 0x0002
+SHAKE_NV_REG_ACC_CONFIG = 0x0004
+SHAKE_NV_REG_CALIB_BYPASS = 0x0006
+SHAKE_NV_REG_CX_CALIB_BYPASS = 0x0007
+SHAKE_NV_REG_ACCOUT = 0x0008
+SHAKE_NV_REG_GYROUT = 0x0009
+SHAKE_NV_REG_MAGOUT = 0x000A
+SHAKE_NV_REG_HEDOUT = 0x000B
+SHAKE_NV_REG_CAP0OUT = 0x000C
+SHAKE_NV_REG_CAP1OUT = 0x000D
+SHAKE_NV_REG_ANA0OUT = 0x000E
+SHAKE_NV_REG_ANA1OUT = 0x000F
+SHAKE_NV_REG_TEMP_COMPENSATION = 0x0010
+SHAKE_NV_REG_STREAM_DISABLE = 0x0012
+SHAKE_NV_REG_DIGFIL_ACC = 0x0014
+SHAKE_NV_REG_DIGFIL_GYR = 0x0015
+SHAKE_NV_REG_DIGFIL_MAG = 0x0016
+SHAKE_NV_REG_DIGFIL_HED = 0x0017
+SHAKE_NV_REG_DIGFIL_CAP0 = 0x0018
+SHAKE_NV_REG_DIGFIL_CAP1 = 0x0019
+SHAKE_NV_REG_DIGFIL_ANA0 = 0x001A
+SHAKE_NV_REG_DIGFIL_ANA1 = 0x001B
+SHAKE_NV_REG_AUDIO_CONFIG = 0x001E
+SHAKE_NV_REG_EXPANSION_CONFIG = 0x026
+SK6_NV_REG_CS0_INC = 0x0028
+SK6_NV_REG_CS0_DEC = 0x0029
+SK6_NV_REG_CS0_INC_PROFILE = 0x002A
+SK6_NV_REG_CS0_DEC_PROFILE = 0x002B
+SK6_NV_REG_CS1_INC = 0x002C
+SK6_NV_REG_CS1_DEC = 0x002D
+SK6_NV_REG_CS1_INC_PROFILE = 0x002E
+SK6_NV_REG_CS1_DEC_PROFILE = 0x002F
+SK7_NV_REG_CAP_INC = 0x0028
+SK7_NV_REG_CAP_DEC = 0x0029
+SK7_NV_REG_CAP_INC_PROFILE = 0x002A
+SK7_NV_REG_CAP_DEC_PROFILE = 0x002B
+SHAKE_NV_REG_SHAKING_CONFIG = 0x0030
+SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD = 0x0032
+SHAKE_NV_REG_SHAKING_HOLDOFF_TIME = 0x0033
+SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE = 0x0034
+SHAKE_NV_REG_SHAKING_HPF_CONSTANT = 0x0035
+SHAKE_NV_REG_SHAKING_LPF_CONSTANT = 0x0036
+SHAKE_NV_REG_LOGGING_PKT_LSB = 0x0038
+SHAKE_NV_REG_LOGGING_PKT_MSB = 0x0039
+SHAKE_NV_REG_HEART_RATE_CONFIG = 0x003A
+SHAKE_NV_REG_RFID_CONFIG = 0x003C
+SHAKE_NV_REG_RFID_FREQUENCY = 0x003D
 
 ## Volatile register addresses
-VO_REG_PKTREQ = 0x0100
-VO_REG_DATAREQ = 0x0101
-VO_REG_VIB_MAIN = 0x0102
-VO_REG_VIB_LEFT = 0x0103
-VO_REG_VIB_RIGHT = 0x0104
-VO_REG_BATTERY = 0x0105
-VO_REG_PWRSTA = 0x0106
-VO_REG_TEMPERATURE = 0x0108
-VO_REG_CALIBRATION = 0x010A
-VO_REG_LOGGING_CTRL = 0x010D
-VO_REG_LOGGING_STATUS = 0x010E
-VO_REG_LOGGING_MEM = 0x0110
-VO_REG_MIDI_AMPLITUDE = 0x0111
-VO_REG_MIDI_NOTE = 0x0112
-VO_REG_MIDI_WAVEFORM = 0x0113
-VO_REG_RFID_SCAN = 0x011A
-VO_REG_EXP_PWM1	= 0x0120
-VO_REG_EXP_PWM2	= 0x0121
-VO_REG_EXP_PWM3	= 0x0122
-VO_REG_EXP_PWM4	= 0x0123
-VO_REG_EXP_PWM5	= 0x0124
-VO_REG_EXP_PWM6	= 0x0125
-VO_REG_VIB_LEFT_CONTINUOUS = 0x0126
-VO_REG_VIB_RIGHT_CONTINUOUS = 0x0127
+SHAKE_VO_REG_PKTREQ = 0x0100
+SHAKE_VO_REG_DATAREQ = 0x0101
+SHAKE_VO_REG_VIB_MAIN = 0x0102
+SHAKE_VO_REG_VIB_LEFT = 0x0103
+SHAKE_VO_REG_VIB_RIGHT = 0x0104
+SHAKE_VO_REG_BATTERY = 0x0105
+SHAKE_VO_REG_PWRSTA = 0x0106
+SHAKE_VO_REG_TEMPERATURE = 0x0108
+SHAKE_VO_REG_CALIBRATION = 0x010A
+SHAKE_VO_REG_LOGGING_CTRL = 0x010D
+SHAKE_VO_REG_LOGGING_STATUS = 0x010E
+SHAKE_VO_REG_LOGGING_MEM = 0x0110
+SHAKE_VO_REG_MIDI_AMPLITUDE = 0x0111
+SHAKE_VO_REG_MIDI_NOTE = 0x0112
+SHAKE_VO_REG_MIDI_WAVEFORM = 0x0113
+SHAKE_VO_REG_RFID_SCAN = 0x011A
+SHAKE_VO_REG_EXP_PWM1	= 0x0120
+SHAKE_VO_REG_EXP_PWM2	= 0x0121
+SHAKE_VO_REG_EXP_PWM3	= 0x0122
+SHAKE_VO_REG_EXP_PWM4	= 0x0123
+SHAKE_VO_REG_EXP_PWM5	= 0x0124
+SHAKE_VO_REG_EXP_PWM6	= 0x0125
+SHAKE_VO_REG_VIB_LEFT_CONTINUOUS = 0x0126
+SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS = 0x0127
 
 # work out platform from os.name
 PLAT_WIN32, PLAT_LINUX = range(2)
@@ -818,7 +829,7 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_LOGGING_CTRL, SHAKE_LOGGING_PAUSE)
+		return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_PAUSE)
 
 	## 	Stops recording or playback AND resets the read/write position to the start of internal memory. 
 	# 	If an output logfile has been opened by the logging_play function, it will be closed. 
@@ -828,7 +839,7 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_LOGGING_CTRL, SHAKE_LOGGING_STOP)
+		return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_STOP)
 
 	## 	Starts logging data into internal memory from the current writing position.
 	# 	Call logging_stop first if you want to reset the writing position to the start of internal memory
@@ -843,7 +854,7 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RECORD)
+		return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RECORD)
 
 	## 	Resets the data logging timestamp clock to zero
 	# 	Should usually only be sent prior to a logging_record command
@@ -851,7 +862,7 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RESET)
+		return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RESET)
 
 	## 	Indicates the current status of data logging on the SHAKE
 	# 	The value returned will be a bitwise combination of these three values:
@@ -866,7 +877,7 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.read(VO_REG_LOGGING_STATUS)
+		return self.read(SHAKE_VO_REG_LOGGING_STATUS)
 
 	## 	Indicates the proportion of internal memory remaining free for data logging
 	# 	
@@ -876,7 +887,7 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.read(VO_REG_LOGGING_MEM)
+		return self.read(SHAKE_VO_REG_LOGGING_MEM)
 
 	## 	Returns the approximate number of packets logged to internal memory
 	#
@@ -885,12 +896,12 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		ret = self.read(NV_REG_LOGGING_PKT_LSB)
+		ret = self.read(SHAKE_NV_REG_LOGGING_PKT_LSB)
 		if ret[0] == SHAKE_ERROR:
 			return SHAKE_ERROR
 		lsb = ret[1]
 
-		ret = self.read(NV_REG_LOGGING_PKT_MSB)
+		ret = self.read(SHAKE_NV_REG_LOGGING_PKT_MSB)
 		if ret[0] == SHAKE_ERROR:
 			return SHAKE_ERROR
 		msb = ret[1]
@@ -914,7 +925,7 @@ class shake_device:
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_POWER1)
+		return self.read(SHAKE_NV_REG_POWER1)
 
 	def write_power_state(self, value):
 		if not self.__connected:
@@ -922,13 +933,13 @@ class shake_device:
 
 		if value < 0 or value > 255:
 			return SHAKE_ERROR
-		return self.write(NV_REG_POWER1, value)
+		return self.write(SHAKE_NV_REG_POWER1, value)
 
 	def read_power_state_2(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_POWER2)
+		return self.read(SHAKE_NV_REG_POWER2)
 
 	def write_power_state_2(self, value):
 		if not self.__connected:
@@ -936,31 +947,31 @@ class shake_device:
 
 		if value < 0 or value > 255:
 			return SHAKE_ERROR
-		return self.write(NV_REG_POWER2, value)
+		return self.write(SHAKE_NV_REG_POWER2, value)
 
 	def read_data_format(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_DATAFMT)
+		return self.read(SHAKE_NV_REG_DATAFMT)
 
 	def write_data_format(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_DATAFMT, value)
+		return self.write(SHAKE_NV_REG_DATAFMT, value)
 
 	def read_acc_config(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 	
-		return self.read(NV_REG_ACC_CONFIG)
+		return self.read(SHAKE_NV_REG_ACC_CONFIG)
 
 	def write_acc_config(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 	
-		return self.write(NV_REG_ACC_CONFIG, value)
+		return self.write(SHAKE_NV_REG_ACC_CONFIG, value)
 
 	def read_sample_rate(self, sensor):
 		if not self.__connected:
@@ -969,7 +980,7 @@ class shake_device:
 		if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_ACCOUT + sensor)
+		return self.read(SHAKE_NV_REG_ACCOUT + sensor)
 
 	def write_sample_rate(self, sensor, value):
 		if not self.__connected:
@@ -978,7 +989,7 @@ class shake_device:
 		if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
 			return SHAKE_ERROR
 	
-		return self.write(NV_REG_ACCOUT + sensor, value)
+		return self.write(SHAKE_NV_REG_ACCOUT + sensor, value)
 
 	def read_digital_filter(self, sensor):
 		if not self.__connected:
@@ -987,7 +998,7 @@ class shake_device:
 		if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_DIGFIL_ACC + sensor)
+		return self.read(SHAKE_NV_REG_DIGFIL_ACC + sensor)
 	
 	def write_digital_filter(self, sensor, value):
 		if not self.__connected:
@@ -996,158 +1007,158 @@ class shake_device:
 		if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_DIGFIL_ACC + sensor, value)
+		return self.write(SHAKE_NV_REG_DIGFIL_ACC + sensor, value)
 
 	def read_calib_bypass(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CALIB_BYPASS)
+		return self.read(SHAKE_NV_REG_CALIB_BYPASS)
 
 	def write_calib_bypass(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CALIB_BYPASS, value)
+		return self.write(SHAKE_NV_REG_CALIB_BYPASS, value)
 
 	def read_cx_bypass(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CX_CALIB_BYPASS)
+		return self.read(SHAKE_NV_REG_CX_CALIB_BYPASS)
 
 	def write_cx_bypass(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CX_CALIB_BYPASS, value)
+		return self.write(SHAKE_NV_REG_CX_CALIB_BYPASS, value)
 
 	def read_packet_streaming(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_STREAM_DISABLE)
+		return self.read(SHAKE_NV_REG_STREAM_DISABLE)
 
 	def write_packet_streaming(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_STREAM_DISABLE, value)
+		return self.write(SHAKE_NV_REG_STREAM_DISABLE, value)
 
 	def read_temp_compensation(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_TEMP_COMPENSATION)
+		return self.read(SHAKE_NV_REG_TEMP_COMPENSATION)
 	
 	def write_temp_compensation(self, value):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.write(NV_REG_TEMP_COMPENSATION, value)
+		return self.write(SHAKE_NV_REG_TEMP_COMPENSATION, value)
 
-	def read_cs0_inc(self):
+	def sk6_read_cs0_inc(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS0_INC)
+		return self.read(SK6_NV_REG_CS0_INC)
 
-	def write_cs0_inc(self, value):
+	def sk6_write_cs0_inc(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS0_INC, value)
+		return self.write(SK6_NV_REG_CS0_INC, value)
 
-	def read_cs0_dec(self):
+	def sk6_read_cs0_dec(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS0_DEC)
+		return self.read(SK6_NV_REG_CS0_DEC)
 
-	def write_cs0_dec(self, value):
+	def sk6_write_cs0_dec(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS0_DEC, value)
+		return self.write(SK6_NV_REG_CS0_DEC, value)
 
-	def read_cs0_inc_profile(self):
+	def sk6_read_cs0_inc_profile(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS0_INC_PROFILE)
+		return self.read(SK6_NV_REG_CS0_INC_PROFILE)
 
-	def write_cs0_inc_profile(self, value):
+	def sk6_write_cs0_inc_profile(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS0_INC_PROFILE, value)
+		return self.write(SK6_NV_REG_CS0_INC_PROFILE, value)
 
-	def read_cs0_dec_profile(self):
+	def sk6_read_cs0_dec_profile(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS0_DEC_PROFILE)
+		return self.read(SK6_NV_REG_CS0_DEC_PROFILE)
 
-	def write_cs0_dec_profile(self, value):
+	def sk6_write_cs0_dec_profile(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS0_DEC_PROFILE, value)
+		return self.write(SK6_NV_REG_CS0_DEC_PROFILE, value)
 
-	def read_cs1_inc(self):
+	def sk6_read_cs1_inc(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS1_INC)
+		return self.read(SK6_NV_REG_CS1_INC)
 
-	def write_cs1_inc(self, value):
+	def sk6_write_cs1_inc(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS1_INC, value)
+		return self.write(SK6_NV_REG_CS1_INC, value)
 
-	def read_cs1_dec(self):
+	def sk6_read_cs1_dec(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS1_DEC)
+		return self.read(SK6_NV_REG_CS1_DEC)
 
-	def write_cs1_dec(self, value):
+	def sk6_write_cs1_dec(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS1_DEC, value)
+		return self.write(SK6_NV_REG_CS1_DEC, value)
 
-	def read_cs1_inc_profile(self):
+	def sk6_read_cs1_inc_profile(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS1_INC_PROFILE)
+		return self.read(SK6_NV_REG_CS1_INC_PROFILE)
 
-	def write_cs1_inc_profile(self, value):
+	def sk6_write_cs1_inc_profile(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS1_INC_PROFILE, value)
+		return self.write(SK6_NV_REG_CS1_INC_PROFILE, value)
 
-	def read_cs1_dec_profile(self):
+	def sk6_read_cs1_dec_profile(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_CS1_DEC_PROFILE)
+		return self.read(SK6_NV_REG_CS1_DEC_PROFILE)
 
-	def write_cs1_dec_profile(self, value):
+	def sk6_write_cs1_dec_profile(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_CS1_DEC_PROFILE, value)
+		return self.write(SK6_NV_REG_CS1_DEC_PROFILE, value)
 
-	def read_cap_thresholds(self):
+	def sk6_read_cap_thresholds(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, [])
 
 		values = []
-		for i in range(NV_REG_CS0_INC, NV_REG_CS1_DEC_PROFILE+1):
+		for i in range(SK6_NV_REG_CS0_INC, SK6_NV_REG_CS1_DEC_PROFILE+1):
 			ret = self.read(i)
 			if ret[0] == SHAKE_ERROR:
 				return (SHAKE_ERROR, [])
@@ -1155,12 +1166,38 @@ class shake_device:
 
 		return (SHAKE_SUCCESS, values)
 		
-	def write_cap_thresholds(self, values):
+	def sk6_write_cap_thresholds(self, values):
 		if not self.__connected or len(values) != 8:
 			return SHAKE_ERROR
 
 		offset = 0
-		for i in range(NV_REG_CS0_INC, NV_REG_CS1_DEC_PROFILE+1):
+		for i in range(SK6_NV_REG_CS0_INC, SK6_NV_REG_CS1_DEC_PROFILE+1):
+			ret = self.write(i, values[offset])
+			if ret == SHAKE_ERROR:
+				return SHAKE_ERROR
+			offset += 1
+
+		return SHAKE_ERROR
+
+	def sk7_read_cap_thresholds(self):
+		if not self.__connected:
+			return (SHAKE_ERROR, [])
+
+		values = []
+		for i in range(SK7_NV_REG_CAP_INC, SK7_NV_REG_CS1_DEC_PROFILE+1):
+			ret = self.read(i)
+			if ret[0] == SHAKE_ERROR:
+				return (SHAKE_ERROR, [])
+			values.append(ret[1])
+
+		return (SHAKE_SUCCESS, values)
+		
+	def sk7_write_cap_thresholds(self, values):
+		if not self.__connected or len(values) != 8:
+			return SHAKE_ERROR
+
+		offset = 0
+		for i in range(SK7_NV_REG_CAP_INC, SK7_NV_REG_CS1_DEC_PROFILE+1):
 			ret = self.write(i, values[offset])
 			if ret == SHAKE_ERROR:
 				return SHAKE_ERROR
@@ -1172,117 +1209,117 @@ class shake_device:
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_AUDIO_CONFIG)
+		return self.read(SHAKE_NV_REG_AUDIO_CONFIG)
 
 	def write_audio_config(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_AUDIO_CONFIG, value)
+		return self.write(SHAKE_NV_REG_AUDIO_CONFIG, value)
 
 	def write_midi_amplitude(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_MIDI_AMPLITUDE, value)
+		return self.write(SHAKE_VO_REG_MIDI_AMPLITUDE, value)
 
 	def write_midi_note(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_MIDI_NOTE, value)
+		return self.write(SHAKE_VO_REG_MIDI_NOTE, value)
 
 	def write_midi_waveform(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_MIDI_WAVEFORM, value)
+		return self.write(SHAKE_VO_REG_MIDI_WAVEFORM, value)
 
 	def read_shaking_config(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_SHAKING_CONFIG)
+		return self.read(SHAKE_NV_REG_SHAKING_CONFIG)
 
 	def write_shaking_config(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_SHAKING_CONFIG, value)
+		return self.write(SHAKE_NV_REG_SHAKING_CONFIG, value)
 
 	def read_shaking_accel_threshold(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_SHAKING_ACCEL_THRESHOLD)
+		return self.read(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD)
 
 	def write_shaking_accel_threshold(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_SHAKING_ACCEL_THRESHOLD, value)
+		return self.write(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD, value)
 
 	def read_shaking_holdoff_time(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_SHAKING_HOLDOFF_TIME)
+		return self.read(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME)
 
 	def write_shaking_holdoff_time(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_SHAKING_HOLDOFF_TIME, value)
+		return self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, value)
 
 	def read_shaking_vibration_profile(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_SHAKING_VIBRATION_PROFILE)
+		return self.read(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE)
 
 	def write_shaking_vibration_profile(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_SHAKING_VIBRATION_PROFILE, value)
+		return self.write(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE, value)
 
 	def read_shaking_hpf_constant(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_SHAKING_HPF_CONSTANT)
+		return self.read(SHAKE_NV_REG_SHAKING_HPF_CONSTANT)
 
 	def write_shaking_hpf_constant(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_SHAKING_HPF_CONSTANT, value)
+		return self.write(SHAKE_NV_REG_SHAKING_HPF_CONSTANT, value)
 
 	def read_shaking_lpf_constant(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_SHAKING_LPF_CONSTANT)
+		return self.read(SHAKE_NV_REG_SHAKING_LPF_CONSTANT)
 
 	def write_shaking_lpf_constant(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_SHAKING_LPF_CONSTANT, value)
+		return self.write(SHAKE_NV_REG_SHAKING_LPF_CONSTANT, value)
 
 	def reset_shaking_detection(self):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		if self.write(NV_REG_SHAKING_CONFIG, 0xFF) == SHAKE_ERROR:
+		if self.write(SHAKE_NV_REG_SHAKING_CONFIG, 0xFF) == SHAKE_ERROR:
 			return SHAKE_ERROR
-		if self.write(NV_REG_SHAKING_HOLDOFF_TIME, 0x0A) == SHAKE_ERROR:
+		if self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, 0x0A) == SHAKE_ERROR:
 			return SHAKE_ERROR
-		if self.write(NV_REG_SHAKING_VIBRATION_PROFILE, 0x00) == SHAKE_ERROR:
+		if self.write(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE, 0x00) == SHAKE_ERROR:
 			return SHAKE_ERROR
-		if self.write(NV_REG_SHAKING_HPF_CONSTANT, 0x20) == SHAKE_ERROR:
+		if self.write(SHAKE_NV_REG_SHAKING_HPF_CONSTANT, 0x20) == SHAKE_ERROR:
 			return SHAKE_ERROR
-		if self.write(NV_REG_SHAKING_LPF_CONSTANT, 0x06) == SHAKE_ERROR:
+		if self.write(SHAKE_NV_REG_SHAKING_LPF_CONSTANT, 0x06) == SHAKE_ERROR:
 			return SHAKE_ERROR
 
 		return SHAKE_SUCCESS
@@ -1291,57 +1328,57 @@ class shake_device:
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_HEART_RATE_CONFIG)
+		return self.read(SHAKE_NV_REG_HEART_RATE_CONFIG)
 	
 	def write_heart_rate_config(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_HEART_RATE_CONFIG, value)
+		return self.write(SHAKE_NV_REG_HEART_RATE_CONFIG, value)
 
 	def read_expansion_config(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(NV_REG_EXPANSION_CONFIG)
+		return self.read(SHAKE_NV_REG_EXPANSION_CONFIG)
 	
 	def write_expansion_config(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(NV_REG_EXPANSION_CONFIG, value)
+		return self.write(SHAKE_NV_REG_EXPANSION_CONFIG, value)
 
 	def read_rfid_config(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
-		return self.read(NV_REG_RFID_CONFIG)
+		return self.read(SHAKE_NV_REG_RFID_CONFIG)
 
 	def write_rfid_config(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
-		return self.write(NV_REG_RFID_CONFIG, value)
+		return self.write(SHAKE_NV_REG_RFID_CONFIG, value)
 
 	def read_rfid_scan_freq(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
-		return self.read(NV_REG_RFID_FREQUENCY)
+		return self.read(SHAKE_NV_REG_RFID_FREQUENCY)
 
 	def write_rfid_scan_freq(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
-		return self.write(NV_REG_RFID_FREQUENCY)
+		return self.write(SHAKE_NV_REG_RFID_FREQUENCY)
 
 	def write_packet_request(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_PKTREQ, value)
+		return self.write(SHAKE_VO_REG_PKTREQ, value)
 
 	def write_data_request(self, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_DATAREQ, value)
+		return self.write(SHAKE_VO_REG_DATAREQ, value)
 
 	def playvib(self, channel, value):
 		if not self.__connected:
@@ -1353,7 +1390,7 @@ class shake_device:
 		if value < 0 or value > 255:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_VIB_MAIN + channel, value)
+		return self.write(SHAKE_VO_REG_VIB_MAIN + channel, value)
 
 	def playvib_continuous(self, channel, amplitude, time):
 		if not self.__connected:
@@ -1380,9 +1417,9 @@ class shake_device:
 		
 		vibbyte += time;
 
-		vibaddr = VO_REG_VIB_LEFT_CONTINUOUS;
+		vibaddr = SHAKE_VO_REG_VIB_LEFT_CONTINUOUS;
 		if(channel == SHAKE_VIB_RIGHT):
-			vibaddr = VO_REG_VIB_RIGHT_CONTINUOUS;
+			vibaddr = SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS;
 		return self.write(vibaddr, vibbyte)
 
 	def upload_vib_sample(self, profile_number, sample_list):
@@ -1413,19 +1450,19 @@ class shake_device:
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(VO_REG_BATTERY)
+		return self.read(SHAKE_VO_REG_BATTERY)
 
 	def read_power_status(self):
 		if not self.__connected:
 			return (SHAKE_ERROR, 0)
 
-		return self.read(VO_REG_PWRSTA)
+		return self.read(SHAKE_VO_REG_PWRSTA)
 
 	def exp_write_gp_register(self, reg, value):
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		return self.write(VO_REG_EXP_PWM1 + reg, value)
+		return self.write(SHAKE_VO_REG_EXP_PWM1 + reg, value)
 
 	def upload_audio_sample(self, address, samples):
 		if not self.__connected:
