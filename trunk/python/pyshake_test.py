@@ -15,28 +15,40 @@ def eventcallback(event_type):
 		print "Event type =", event_type
 
 # create a shake_device object
-pyshake_packets.debugging = True
-sd = shake_device()
+sd = shake_device(SHAKE_SK7)
 
 # connect using a COM port number (pyserial uses port numbers starting at 0, so
 # this is actually saying "use COM3")
 # you can also use the other forms of port identifier that pyserial supports, eg
 # sd.connect('COM3:')
-sd.connect(39)
+sd.connect(40)
+
+import time
+time.sleep(5)
 
 sd.write_data_format(2)
 
-# turn on the accelerometer and button
-if sd.write_power_state(SHAKE_POWER_ACC | SHAKE_POWER_NAV) != SHAKE_SUCCESS:
+# turn on the accelerometer, capacitive sensors and button
+if sd.write_power_state(SHAKE_POWER_ACC | SHAKE_POWER_CAP | SHAKE_POWER_NAV) != SHAKE_SUCCESS:
 	print "Failed to set power state"
 
-# set accelerometer sample rate to 50Hz
-if sd.write_sample_rate(SHAKE_SENSOR_ACC, 3) != SHAKE_SUCCESS:
-	print "Failed to set sample rate"
+# set accelerometer sample rate to 20Hz
+if sd.write_sample_rate(SHAKE_SENSOR_ACC, 20) != SHAKE_SUCCESS:
+	print "Failed to set sample rate (ACC)"
+
+# set capacitive sensor sample rate to 20Hz
+if sd.write_sample_rate(SHAKE_SENSOR_CAP, 20) != SHAKE_SUCCESS:
+	print "Failed to set sample rate (CAP)"
 
 # display some accelerometer readings
-for i in range(250):
+for i in range(200):
 	print "Accelerometer:", sd.acc(), "\r",
+	time.sleep(0.01)
+print "\n"
+
+# display some capacitive sensor reading
+for i in range(200):
+	print "Cap sensors: ", sd.cap(), "\r",
 	time.sleep(0.01)
 print "\n"
 
@@ -44,8 +56,8 @@ print "\n"
 print "Serial number:", sd.info_serial_number()
 print "Firmware version:", sd.info_firmware_revision()
 print "Hardware version:", sd.info_hardware_revision()
-print "Expansion module 1:", sd.info_module_name(sd.info_module_slot1())
-print "Expansion module 2:", sd.info_module_name(sd.info_module_slot2())
+print "Expansion module 1:", sd.info_module_name(sd.info_module(0))
+print "Expansion module 2:", sd.info_module_name(sd.info_module(1))
 
 # register event callback
 sd.register_event_callback(eventcallback)
