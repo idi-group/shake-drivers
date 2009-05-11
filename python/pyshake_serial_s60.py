@@ -70,11 +70,12 @@ class serial_port(base_serial_port):
 			self.sock = socket.socket(socket.AF_BT, socket.SOCK_STREAM)
 			self.target = (bt_addr, 1)
 
-	def open(self):
+	def open(self, baud=230400):
 		if self.connected:
 			appuifw.note(u'Already connected!')
 			return False
 			
+		# baud rate is ignored here
 		self.sock.connect(self.target)
 
 		self.connected = True
