@@ -241,39 +241,39 @@ class SK6(pyshake_sk_common.SHAKE):
 			self.data.accx = int(packetbuf[5:10])
 			self.data.accy = int(packetbuf[11:16])
 			self.data.accz = int(packetbuf[17:22])
-			self.internal_timestamps[SHAKE_SENSOR_ACC] = int(packetbuf[23:25])
+			self.data.internal_timestamps[SHAKE_SENSOR_ACC] = int(packetbuf[23:25])
 		elif packet_type == SK6_DATA_GYRO:
 			# fmt: $ARS,+dddd,+dddd,+dddd,ss*CS\r\n
 			self.data.gyrx = int(packetbuf[5:10])
 			self.data.gyry = int(packetbuf[11:16])
 			self.data.gyrz = int(packetbuf[17:22])
-			self.internal_timestamps[SHAKE_SENSOR_GYRO] = int(packetbuf[23:25])
+			self.data.internal_timestamps[SHAKE_SENSOR_GYRO] = int(packetbuf[23:25])
 		elif packet_type == SK6_DATA_MAG:
 			# fmt: $MAG,+dddd,+dddd,+dddd,ss*CS\r\n
 			self.data.magx = int(packetbuf[5:10])
 			self.data.magy = int(packetbuf[11:16])
 			self.data.magz = int(packetbuf[17:22])
-			self.internal_timestamps[SHAKE_SENSOR_MAG] = int(packetbuf[23:25])
+			self.data.internal_timestamps[SHAKE_SENSOR_MAG] = int(packetbuf[23:25])
 		elif packet_type == SK6_DATA_HEADING:
 			# $HED,dddd,dd*CS
 			self.data.heading = int(packetbuf[5:9])
-			self.internal_timestamps[SHAKE_SENSOR_HEADING] = int(packetbuf[10:12])
+			self.data.internal_timestamps[SHAKE_SENSOR_HEADING] = int(packetbuf[10:12])
 		elif packet_type == SK6_DATA_CAP0:
 			# $CS0,dddd,dd*CS[CR][LF]
 			self.cap_sk6[0] = int(packetbuf[5:9])
-			self.internal_timestamps[SHAKE_SENSOR_CAP0] = int(packetbuf[10:12])
+			self.data.internal_timestamps[SHAKE_SENSOR_CAP0] = int(packetbuf[10:12])
 		elif packet_type == SK6_DATA_CAP1:
 			# $CS1,dddd,dd*CS[CR][LF]
 			self.cap_sk6[1] = int(packetbuf[5:9])
-			self.internal_timestamps[SHAKE_SENSOR_CAP1] = int(packetbuf[10:12])
+			self.data.internal_timestamps[SHAKE_SENSOR_CAP1] = int(packetbuf[10:12])
 		elif packet_type == SK6_DATA_ANA0:
 			# $AI0,dddd,dd*CS
 			self.ana0 = int(packetbuf[5:9])
-			self.internal_timestamps[SHAKE_SENSOR_ANA0] = int(packetbuf[10:12])
+			self.data.internal_timestamps[SHAKE_SENSOR_ANA0] = int(packetbuf[10:12])
 		elif packet_type == SK6_DATA_ANA1:
 			# $AI1,dddd,dd*CS
 			self.ana1 = int(packetbuf[5:9])
-			self.internal_timestamps[SHAKE_SENSOR_ANA1] = int(packetbuf[10:12])
+			self.data.internal_timestamps[SHAKE_SENSOR_ANA1] = int(packetbuf[10:12])
 		elif packet_type >= SK6_DATA_NVU and packet_type <= SK6_DATA_NVN:
 			if self.__shake.navcb != None:
 				event = -1
