@@ -33,6 +33,7 @@ typedef struct {
 	short ana0, ana1;
 	short shaking_peak_accel, shaking_direction, shaking_timestamp;
 	short hr_bpm;
+	short rph[3]; // roll-pitch-heading
 
 	/* sequence numbers from the various types of data packets */
 	unsigned char internal_timestamps[8]; 

@@ -51,6 +51,7 @@ static PyObject* pyshake_magz(PyObject* self, PyObject* args);
 static PyObject* pyshake_mag(PyObject* self, PyObject* args);
 
 static PyObject* pyshake_heading(PyObject* self, PyObject* args);
+static PyObject* pyshake_sk7_roll_pitch_heading(PyObject* self, PyObject* args);
 
 static PyObject* pyshake_sk6_cap0(PyObject* self, PyObject* args);
 static PyObject* pyshake_sk6_cap1(PyObject* self, PyObject* args);
@@ -93,6 +94,7 @@ static PyObject* pyshake_rfid_scan(PyObject* self, PyObject* args);
 
 static PyObject* pyshake_wait_for_acks(PyObject* self, PyObject* args);
 
+
 static PyObject* pyshake_cleanup(PyObject* self, PyObject* args);
 
 static PyMethodDef pyshake_methods[] = {
@@ -128,6 +130,7 @@ static PyMethodDef pyshake_methods[] = {
 	{ "mag",			pyshake_mag,				1,	"x,y,z-axis magnetometer" },
 
 	{ "heading",		pyshake_heading,			1,	"heading" },
+	{ "sk7_roll_pitch_heading", pyshake_sk7_roll_pitch_heading, 1, "roll, pitch, heading" },
 
 	{ "sk6_cap0",			pyshake_sk6_cap0,				1,	"cap sw 0 proximity" },
 	{ "sk6_cap1",			pyshake_sk6_cap1,				1,	"cap sw 1 proximity" },

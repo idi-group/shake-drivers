@@ -242,6 +242,7 @@ shake_device* shake_init_internal(shake_conn_data* scd) {
 	} else {
 		devpriv->shake = new SK6(dev, devpriv);
 	}
+	memset(&(devpriv->shake->data), 0, sizeof(sk_sensor_data));
 
 	// launch the threads used internally
 	shake_thread_init(&(devpriv->thread), 
@@ -648,6 +649,12 @@ SHAKE_API int shake_logging_packets_read(shake_device* sh) {
 	if (!sh) return SHAKE_ERROR;
 
 	return ((shake_device_private*)sh->priv)->packets_read;
+}
+
+SHAKE_API int sk7_logging_bt_power_down(shake_device* sh) {
+	if(!sh) return SHAKE_ERROR;
+
+	return shake_write(sh, SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_BT_POWER_DOWN);
 }
 
 SHAKE_API int shake_read_power_state(shake_device* sh, unsigned char* value) {
@@ -1318,6 +1325,16 @@ int shake_heading(shake_device* sh) {
 	return hdg;
 }
 
+SHAKE_API int sk7_roll_pitch_heading(shake_device* sh, int* rph) {
+	if(!sh || !rph) return SHAKE_ERROR;
+
+	shake_device_private* devpriv = (shake_device_private*)sh->priv;
+	for(int i=0;i<3;i++)
+		rph[i] = devpriv->shake->data.rph[i];
+
+	return SHAKE_SUCCESS;
+}
+
 int sk6_cap(shake_device* sh, int* proxboth) {
 	shake_device_private* dev;
 
@@ -1914,6 +1931,73 @@ SHAKE_API int shake_write_rfid_scan_freq(shake_device* sh, unsigned char value) 
 }
 
 
+SHAKE_API int sk7_override_led(shake_device* sh, unsigned char red, unsigned char green, unsigned char blue) {
+	if(!sh) return SHAKE_ERROR;
+
+	int ret1 = shake_write(sh, SHAKE_VO_REG_LED_RED, red);
+	int ret2 = shake_write(sh, SHAKE_VO_REG_LED_GREEN, green);
+	int ret3 = shake_write(sh, SHAKE_VO_REG_LED_BLUE, blue);
+
+	if(ret1 == SHAKE_ERROR || ret2 == SHAKE_ERROR || ret3 == SHAKE_ERROR)
+		return SHAKE_ERROR;
+
+	return SHAKE_SUCCESS;
+}
+
+SHAKE_API int sk7_configure_heading_feedback(shake_device* sh, int lower_threshold, int upper_threshold, int hysteresis, int vib_profile) {
+	if(!sh) return SHAKE_ERROR;
+
+	// lower threshold; lsb
+	if(shake_write(sh, SK7_NV_REG_HEADING_LOWER_LSB, lower_threshold & 0x00FF) != SHAKE_SUCCESS)
+		return SHAKE_ERROR;
+
+	// lower threshold; msb
+	if(shake_write(sh, SK7_NV_REG_HEADING_LOWER_MSB, (lower_threshold & 0xFF00) >> 8) != SHAKE_SUCCESS)
+		return SHAKE_ERROR;
+
+	// upper threshold; lsb
+	if(shake_write(sh, SK7_NV_REG_HEADING_UPPER_LSB, upper_threshold & 0x00FF) != SHAKE_SUCCESS)
+		return SHAKE_ERROR;
+
+	// upper threshold; msb
+	if(shake_write(sh, SK7_NV_REG_HEADING_UPPER_MSB, (upper_threshold & 0xFF00) >> 8) != SHAKE_SUCCESS)
+		return SHAKE_ERROR;
+
+	// hysteresis
+	if(hysteresis > 255)
+		hysteresis = 255;
+	if(shake_write(sh, SK7_NV_REG_HEADING_HYSTERESIS, hysteresis) != SHAKE_SUCCESS)
+		return SHAKE_ERROR;
+
+	// vibration profile
+	if(shake_write(sh, SK7_NV_REG_HEADING_VIB_PROFILE, vib_profile) != SHAKE_SUCCESS)
+		return SHAKE_ERROR;
+
+	return SHAKE_SUCCESS;
+}
+
+SHAKE_API int sk7_control_heading_feedback(shake_device* sh, int enabled, int vib_looping, int led_feedback) {
+	if(!sh) return SHAKE_ERROR;
+
+	int val = 0;
+	if(enabled)
+		val |= 0x01;
+
+	if(vib_looping)
+		val |= 0x02;
+
+	if(led_feedback)
+		val |= 0x04;
+
+	return shake_write(sh, SK7_NV_REG_HEADING_FEEDBACK, val);
+}
+
+SHAKE_API int sk7_configure_roll_pitch_heading(shake_device* sh, int value) {
+	if(!sh) return SHAKE_ERROR;
+
+	return shake_write(sh, SK7_NV_REG_RPH_CONFIG, value);
+}
+
 /* generic function to read a register on the SHAKE */
 SHAKE_API int shake_read(shake_device* sh, int addr, unsigned char* value) {
 	shake_device_private* dev;
@@ -1969,7 +2053,6 @@ SHAKE_API int shake_write(shake_device* sh, int addr, unsigned char value) {
 
 	/* send a command packet containing the new value for the register, then
 	*	wait for an ack packet to come back with a success/failure code */
-	
 	write_bytes(dev, scpbuf, cmdlen);
 
 	if(dev->wait_for_acks == 0)
@@ -1992,18 +2075,5 @@ SHAKE_API int shake_write(shake_device* sh, int addr, unsigned char value) {
 
 	dev->lastack = FALSE;
                             
-	return SHAKE_SUCCESS;
-}
-
-SHAKE_API int shake_override_led(shake_device* sh, unsigned char red, unsigned char green, unsigned char blue) {
-	if(!sh) return SHAKE_ERROR;
-
-	int ret1 = shake_write(sh, SHAKE_VO_REG_LED_RED, red);
-	int ret2 = shake_write(sh, SHAKE_VO_REG_LED_GREEN, green);
-	int ret3 = shake_write(sh, SHAKE_VO_REG_LED_BLUE, blue);
-
-	if(ret1 == SHAKE_ERROR || ret2 == SHAKE_ERROR || ret3 == SHAKE_ERROR)
-		return SHAKE_ERROR;
-
 	return SHAKE_SUCCESS;
 }

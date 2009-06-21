@@ -445,6 +445,21 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 			}
 			break;
 		}
+		case SK7_DATA_RPH: {
+			sk7_data_rph_packet* datarph = (sk7_data_rph_packet*)rawpacket;
+			int seq;
+			data.rph[0] = dec_ascii_to_int(datarph->roll.data, 5, 4);
+			data.rph[1] = dec_ascii_to_int(datarph->pitch.data, 5, 4);
+			data.rph[2] = dec_ascii_to_int(datarph->heading.data, 5, 4);
+			data.internal_timestamps[SHAKE_SENSOR_HEADING] = seq;
+
+			if(playback && devpriv->log) {
+				double tsval = dec_ascii_to_int(timestamp->timestamp, 10, 10) / 100.0;
+				fprintf(devpriv->log, "%.3f,RPH,%d,%d,%d\n", tsval, SHAKE_SENSOR_HEADING, data.rph[0], data.rph[1], data.rph[2]);
+			}
+			break;			   
+		}
+
 		case SK7_DATA_NVU: case SK7_DATA_NVD:
 		case SK7_DATA_NVC: case SK7_DATA_NVN:
 			if(devpriv->navcb || devpriv->navcb_STDCALL) {
@@ -530,13 +545,18 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 	int len = sk7_packet_lengths[packet_type];
 
 	switch(packet_type) {
-		case SK7_RAW_DATA_ACC:
+		case SK7_RAW_DATA_ACC: {
 			srpl = (sk7_raw_packet_long*)rawpacket;
 			data.accx = srpl->data[0] + (srpl->data[1] << 8);
 			data.accy = srpl->data[2] + (srpl->data[3] << 8);
 			data.accz = srpl->data[4] + (srpl->data[5] << 8);
+
+			int lastseq = data.internal_timestamps[SHAKE_SENSOR_ACC];
+			//printf("%03d\n", srpl->seq);
+			if( (lastseq + 1 != srpl->seq))
+				if(lastseq != 255) printf("MISSING PACKET: %d -> %d (%d)\n", lastseq, srpl->seq, has_seq);
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_ACC] = srpl->seq;
-		
+							   }
 			break;
 		case SK7_RAW_DATA_GYRO:
 			srpl = (sk7_raw_packet_long*)rawpacket;
@@ -611,6 +631,15 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 				shake_thread_signal(&(devpriv->thread), CALLBACK_THREAD);
 			}
 			break;
+		case SK7_RAW_DATA_RPH: {
+			srpl = (sk7_raw_packet_long*)rawpacket;
+			data.rph[0] = srpl->data[0] + (srpl->data[1] << 8);
+			data.rph[1] = srpl->data[2] + (srpl->data[3] << 8);
+			data.rph[2] = srpl->data[4] + (srpl->data[5] << 8);
+			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srpl->seq;
+			break;			   
+		}
+
 		// this is the packet type for a microphone sample packet
 		case SK7_RAW_DATA_AUDIO: {
 			// ignore unless callback registered

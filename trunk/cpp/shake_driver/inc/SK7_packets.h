@@ -33,7 +33,7 @@ extern "C" {
 #define SK7_DEFAULT_CHECKSUM 0x00
 
 #define SK7_MAX_PACKET_SIZE 	64
-#define SK7_NUM_PACKET_TYPES	57
+#define SK7_NUM_PACKET_TYPES	59
 
 #define SK7_HEADER_LEN		4	// "$pid," == 4 chars
 #define SK7_RAW_HEADER_LEN	3
@@ -52,6 +52,7 @@ enum sk7_packet_types {
 	SK7_DATA_CAP,					// capacitive sensors
 	SK7_DATA_ANA0,					// analog input 0
 	SK7_DATA_ANA1,					// analog input 1
+	SK7_DATA_RPH,					// roll-pitch-heading
 
 	SK7_DATA_NVU,						// nav switch up
 	SK7_DATA_NVD,						// nav switch down
@@ -111,6 +112,7 @@ enum sk7_packet_types {
 	SK7_RAW_DATA_ANALOG1,
 	SK7_RAW_DATA_EVENT,
 	SK7_RAW_DATA_SHAKING,
+	SK7_RAW_DATA_RPH,
 	SK7_RAW_DATA_AUDIO_EXP, 
 	SK7_RAW_DATA_AUDIO_HEADER,
 	SK7_RAW_DATA_AUDIO,
@@ -126,6 +128,7 @@ static char* sk7_packet_type_names[] = {
 	"ASCII/Cap1",
 	"ASCII/Ana0",
 	"ASCII/Ana1",
+	"ASCII/RPH",
 	"ASCII/NavUp",
 	"ASCII/NavDown",
 	"ASCII/NavCentre",
@@ -154,6 +157,7 @@ static char* sk7_packet_type_names[] = {
 	"Binary/Analog1",
 	"Binary/Event",
 	"Binary/Shaking",
+	"Binary/RPH",
 	"Binary/AudioSTANE",
 	"Binary/AudioHeader",
 	"Binary/Audio",
@@ -168,6 +172,7 @@ static char* sk7_packet_headers[] = {
 	"$CSA",		// data; capacitive sensors
 	"$AI0",		// data; analog input 0
 	"$AI1",		// data; analog input 1
+	"$RPH",		// data; roll-pitch-heading
 
 	"$NVU",		// data; nav switch up
 	"$NVD",		// data; nav switch down
@@ -226,6 +231,7 @@ static char sk7_raw_packet_headers[] = {
 	119,	// raw ana1
 	118,	// nav events
 	117,	// shaking events
+	116,	// roll-pitch-heading
 	114,	// expansion module audio
 	113,	// audio (headers)
 	112,	// audio (data packets)
@@ -243,6 +249,7 @@ static unsigned sk7_packet_lengths[] = {
 	45, 		// data; capacitive sensors
 	14,			// data: analog input 0
 	14,			// data; analog input 1
+	27,			// data; roll-pitch-heading
 
 	6,			// data; nav switch up
 	6,			// data; nav switch down
@@ -299,6 +306,7 @@ static unsigned sk7_packet_lengths[] = {
 	6,			// raw data; analog input 1
 	5,			// raw data; nav switch / cap switch events (never has timestamps/packet counter)
 	9,			// raw data; shaking event detected
+	10,			// raw data; RPH
 	35,			// raw data; audio sample (extension module contact mic)
 	3,			// raw data: audio header (for playback flow control)
 	35,			// raw data; (audio sample)
@@ -307,7 +315,7 @@ static unsigned sk7_packet_lengths[] = {
 // TODO UPDATE
 /* indicates which packet types could have checksums */
 static int sk7_packet_has_checksum[] = {
-	1,1,1,1,1,1,1,1,		// these are the 8 basic sensor output channels
+	1,1,1,1,1,1,1,1,1,		// these are the 8 basic sensor output channels + RPH
 
 	0,0,0,0,0,0,0,0,		// nav switch and cap switch events
 	0,0,					// logger packets
@@ -499,6 +507,22 @@ struct sk7_data_hr_packet {
 	sk7_packet_terminator term ;
 } PACKED;
 typedef struct sk7_data_hr_packet sk7_data_hr_packet;
+
+struct sk7_data_rph_packet {
+	sk7_packet_header hdr ;
+	char sep1 ;
+	sk7_packet_data_4ds roll ;
+	char sep2 ;
+	sk7_packet_data_4ds pitch ;
+	char sep3 ;
+	sk7_packet_data_4ds heading ;
+	char sep4 ;
+	sk7_packet_data_2d seq ;
+	char sep5 ;
+	sk7_packet_checksum checksum ;
+	sk7_packet_terminator term ;
+} PACKED;
+typedef struct sk7_data_rph_packet sk7_data_rph_packet;
 
 /* packets which never have checksums */
 
