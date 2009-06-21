@@ -138,6 +138,8 @@ enum shake_logging_commands {
 	SHAKE_LOGGING_RECORD = 0x04,
 	/**	Reset SHAKE logging timer to zero */
 	SHAKE_LOGGING_RESET	= 0x05,
+	/**	Power down BT module */
+	SHAKE_LOGGING_BT_POWER_DOWN = 0x06,
 };
 
 /**	When reading the VO_REG_LOGGING_STATUS register, the result will be a combination of zero or more of these values */
@@ -339,6 +341,31 @@ enum shake_logging_state {
 
 /** RFID scanner frequency */
 #define SHAKE_NV_REG_RFID_FREQUENCY	0x003D
+
+/** (SK7) roll-pitch-heading configuration */
+#define SK7_NV_REG_RPH_CONFIG			0x0046
+
+/**	(SK7) heading feedback configuration register */
+#define SK7_NV_REG_HEADING_FEEDBACK	0x0048
+
+/**	(SK7) heading feedback lower threshold LSB */
+#define SK7_NV_REG_HEADING_LOWER_LSB	0x004A
+
+/**	(SK7) heading feedback lower threshold MSB */
+#define SK7_NV_REG_HEADING_LOWER_MSB	0x004B
+
+/**	(SK7) heading feedback upper threshold LSB */
+#define SK7_NV_REG_HEADING_UPPER_LSB	0x004C
+
+/**	(SK7) heading feedback upper threshold MSB */
+#define SK7_NV_REG_HEADING_UPPER_MSB	0x004D
+
+/**	(SK7) heading feedback hysteris */
+#define SK7_NV_REG_HEADING_HYSTERESIS	0x004E
+
+/**	(SK7) heading feedback vibration profile number */
+#define SK7_NV_REG_HEADING_VIB_PROFILE	0x004F
+
 
 /* volatile register addresses. These are either write-only or read-only as indicated. */
 

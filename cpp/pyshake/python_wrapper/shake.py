@@ -204,6 +204,7 @@ SHAKE_LOGGING_PAUSE	=	0x02
 SHAKE_LOGGING_STOP	=	0x03
 SHAKE_LOGGING_RECORD =	0x04
 SHAKE_LOGGING_RESET	=	0x05
+SHAKE_LOGGING_BT_POWER_DOWN = 0x06
 
 ## The contents of the SHAKE_VO_REG_LOGGING_STATUS register should be a combination of these values 
 SHAKE_LOGGING_RECORDING	=	0x01
@@ -331,6 +332,15 @@ SHAKE_NV_REG_LOGGING_PKT_MSB = 0x0039
 SHAKE_NV_REG_HEART_RATE_CONFIG = 0x003A
 SHAKE_NV_REG_RFID_CONFIG = 0x003C
 SHAKE_NV_REG_RFID_FREQUENCY = 0x003D
+SK7_NV_REG_RPH_CONFIG = 0x0046
+SK7_NV_REG_HEADING_FEEDBACK = 0x0048
+SK7_NV_REG_HEADING_LOWER_LSB = 0x004A
+SK7_NV_REG_HEADING_LOWER_MSB = 0x004B
+SK7_NV_REG_HEADING_UPPER_LSB = 0x004C
+SK7_NV_REG_HEADING_UPPER_MSB = 0x004D
+SK7_NV_REG_HEADING_HYSTERESIS = 0x004E
+SK7_NV_REG_HEADING_VIB_PROFILE = 0x004F
+
 
 ## Volatile register addresses
 SHAKE_VO_REG_PKTREQ = 0x0100
@@ -643,6 +653,12 @@ class shake_device:
 			return SHAKE_ERROR
 		return pyshake.heading(self.__shakedev)
 
+	## 	Get current roll,pitch,heading
+	def sk7_roll_pitch_heading(self):
+		if not self.__connected:
+			return SHAKE_ERROR
+		return pyshake.sk7_roll_pitch_heading(self.__shakedev)
+
 	## 	Get current proxmity value for cap switch 0
 	# 	@return current proximity value for cap switch 0 (0-255)
 	def cap0(self):
@@ -863,6 +879,13 @@ class shake_device:
 			return SHAKE_ERROR
 
 		return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RESET)
+
+	## 	Powers down the Bluetooth module to increase logging battery life
+	def logging_bt_power_down(self):
+		if not self.__connected:
+			return SHAKE_ERROR
+
+		return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_BT_POWER_DOWN)
 
 	## 	Indicates the current status of data logging on the SHAKE
 	# 	The value returned will be a bitwise combination of these three values:
@@ -1507,6 +1530,50 @@ class shake_device:
 		pyshake.wait_for_acks(self.__shakedev, wait_for_ack)
 		return SHAKE_SUCCESS
 
+	def sk7_override_led(self, r, g, b):
+		if not self.__connected:
+			return SHAKE_ERROR
 
+		ret1 = self.write(SHAKE_VO_REG_LED_RED, r)
+		ret2 = self.write(SHAKE_VO_REG_LED_GREEN, g)
+		ret3 = self.write(SHAKE_VO_REG_LED_BLUE, b)
 
+		if ret1 == SHAKE_ERROR or ret2 == SHAKE_ERROR or ret3 == SHAKE_ERROR:
+			return SHAKE_ERROR
+
+		return SHAKE_SUCCESS
+		
+	def sk7_configure_heading_feedback(self, lower_threshold, upper_threshold, hysteresis, vib_profile):
+		if self.write(SK7_NV_REG_HEADING_LOWER_LSB, lower_threshold & 0x00FF) != SHAKE_SUCCESS:
+			return SHAKE_ERROR
+
+		if self.write(SK7_NV_REG_HEADING_LOWER_MSB, (lower_threshold & 0xFF00) >> 8) != SHAKE_SUCCESS:
+			return SHAKE_ERROR
+
+		if self.write(SK7_NV_REG_HEADING_UPPER_LSB, upper_threshold & 0x00FF) != SHAKE_SUCCESS:
+			return SHAKE_ERROR
+
+		if self.write(SK7_NV_REG_HEADING_UPPER_MSB, (upper_threshold & 0x00FF) >> 8) != SHAKE_SUCCESS:
+			return SHAKE_ERROR
+
+		if self.write(SK7_NV_REG_HEADING_HYSTERESIS, hysteresis) != SHAKE_SUCCESS:
+			return SHAKE_ERROR
+
+		if self.write(SK7_NV_REG_HEADING_VIB_PROFILE, vib_profile) != SHAKE_SUCCESS:
+			return SHAKE_ERROR
+
+		return SHAKE_SUCCESS
+
+	def sk7_control_heading_feedback(self, enabled, vib_looping, led_feedback):
+		val = 0
+		if enabled:
+			val |= 1
+		if vib_looping:
+			val |= 2
+		if led_feedback:
+			val |= 4
+		return self.write(SK7_NV_REG_HEADING_FEEDBACK, val)
+
+	def sk7_configure_roll_pitch_heading(self, val):
+		return self.write(SK7_NV_REG_RPH_CONFIG, val)
 

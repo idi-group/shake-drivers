@@ -590,6 +590,30 @@ static PyObject* pyshake_heading(PyObject* self, PyObject* args) {
 	return Py_BuildValue("i", SHAKE_ERROR);
 }
 
+static PyObject* pyshake_sk7_roll_pitch_heading(PyObject* self, PyObject* args) {
+	int id;
+
+	PyArg_ParseTuple(args, "i", &id);
+
+	if(id < 0 || id >= MAX_SHAKES) {
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+
+	if(devicelist[id] != NULL) {
+		int rph[3];
+		PyObject* obj;
+
+		sk7_roll_pitch_heading(devicelist[id], rph);
+		obj = Py_BuildValue("[i, i, i]", rph[0], rph[1], rph[2]);
+		Py_INCREF(obj);
+		return obj;
+	}
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
 static PyObject* pyshake_sk6_cap0(PyObject* self, PyObject* args) {
 	int id;
 

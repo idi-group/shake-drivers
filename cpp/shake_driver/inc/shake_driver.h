@@ -319,7 +319,7 @@ SHAKE_API int shake_register_event_callback(shake_device* sh, void (SHAKE_CALLBA
 *	@return */
 SHAKE_API void shake_wait_for_acks(shake_device* sh, int wait_for_ack);
 
-/**	Allows you to override the LED colour of the SHAKE. 
+/**	Allows you to override the LED colour of the SHAKE (SK7 only!)
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()	
 *	@param red red value (1-255)
@@ -327,7 +327,7 @@ SHAKE_API void shake_wait_for_acks(shake_device* sh, int wait_for_ack);
 *	@param blue blue (1-255)
 *
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
-SHAKE_API int shake_override_led(shake_device* sh, unsigned char red, unsigned char green, unsigned char blue);
+SHAKE_API int sk7_override_led(shake_device* sh, unsigned char red, unsigned char green, unsigned char blue);
 
 #ifdef _WIN32
 /** Identical to the shake_register_event_callback() function in every way, except that it accepts a pointer to
@@ -525,6 +525,16 @@ SHAKE_API int shake_mag(shake_device* sh, int* xyz);
 *	@return A value are in the range 0-3599 (tenths of a degree), SHAKE_ERROR otherwise */
 SHAKE_API int shake_heading(shake_device* sh);
 
+/**	SK7 only. Read current roll-pitch-heading values (requires the roll-pitch-heading packet output
+*	to be enabled first, see sk7_configure_roll_pitch_heading. If legacy heading packet output is
+*	enabled, use shake_heading to retrieve that data.
+*	
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param rph pointer to a 3 element array of integers, into which the roll, pitch and heading readings
+*			will be placed (in that order). See the user manual for details of the format of each value.
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int sk7_roll_pitch_heading(shake_device* sh, int* rph);
+
 /** Read the proximity value of the first capacitive sensor.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@return A value in the range 0-255 (255 is highest proximity), SHAKE_ERROR otherwise */
@@ -712,6 +722,14 @@ SHAKE_API int shake_logging_packet_count(shake_device* sh);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_logging_packets_read(shake_device* sh);
 
+/**	The SHAKE SK7 can optionally power down the Bluetooth module while logging is active to increase 
+*	battery life. To power down the Bluetooth module, simply call this function. The module will remain
+*	inactive until the SK7 is reconnected using a USB cable. 
+*
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int sk7_logging_bt_power_down(shake_device* sh);
+
 /*	=== Register access functions === 
 *	These functions allow you to easily get/set the values of the various configuration registers
 *	on a SHAKE device */
@@ -849,6 +867,10 @@ SHAKE_API int shake_write_temp_compensation(shake_device* sh, unsigned char valu
 /** Read the SHAKE_NV_REG_STREAM_DISABLE register, which can be used to disable the streaming of data packets for selected sensors.
 *	The value returned will be a combination of the values from the ::shake_stream_disable enumeration. If 
 *	the bit for a particular sensor is set, it means data streaming is DISABLED for that sensor (even if sample rate above 0).
+*
+*	NOTE: this functionality is removed on SK7s with firmware version >= 1.00. Setting the sample rate to 0 has an 
+*	equivalent effect.
+*	
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value pointer to an unsigned char variable which will receive the contents of the register 
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
@@ -857,6 +879,10 @@ SHAKE_API int shake_read_packet_streaming(shake_device* sh, unsigned char* value
 /** Write the SHAKE_NV_REG_STREAM_DISABLE register, which can be used to disable the streaming of data packets for selected sensors.
 *	The value to write should be a combination of the values from the ::shake_stream_disable enumeration. If 
 *	the bit for a particular sensor is set, it means data streaming will be DISABLED for that sensor (even if sample rate above 0).
+*
+*	NOTE: this functionality is removed on SK7s with firmware version >= 1.00. Setting the sample rate to 0 has an 
+*	equivalent effect.
+*
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param value the value to write into the register
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
@@ -1561,6 +1587,42 @@ SHAKE_API int shake_read_rfid_scan_freq(shake_device* sh, unsigned char* value);
 *	@param value to write into the register (between SHAKE_RFID_AUTOSCAN_MIN_FREQ and SHAKE_RFID_AUTOSCAN_MAX_FREQ)
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_rfid_scan_freq(shake_device* sh, unsigned char value);
+
+/**	SK7 only. Configures vibration feedback which is activated when the compass heading enters a defined range. Note that
+*	vibration feedback must be enabled using sk7_configure_heading_feedback, and the vibrator power must be turned on.
+*
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param lower_threshold lower threshold for the heading value, in tenths of a degree
+*	@param upper_threshold upper threshold for the heading value, in tenths of a degree
+*	@param hysteresis the amount by which the heading must change above/below a threshold before the vibration
+*			feedback will be triggered again. Allowed values are 0-255, in tenths of a degree.
+*	@param vib_profile the address of the vibration profile to play when a threshold is crossed.
+*
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int sk7_configure_heading_feedback(shake_device* sh, int lower_threshold, int upper_threshold, int hysteresis, int vib_profile);
+
+/**	SK7 only. Enable/disable heading vibration feedback partially or completely 
+*
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param enabled set to 0 to disable ALL heading feedback, any other value to enable it
+*	@param vib_looping set to 0 to disable vibration looping, any other value to enable it
+*	@param led_feedback set to 0 to disable LED feedback when a threshold is crossed, any other value to enable it
+*
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int sk7_control_heading_feedback(shake_device* sh, int enabled, int vib_looping, int led_feedback);
+
+/**	SK7 only. Configure output of roll-pitch-heading packet in firmware >= v1.00
+*
+*	The value parameter should be set as follows (21/6/09):
+*		0:	disable RPH output, use old heading only packet instead
+*		1:	output RPH packets using accelerometer and magnetometer to calculate the data
+*	More options may be available in future firmware releases.
+*	
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param value the value to write into the roll-pitch-heading configuration register
+*
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int sk7_configure_roll_pitch_heading(shake_device* sh, int value);
 
 /* 	=== Basic register access functions === 
 *	These functions allow you direct access to the various registers on the device.

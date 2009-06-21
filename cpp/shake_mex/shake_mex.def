@@ -1,0 +1,2 @@
+LIBRARY shake_mex
+EXPORTS mexFunction
