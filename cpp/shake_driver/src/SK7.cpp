@@ -637,6 +637,7 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 			data.rph[0] = srpl->data[0] + (srpl->data[1] << 8);
 			data.rph[1] = srpl->data[2] + (srpl->data[3] << 8);
 			data.rph[2] = srpl->data[4] + (srpl->data[5] << 8);
+			data.heading = data.rph[2];
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srpl->seq;
 			break;			   
 		}
