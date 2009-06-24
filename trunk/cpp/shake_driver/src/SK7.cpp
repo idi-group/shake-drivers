@@ -451,6 +451,7 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 			data.rph[0] = dec_ascii_to_int(datarph->roll.data, 5, 4);
 			data.rph[1] = dec_ascii_to_int(datarph->pitch.data, 5, 4);
 			data.rph[2] = dec_ascii_to_int(datarph->heading.data, 5, 4);
+			data.heading = data.rph[2];
 			data.internal_timestamps[SHAKE_SENSOR_HEADING] = seq;
 
 			if(playback && devpriv->log) {
@@ -553,8 +554,8 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 
 			int lastseq = data.internal_timestamps[SHAKE_SENSOR_ACC];
 			//printf("%03d\n", srpl->seq);
-			if( (lastseq + 1 != srpl->seq))
-				if(lastseq != 255) printf("MISSING PACKET: %d -> %d (%d)\n", lastseq, srpl->seq, has_seq);
+			//if( (lastseq + 1 != srpl->seq))
+			//	if(lastseq != 255) printf("MISSING PACKET: %d -> %d (%d)\n", lastseq, srpl->seq, has_seq);
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_ACC] = srpl->seq;
 							   }
 			break;
