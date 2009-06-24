@@ -1,0 +1,552 @@
+16/01/2006 Capacitance sensor notes:
+
+Want two sensors.
+Before I have used a shunt method of sensing, the main advantage of this is that the touch plate is a single element. A big disadvantage is that it is very susceptible to noise, since placing a ground shield around the electrodes reduces the sensitivity.
+
+An alternative is to use a conduction method, have a transmit plate and a sense plate. HF current flows into the sense plate from the transmit plate (into a defined impedance). If a grounded object comes close to the plates, then the electric fields are diverted from the sense impedance.
+
+The distance between the plates should be at least twice the thickness of the plastic wall. 
+
+
+
+24/01/2006 Cap Sensor
+
+This is the current design – 
+
+
+
+A few notes:
+
+1) synchronous demodulation is not used, I will test it for susceptibility for noise and hopefully it will be OK
+2) Fs is variable, and the Lr Cr forms a resonant circuit, thus the voltage on the transmitting plates can be controlled by adjusting Fs. The voltage on the fast peak detect is fed to the ADC, so the firmware can optimize or calibrate the steady state levels
+3) The resonant LC is buffered from the uController output to eliminate the chance of high voltages / currents destroying it
+4) After testing, it may be possible to eliminate the drive buffer, if the currents are small enough
+5) The HP filter R1C1 should be set just below the expected normal operational Fs, and the LP formed by R2C2 should be set just above it
+6) The supply to this whole circuit must be switchable, using a FET or whatever – this part of the circuit is not shown
+7) The circuit can measure both the steady state coupling between the transmit and receive plates ( by sampling the fast peak detect output) and the onset time of two separate points in a downward coupling change ( since the trip comparators connect to separate IRQ lines on the uController)
+8) The time constant CpRp must be greater than the time required for the uController to service the interrupts because I think that the PLA interrupts are level sensitive and the data sheet claims that the interrupt must be active for the time it takes to enter the privileged mode.
+9) The diodes on the PLA lines prevent the negative current spikes flowing in the uController intrinsic diodes when the op-amp outputs swing low
+10) The diodes used for the peak detect and the protection can be dual common anode schotky types in SC70. (BAS70-06)
+
+
+Choice of inductor:
+Assume that the freq = 1MHz
+Assume that want voltage on plate = 30V pk-pk
+
+In PSIPICE entered this circuit, where the inductor is the 
+murata LQG21N series, 4u7, 30mA, Q = 45, SRF = 45MHz
+which is probably going to be used in several other places in SHAKE
+
+The value of capacitance is that to give the required resonance of 1MHz.
+Obviously this value of capacitance is not standard. Change to 4.7n – 
+
+
+
+
+The peak is at 1.05MHz, OK
+Voltage gain is X4, a reasonable compromise between the voltage step up and the bandwidth and power consumption.
+
+The RMS voltage across the inductors resistance of 6.5ohm is 1.2V
+Thus power dissipated in the inductor is 220mW!
+A huge price to pay for the higher voltage.
+
+Try a smaller inductor. In the same range (murata LQG21N series) try – 
+100nH Q=20@25MHz SRF  = 340M
+Equivalent res = 0.785
+Parallel cap = 2.2pF
+Res cap required = 253nF
+Let Cres = 220nF
+
+(Q of this circuit is now 
+- now the damping factor is too high, there is no gain in voltage.
+
+
+Use large inductor – 470uH, 1210, Fr = 5MHz, Q = 50, Farnell  HYPERLINK "http://ie.farnell.com/jsp/endecaSearch/partDetail.jsp?SKU=9522255&N=401" 9522255 
+LQH32CN471K23L
+
+
+Now the circuit is – 
+
+
+
+The output voltage pk-pk is 13V (X4 factor as required) and the supply current is 1.4mA excluding switching loses. The buffer circuit is not nescessay now.
+
+Choice of input op-amp
+
+Assume that the coupled capacitance is 1pF
+Assume that the Fs = 1MHz, Sine, 12V pk-pk
+Then the equivalent input impedance to the virtual ground input (inverting input) of the op-amp is 159k
+We want an output from the op-amp of 3V pk-pk, thus we need a gain of 0.25
+Therefore Rf = 159k/4 = 39k
+
+The GBW required for the op-amp is approx 10MHz, slew rate >10V/uS
+Need FET input. Isupply < 200uA.
+
+ HYPERLINK "javascript:newWindow(%22opa345%22,%20%22true%22,%22OPA345%22);" OPA345
+Perfect for the input amp, but expensive in quad version ($2/1k)
+
+ HYPERLINK "javascript:newWindow(%22lmv824%22,%20%22true%22,%22LMV824%22);" LMV824
+Likely contender for use in the magnetometers, cheap, quad, only problem is slew is only 1.7V/uS
+
+Alternatively could use a dual comparator and a single higher grade op-amp.
+
+ HYPERLINK "javascript:newWindow(%22lmv821%22,%20%22true%22,%22LMV821%22);" LMV821
+Available in SC70, 5MHz , 2.5V/uS, cheap
+100000pA == 100nA
+If Rf were 1meg, then offset would be = 0.1V, should be OK 
+
+This appears to be a suitable (dual)comparator:
+ HYPERLINK "javascript:newWindow(%22lmv393%22,%20%22true%22,%22LMV393%22);" LMV393
+
+This is the latest design – 
+
+Notes:
+Now that using comparator, they can only pull down, so the pulse to the uController inputs to the PLA must be a low pulse. Thus the PLA will have to invert the signals before applying to the interrupt lines. The reverse pulse protection diodes are now not required.
+
+The series resistor in the receive plate path acts with the capacitance of the plate to the source of the signal to implement a HP filter, at the expense of gain of the circuit. Need to revisit this later to optimize.
+
+The current required by the circuit is low enough (<2mA??) such that the supply can be controlled directly from the uController GPIO, no need for the switching FET.
+
+
+30/01/2006 Cap-sensing circuit revisited
+
+Since now the peripheral features are much more advanced in the uController, can simplify the circuit.
+
+We can use timer 4 as a gated timer. When the timer pin is high, the counter will be incremented at a rate of the instruction clock. On the falling edge of the timer pin, the interrupt is generated.
+
+This will work – 
+
+But it cannot distinguish between the direction of the capacitance delta. Want a way so that a trigger only happens in one direction.
+
+Solution:
+Leave the gated timer mode always on. When the lower threshold comparator goes low, a timer interrupt will occur. Now in the timer isr() sample the output of the higher comparator. If it is high, then this is a valid hit. If it is low, then ignore.
+(note: this arrangement can be modified in firmware to implement a touch switch that will work in the opposite direction)
+
+
+
+
+Here is the expected timing diagram – 
+
+
+
+16/03/2006 Component choices
+
+
+Cap Sensor input stage
+
+
+Fs  ~=500kHz
+Let Fc = 600kHz
+If C = 1n
+R43 = 1/(2pi1nF600k) = 265ohm 
+Let C57 = 47pF, R43 =  5.6k
+However, there will be a couple of pF of parasitic capacitance in parallel with C57, so compensate by reducing R43 to 4.7k
+(this value is used in the magnetometer circuit also)
+
+33pF is used in the oscillator circuit, so let C57 = 33pF
+Now the corner frequency = 1/(2pi*4k7*40p) = 850kHz
+
+
+Cap sensing comparator output pull-ups
+
+
+The timing and levels of the comparator inputs has still to be determined. For the moment, I will assume that I require a rise time on the comp outputs of 1 instruction cycle at nominal frequency (one timer tick)
+Trise <= 4/7.37MHz = 540nS
+
+Neither data sheet for the dsPICC  or the LMV393 give the input/output capacitances. Assume total capacitance = 20pF
+R40 = R41 = 540nS / 20pF = 27k
+Let R40 = R41 = 47k because 47k is used elsewhere
+
+
+
+03/04/2006 Cap sense component choice
+
+
+
+At the moment, the peak voltage out from the first stage op-amp drops by 200mV when the finger is flush to 0.8mm FR4 away from the plates.
+Design the speed detect threshold to be half this, or 100mV.
+
+The time constant of the upper branch needs to be at leasrt 10 times lower than the lower branch. It also needs to be low enough to allow the capture of fast finger movements. Try T(C55,R38) = 1mS, C55 = 100nF, R38 = 10k
+(waste current = 2V / 10k = 200nA. check later if this is comparable to the whole cap sense circuit, and if so, use higher impedance values)
+
+
+The lower branch can have a time constant of 500ms or more. The first threshold can be about 50mV below the top, and the 2nd can be 150mV below the top.
+
+Vtop = 2.25V
+V1 = 2.2V
+V2 = 2.1V
+
+Let R46 = 100k
+R45 = 4.7K
+R44 = 2.7k
+
+If C56 = 100nF, then the time constant of the lower branch = 11mS
+If C = 4.7uF, then the time constant of the lower branch = 517mS
+
+
+Need to keep the current through both peak detect diodes approx the same. Thus set R38 = 100k, C55 = 10nF
+
+By trial and error this circuit performs OK – 
+
+
+
+For very quick tap, this is the voltage on the CAP_SNS_AN node (green) and on the CAP_SNS_TMR_GATE node (yellow) – 
+
+
+
+
+For a normal tap – 
+
+
+
+And for a soft tap – 
+
+
+
+Thus the timer will be on for approx 400uS – 500uS for quick tap
+500uS – 1mS for a medium tap
+1mS or greater for a soft tap (this can be up to 20mS)
+
+03/04/2006 Cap Sense Firmware
+
+The INT2 pin is used for the cap sense interrupt. This line goes high co-incident with the CAP_SNS_TMR_GATE node going high as shown in the yellow traces of the above waveform captures. Thus the edge polarity for INT2 must be the positive edge. 
+
+Set the maximum trigger rate of the capacitive switch to be 7Hz. 
+
+Then in the INT2 isr(), disable INT2 interrupts, set counter to a level that gets decremented in main timer isr() and when reaches zero re-enables INT2. 
+For 7 triggers / second, require the interrupt to be re-enabled in 140mS. Thus the counter gets initialized to 140. 
+
+Also in the INT2 isr(), start TMR4 as a gated counter and enable TMR4 interrupt. 
+On the down edge of the CAP_SNS_TMR_GATE node the TMR4 isr() will be invoked. This isr() should capture the TMR4 value and disable TMR4 interrupts and set a flag to instruct a routine in the main code to perform the velocity calculation and add the cap sense packet to the output data queue.
+
+TMR4 is a 16bit timer. Want to be able to capture pulses up to 20mS long and for the cap sense to work at 7.37MHz/4 oscillator, 7.37MHz and 4*7.37MHz oscillator.
+For 7.37MHz oscillator, increment time without prescale is ~=500nS
+20mS / 500nS = 40,000 no pre-scale required
+Thus no prescale required for 7.37MHz/4 also.
+Thus for 4*7.37MHz oscillator prescale of X4 is required. However, only prescales of X8, X64 and X256 are available.
+
+Let there be three detection ranges, LOW, MEDIUM and HIGH
+HIGH == <= 500uS ===                  <921 ticks
+MED == 500uS to 1mS ==        922ticks to 1844ticks
+LOW = 				>1844ticks
+
+05/04/2006 Cap sense tracking peak detect time constant
+
+Is too fast – only takes 150mS to discharge to lowest level. This is because it is being discharged by only a small amount of the full range to which the RC time constant equations apply.
+
+
+
+this will make the detection of very slow triggers impossible. It also adds extra switching to the up part of the trigger.
+
+Ideally would like a time constant on the slow peak detect to be 5 to 10 seconds or more.
+Allow a voltage drop of 20mV in 5 seconds on a cap of 4.7uF, then the max discharge current will be – 
+20nA
+
+2V/1meg = 2uA
+Thus the discharge current is 100 times greater than it should be.
+
+The input bias current of the LMV393 is ~= 25nA nominal, 250nA max
+
+ 05/04/2006 Firmware solution to the cap sensor
+
+It will get a bit messy, since the ADC is constantly sampling a particular pattern at a rate of 1kHz, but the following circuit would then be sufficient – 
+
+
+
+
+
+The firmware would do the following – 
+1) constantly keep a running average of the peak detect value with a several second time constant
+2) every sample check if the latest value crosses the first threshold
+3) if it does, start the timer
+4) every sample check if the latest value crosses the 2nd threshold
+5) stop the timer and record the time on the timer
+
+the limitations of this method are that the resolution is proportional to the sample rate. If the sample rate is 1kHz (as it is in the current design), then might be able to detect the following ranges
+1) <1mS
+2) 1mS – 2mS
+3) 2mS – 3mS
+4) >3mS
+Giving a possibility of 4 different threshold levels.
+
+If the sample time is kept fixed after the first sample and the value is measured, it may be possible to discern more velocity levels.
+
+05/04/2006 Minimal Design for the cap sensor
+
+
+
+
+This is the output for shunt capacitance between 1pF and 3pF in steps of 0.5pF - 
+
+
+
+
+The difference between min and max is 175mV.
+
+
+Here is the tweaked and streamlined version of the same circuit – 
+
+
+And the performance for a delta capacitance on the plate of 2pF – 
+
+
+In practice the static level is about 900mV and drops up to about 160mV below using the index finger through 0.8mm FR4
+In the next PCB layout, it may be possible to reduce the parasitic capacitance further than at present by layout. Also, the reverse capacitance of the diodes will contribute a large amount.
+To simulate the same values, require approx 11pF of parasitic capacitance and 5pF of extra capacitance when activated.
+
+
+The delta in output voltage increases by about 10% when the feed resistor is decreased to 33k
+
+
+
+
+
+
+
+
+29/08/2006 Cap sense for SAMHPCB0609R01
+
+
+
+Voltage measured on diode cathode is ~=590mV when 7*7mm cap sense plates are not touched.  This drops to 550mV when touched and device is grounded via PSU and oscilloscope. (Fosc = 460kHz)
+
+Thus need to set the inverting input to ~500mV. 
+
+
+
+This simulation gives a gain of approx 5 - 
+
+
+
+
+However, in the actual circuit, there is too much 460khz ripple. Add the piggyback feedback cap thus – 
+
+
+
+This also helps to reduce the magnitude of the ADC induced spike from 600mV to about 350mV.
+It takes 400nS for the output of the op-amp to settle after the ADC switches the channel. Thus need to ensure that the acquisition time for sampling is at least 500nS, preferably 1uS or more.
+
+30/08/2006 Production notes:
+
+Battery Wires
+Red = 29mm
+Black = 32mm
+
+Cap Sense wires
+CS0 = yellow = 26mm
+CS1 = white = 34mm
+
+
+
+21/10/2006 Capacitive sense notes
+
+On designing the calibration routine, I noticed that the ripple in the acquired signal is quite high – 
+
+
+
+Where Fs = 1024Hz
+This frequency is probably due to the switching frequency of the PWM aliased.
+
+FPWM = 460kHz
+
+The above plots had the sampling time set to 12TAD thus – 
+AD1CON3bits.ADCS = 7;		// ADC Conversion Clock Tad=Tcy*(ADCS+1)
+AD1CON3bits.SAMC = 12; 	// sample for 12TAD at TAD = 1.09uS
+
+This corresponds to a conversion clock of 
+
+TAD = (1/7370000 )* 8 = 1.09uS
+And the sample time is thus 12*1.09uS = 13uS
+
+The period of the PWM is 1/460k = 2.17uS
+
+Unfortunately increasing the accuisition time is unlikely to reduce this ripple since the output of the op-amp is connected directly to the ADC input. Only way to possibly reduce the ripple without modifying the hardware is to increase the PWM frequency.
+
+When the frequency is doubled, the output of the op-amps is saturated low.
+
+This is how the waveforms look at the moment ( with the mains connected)– 
+
+
+
+And the ripple / noise is – 
+
+
+
+
+Thus the normal peak-peak ripple is about 30 counts when not touched and 25 when touched (not including the pedestel which is probably due to Vdd variations or BT activity.
+
+
+
+Cap sensing
+
+Look at using the AD7142, about €1.50 in 1k
+ HYPERLINK "http://search.digikey.com/scripts/DkSearch/dksus.dll?Cat=2556768;keywords=ad7142" http://search.digikey.com/scripts/DkSearch/dksus.dll?Cat=2556768;keywords=ad7142
+
+It contains 14 cap sense channels. Could design a funky pattern on a PCB at the back of the unit ( under the battery? Use 0.2mm PCB? ). In full power mode it only consumes 1mA. 
+
+Multi-Touch:
+there is a very long history to this technology, so I doubt Apple really have much IP to protect except perhaps
+certain applications of it. Here is a great history / overview of the technology - 
+ HYPERLINK "http://www.billbuxton.com/multitouchOverview.html" http://www.billbuxton.com/multitouchOverview.html
+
+We have already decided to use the AD7142.
+Important info here – 
+ HYPERLINK "http://www.analog.com/static/imported-files/application_notes/AN_854.pdf" http://www.analog.com/static/imported-files/application_notes/AN_854.pdf
+
+what type of sensor layout?
+
+
+
+
+
+
+
+We could also use the AD7143, which is the same but has 8 channles instead of 12. Also comes in a smaller package. It has an update rate of 40Hz instead of 30Hz.
+
+ HYPERLINK "http://www.analog.com/en/prod/0,,760_1077_AD7143,00.html" http://www.analog.com/en/prod/0,,760_1077_AD7143,00.html
+
+the AD website has a very good web seminar on the use of the IC, and also has various footprints for sensor layouts ( disc, slider buttons etc.)
+
+
+there is also an application note / PCB design and firmware for a 200*200 pixel (40mm sq) multi-touch design.
+
+Multi-Touch:
+there is a very long history to this technology, so I doubt Apple really have much IP to protect except perhaps
+certain applications of it. Here is a great history / overview of the technology - 
+http://www.billbuxton.com/multitouchOverview.html
+
+18/11/2007 Connections
+
+A good idea that comes to mind is to have the cap sense array on a flexible PCB (FPC) and use one of Hirose connectors on the main PCB ( lookup the FH26 series in Digikey )
+Then the AD7142 will sit on the main PCB, and the FPC could be single sided (0.2mm thick) and glued directly to the under inner wall of the SHAKE.
+
+21/11/2007 Connections to the AD7142
+
+Does the Vdd to the AD7142 need to be switched?
+No, Icc = 2.25uA in full shutdown mode
+
+So only require the SPI connections, an SPI_CS# and an INT line.
+THe SDO output does float when not outputting data ( ie when CS# is high )
+
+22/11/2007
+Here is a design for the dual touch sensor pad, as detailed in 
+
+
+
+
+It is designed for the AD7147, not the AD7142. The AD7147 works with delta capacitances of 8pF, as opposed to 2pF for the AD7142. I’m not sure whether the touch pad design will work for the 7142. In any case, the 7147 is in an easier to manage package, 32 pins instead of 40 pins so there will be less issues with solderability.
+
+The above design is for a pad of max size 40mm*40mm, and the maximum output resolution is 200*200 positions.
+Since my design will be smaller ( perhaps 32mm * 32mm) will the resolution be greater?
+
+The above design uses 12 of the 13 cap lines ( it uses all but line CN12 ).
+
+For true multi-touch, with perhaps lower resolution, and for easier code development, a very simple array of 12 rectangular pads could be implemented. If the pads are smaller than a typical fingertip, then position can be inferred by the relative levels between the pads. This would only require a single layer FPC, and could easily be prototyped with copper tape and wire.
+If the pads were 6mm each with 1mm spacing inbetween, then a 4*3 matrix would give an overall coverage of  (6*4)+3  * (6*3)+2  = 27mm * 20mm
+-too small
+In practice, the fingertip is usually larger. If the pads were 7.5mm square, then
+an overall coverage of  (7.5*4)+3  * (7.5*3)+2  = 33mm * 24.5mm
+
+(the expected dimensions of the SK7 as of writing are 33mm * 43mm)
+Allowing for 13mm at the antenna end of the device, and 1mm wall thickness, the available area for the touch pad will be a maximum of 31mm * 28mm
+
+AD7142 or AD7147?
+AD7142AD7147Size25mm216mm2Pins3224power0.9mA0.9mAelements1413resolution<1fF>1fFRange2pF8pFCost$1.35$1.30
+I think I will stick with the 7142 mainly because of the better resolution. Also, there is no need for the higher range of the 7147 as the pad size I will be using is so small and will be behind about 1mm of plastic.
+
+Is it still worth while going for a FPC? If we went for a 0.4mm double sided PCB instead, and mounted the circuit on the board, and had the circuit at the top of the unit, then the high components could fit in an area close to the bottom of the SK7, ie away from where the option module and gyros would be located. We could use fine enamled copper wire to connect to the main PCB, the following connections are required – 
+
+1) Gnd
+2) MISO
+3) MOSI
+4) CLK
+5) CS#
+6) INT
+7) Vdd
+
+This would allow the cap sensing to be an option. It would also allow flexibility in that the PCB could contain a microcontroller if the load turned out to be too much for the dsPIC. It would also free up some space on the main PCB.
+
+Use flat ribbon cable for the interconnect?
+If so, 0.5mm could be bored into the SK7 roof where the cable could be soldered thru-hole.
+To minimise EMI, it may be necessary to have an extra ground or two ( to minimise the loop area for MISO, MOSI and CLK ).
+Minimum standard ribbon pitch is 0.64mm. Using 8 ways, this would be a length of 5.12mm. THe PCB hole – hole spacing would be 0.64mm, assuming a drill of 0.3mm, and a pad of 0.5mm, then there would be 0.14mm spacing between pads.
+
+This will be troublesome to manufacture.
+What about using the I2C version of the AD7142? Then only 5 connections are necessary ( with INT ) or 4 if INT is not required.
+
+What is the likely data transfer rate between the AD7142 and the host?
+The max SPI clock frequency = 5MHz.
+The max I2C clock frequency = 400kHz.
+
+Assume that I want to sample at the maximum 30Hz, all 12 channels. Then we have to read the device 360 times / second.
+
+Note:
+The main difference between the 7142 and 7147 is the mode of operation. 
+The 7142 is based on shunting the signal source away from the signal sensor.
+The 7147 is based on measuring the the amount of signal that is shunted to ground ( like my design in the SK6 )
+Thus the 7147 is better where a single layer PCB layout is required, as there does not need to be the signal source pads adjacent to the sense pads. However, my guess would be that the 7142 is less prone to noise, but I’m not certain of this.
+For my plan above of having the matrix touch pad, the 7147 is definetly the part to use.
+
+AD7142
+Full power mode - use this to scan all channels at a constant rate.
+All unused cap sense pins should be connected to Cshield pin to prevent cross coupling.
+All Cinx pins can be individually multiplexed to the ADC.
+00 - Cinx floating
+01 - Cinx -> ADC + input
+10 - Cinx -> ADC - input
+11 - Cinx -> Cshield
+Each sensor channel also has offset values stored in registers that can be used to offset the
+ sensor capacitance be + or - 20pF.
+
+I2C addressing:
+
+
+
+
+05/10/2008
+from the AD7147 datasheet-
+
+A square wave excitation signal is applied to CINx during the conversion, and the modulator continuously samples the charge going through CINx. The output of the modulator is processed via a digital filter, and the resulting digital data is stored in the CDC_RESULT_Sx registers for each conversion stage, at Address 0x00B to Address 0x016.
+
+
+
+
+we require full power mode when the cap sensing is enabled, and shutdown mode otherwise.
+( for the UGLA cap sensor board, always full power mode )
+
+
+
+
+
+
+
+
+
+this will need to be automated upon power up. Basically follow the above algorithm, flashing the LEDs in a particular pattern to indicate the the end user that calibration is in progress. For the SK7, implement a command to start the calibration process, do the same for the UGLA cap sensing board.
+
+Output Data packet format:
+when fully calilbrated, there is no need for 16bit resolution. Use 8bit resolution for each of the 13 channels. This allows the conversion decimation rate to be set to the minimum and the noise should still be less than 1 LSBit pk-pk, and will result in the lowest latency.
+If using ASCII mode, the output data format would be – 
+
+$CSA,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,mm,ZZ,CS
+
+where aa == CH0 value in hex
+bb == CH1 value in hex
+……
+mm == CH12 value in hex
+ZZ = packet count
+CS = optional checksum
+
+so there is about 43 bytes per packet.
+the maximum data rate will be 100Hz, so the data would be 4300 bytes per second, or about 35kbits per second over the BT link.
+
+For raw mode, the packet format needs some care so that the header bytes are not encountered in the data. Thus 0x7F is not allowed in the data, so when transmitting - 
+
+if( ui8DataOut == 0xFF ) ;
+else if( ui8DataOut >= 0x7F ) ui8DataOut += 1;
+
+and when receiving
+
+if( ui8DataIn >= 0x80 ) ui8DataIn -= 1;
+
+
