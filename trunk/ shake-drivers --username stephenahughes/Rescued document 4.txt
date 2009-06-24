@@ -1,0 +1,2131 @@
+10/08/2005 Magnetometer selection:
+The triple axes device used in MESH is expensive – 
+
+Last supplier in the UK
+[HYPERLINK mailto:sales@inertialaero.demon.co.uk mailto:sales@inertialaero.demon.co.uk]
+
+MESH R00:
+qty10		HMC 6352 Dual Axis Compass on a chip.	£41.00 each
+these are out of the question.
+
+MESH R02
+
+
+
+Dual axis
+
+
+
+Thus best to have the third axis as a plugin option.
+
+ HYPERLINK "http://www.hitachimetals.com/product/sensors/mems/magnetic_compass.cfm" http://www.hitachimetals.com/product/sensors/mems/magnetic_compass.cfm
+
+The Hitatchi HM55B is not a good alternative, since it consumes 10mA and takes up to 40mS to take a measurement. Since two would be required, that translates to 20mA if the sampling takes place at the maximum of 25Hz
+
+This 40mS delay is most likely due to the time constant of the integrated LP filter. Unfortunately the outputs of the MRE bridges are not available.
+
+
+31/12/2005 Op-amp selection
+
+For the magnetometer amps, and possibly for the accelerometers, these amps are worth considering –
+OPA374
+(recommended price = $0.36 / 1k )
+Quad version in TSSOP14, so may not be the smallest footprint solution.
+OPAy348
+(recommended price = $0.45 / 1k )
+Available in SC70 package (single) and SOT23 (dual)
+
+
+12/01/2006 Magnetometer Reset Circuit
+
+
+Need to minimize the component count, and the size of the components.
+The BJTs above are SOT23, they need to be much smaller.
+
+Each set/reset strap has a nominal
+resistance of 3 to 6 ohms with a minimum required
+peak current of 400mA for reset or set pulses.
+
+So let the current pulse = 500mA
+Let the min battery voltage = 3.5V
+Then the straps must be in parallel so that each gets the required current, assuming that the straps are at the worst case resistance of 6ohm. Also, the switches must have a resistance of 1ohm or less at 1.5A.
+
+Are the caps needed in the base drive in the above circuit?
+They ensure that the two transistors are never on at the same time. They also eliminate the need for series base drive resistors.
+ Assume that the gain of the transistors is >=100 at the 2A collector current, then would require 20mA drive from the uController, which should be no problem.
+
+Time taken to dump the energy from the 100nF cap is  (assume 2 time constants)
+2 * 100n * 3ohm = 600nS
+Thus a spacing between the +ve pulse and –ve pulse of 1uS is fine.
+
+If FETS are used, then the series caps and the base discharge resistors can be eliminated. 
+Neither Farnell or Digikey stock any selection of suitable FETs (ie in SOT323, SC70 packages that have a low enough RDSon)
+
+Fairchild Semi:
+Complementary FETS in SC70-6 packages
+ HYPERLINK "http://www.fairchildsemi.com/pf/FD/FDG6332C.html" http://www.fairchildsemi.com/pf/FD/FDG6332C.html
+
+datasheet -  HYPERLINK "http://www.fairchildsemi.com/ds/FD/FDG6332C.pdf" http://www.fairchildsemi.com/ds/FD/FDG6332C.pdf
+
+$0.33 / 1000
+No samples available
+Have got price €0.145 / 3000 on Hkinventory.com
+
+Both FETs have a 2A pulse current rating.
+If both straps in parallel and = 3ohms, then total impedance is 400mohm + 1.5ohm = 1.9ohm
+Vbat max = 4.2V, so I peak = 2.21amp
+If the supply is taken from the Vdd rail, then Ipeak = 1.73A
+Both transistors have an input capacitance of 110pF.
+Total gate capacitance = 220pF
+Want to drive them on in 100nS
+Thus drive current required is = 6.6mA, no problem for the uController
+Series resistor required for time constant of 50nS is 220ohm
+Let Rseries = 100ohm (this will limit the noise due to the pulse, and minimize the dip in the Vdd supply to the uController)
+
+Now the reset circuit becomes – 
+
+
+A saving of 4 0603 devices and an SC70.
+
+
+As an alternative, this could be used - Si1553DL
+ HYPERLINK "http://www.vishay.com/mosfets/list/product-71078/" http://www.vishay.com/mosfets/list/product-71078/
+
+
+12/01/2006 Offset Strap implementation
+Is this necessary? In MESH, there were large variations in the offset values from device to device, which seriously degraded the dynamic range of the measurements.
+
+According to the data sheets, 10mA is required for each Gauss. Earths magnetic field is approx 0.5 Gauss, so changes of this magnitude will probably suffice. Thus a current source of +/- 5mA would be required. The offset strap has a resistance of 15ohms, so the max voltage across it will be = 75mV. The max power in the strap will be 375uW.
+The electronics to create a bi-polar switching current source that is controllable by the uController is probably beyond the limits of this design due to space and cost constraints.
+
+
+13/01/2006 Magnetometer power supply requirements – 
+Each bridge has a nominal resistance of 1k
+Driving from 3.3V, the current for all three bridges is 3.3V/330ohm = 10mA
+If I were to drive it from 1.8V( min recommended), then the current would be =5.4mA
+
+If all three devices are sampled consecutively, is it feasible to shut down the sensors in between samples?
+Here there is a trade-off between aliasing and power consumption. 
+The higher the sample rate, the less time there is between samples for the sensor and its amplifiers / filters to settle. The lower the aliasing error required, the higher the settling time of the filters (ie the lower the cutoff of the filters)
+
+If I could get a least a 3:1 duty ratio on the power to the magnetometers?
+Assume that 3 time constants are required for the error to be low enough.
+Could have a low power mode. Let the cutoff of both the filters = 100Hz, then the time constant ~= 1.6mS, 3 time constants = 5mS. 
+Sample at 40Hz. (every 25mS)
+Power up sensors, wait 5mS, sample them, shut down sensors. ON ratio is 1:5, thus the average current consumption would be (10mA + 1mA) / 5 = 2.2mA
+This mode of operation may be useful for compassing in power critical applications. The 40Hz sample rate can be internally downsampled to 20Hz to give a double of resolution.
+Note: there is no anti-aliasing filtering in this mode of operation.
+
+If there turns out to be plenty of space on the PCB, then could include 3 N-FETs that when on, connects extra caps across the cap in the last stage of filtering.
+
+It may also be worth considering using inductors (low Q) in place of the resistors in the last stage of filtering.
+
+13/01/2006 Method to get 1.8V supply for the bridges cheaply
+
+
+When the MCS_PS_ENABLE# is pulled low by the uCOntroller, it must only do so in a time period when there is no sampling taking place, since there will be a small glitch in the reference voltage.
+
+This circuit will give approx 1.8V to the bridge, thus halving the current consumption. The gain of the differential amplifiers must be doubled to compensate.
+
+Suitable BJT – BC847BW, philips
+Farnell 3023370 €0.05 / 100
+
+13/01/2006 Magnetometer amp selection
+
+For the magnetometer amps, and possibly for the accelerometers, these amps are worth considering –
+OPA374
+(recommended price = $0.36 / 1k )
+Quad version in TSSOP14, so may not be the smallest footprint solution.
+OPAy348
+(recommended price = $0.45 / 1k )
+Available in SC70 package (single) and SOT23 (dual)
+
+
+Burr-brown do no do dual instrumentation amps in small packages (other vendors likely the same), so op-amps configured as difference amps is the way forward.
+
+Would like a BW of 100Hz, and a gain of up to 500. Thus the GBW of the amp required is >= 50kHz. A 200kHz BW will be sufficient.
+
+Offset voltage drift:
+Assume that the gain = 820k/4.7k = 175
+Assume that we can tolerate 2LSB of error over a temp difference of 20deg
+2LSB == 5V / 4096 = 0.00122V = 1.2mV
+Thus need offset drift less than 1220uV/(175 * 20deg) = 0.34uV/degC
+
+The TLV2454 has 0.3uV/degC drift
+Datasheet -  HYPERLINK "http://focus.ti.com/lit/ds/symlink/tlv2454.pdf" http://focus.ti.com/lit/ds/symlink/tlv2454.pdf
+Supply Current . . . 23 ?A/Channel
+_ Gain-Bandwidth Product . . . 220 kHz
+_ Output Drive Capability . . . ?10 mA
+_ Input Offset Voltage . . . 20 ?V (typ)
+_ VDD Range . . . 2.7 V to 6 V
+_ Power Supply Rejection Ratio . . . 106 dB
+_ Ultralow-Power Shutdown Mode
+IDD . . . 16 nA/ch
+_ Rail-To-Rail Input/Output (RRIO)
+_ Ultrasmall Packaging
+? 5 or 6 Pin SOT-23 (TLV2450/1)
+? 8 or 10 Pin MSOP (TLV2452/3)
+
+Dual or quad?
+MSOP-8
+
+
+
+With A = 5 for 14 pin TSSOP
+Area for quad = 6.6*5 = 33
+Area for dual = 3.1*5.05 = 15.65
+
+(Area for dual in SOT23 = 9)
+
+Or if use TVSSOP14
+
+A = 3.6 for 14 pin
+Area = 6.6*3.6 = 23.76
+
+Only one device in this package -  HYPERLINK "http://focus.ti.com/lit/ds/symlink/lmv824.pdf" http://focus.ti.com/lit/ds/symlink/lmv824.pdf
+Supply Current = 1mA total for QUAD
+Vios / temp = 1uV /degC
+
+Is the low input offset drift really necessary? Is the temperature drift of the bridge itself the limiting factor?
+
+The sensitivity tempco with 5V voltage source across the bridge is 3000ppm/deg C
+== 0.3% / deg C! which I imagine is larger than the op-amp voltage drift.
+
+Best to calibrate the sensors for temperature at the same time as the gyros and the accelerometers.
+
+
+Worth considering for the magnetometers is this – 
+MAX4246Ultra-Small SOT23 Package, Rail-to-Rail I/O with Disable, Dual Low-Power Op Amps
+Vio = 1.5mV max
+Noise  = 50nV
+Vio = 
+Supply  = 0.7mA / amp
+Package = 8SOT23
+
+13/01/2006 Noise of the HMC105x series
+
+The noise density for the HMR105X series is around
+50nV/sqrt Hz at the 1 Hz corner, and quickly drops
+below 10nV/sqrt Hz at 5Hz and begins to fit the
+Johnson Noise value at just below 5nV/sqrt Hz beyond
+50Hz. The 10Hz noise voltage averages around 1.4
+micro-volts with a 0.8 micro-volts standard deviation.
+
+Since my bandwidth is 100Hz, I can assume that the total noise is about 7nV / rootHz.
+Total input noise voltage to opamp is 70nV RMS + Johnson noise of input resistors.
+With gain of 200, the total noise due to the sensor is 14uV RMS, or about 100uV pk-pk.
+1LSB is 600uV pk-pk.
+
+Equiv i/p noise voltage of the LMV824 is 45nV/rootHz. This is by far the dominant noise.
+If gain = 200, output noise = sqrt(100)*45n*200= 90uV RMS ~= 500uV pk-pk, about 1LSB.
+This noise will ensure that the over-sampling can work properly in the event of the magnetic signal being well below these values (this noise will act as dither)
+
+
+13/01/2006 vertical magnetometer choice
+
+Originally I had planned to use the HMC1051 thru hole device. However, this may prove difficult to align vertically when soldering. Best use the SM version
+
+Note: here are details on methods to compensate for cross-axis components-
+ HYPERLINK "http://www.ssec.honeywell.com/magnetic/datasheets/an215.pdf" http://www.ssec.honeywell.com/magnetic/datasheets/an215.pdf
+
+note: for some fucked up reason, the SM version is about 3 times the cost of the thru version!
+
+
+
+Magnetometer Differential amps
+
+
+In MESH I ended up with a gain of 200 (1meg / 4.7k) to cater for large offsets. (The original gain was set to 400)
+
+Critical parameters of the HMC105x for setting the gain of the amps – 
+
+
+
+
+Earths magnetic field = +/- 0.5Guass
+Therefore would like to measure a total range of +/- 1Guass without saturation
+Assume that the sensitivy is at the max, = 1.2mV/V/Guass
+Assume that the supply voltage on the bridge is 1.8V
+Then the swing in the output due to +/-1 GUASS field will be
+Vout = +/- (1.2mV * 1.8 * 1) = +/- 2.16mV
+
+Now assume a max offset of 1.25mV/V, = +/- 2.25mV
+Thus the maximum output swing differential will be +/- (2.16mV+2.25mV) = +/-4.41mV
+
+The ADC works to a reference of 2.5V, so the amplifiers should work to a reference of 1.25V.
+
+The maximum gain of the amplifiers should be
+2.5V / (4.41mV – (-4.41mV)) = 2.5V / 8.82mV = 283
+
+So keeping the gain = 200 should be OK.
+
+Require the LPF to be 100Hz. Since there are two stages, set both to 120Hz.
+Cf = 1/(2pi*120*2meg) = 660pF
+Let Cf = 680pF
+
+
+!!!!!
+I had previously decided (in the BT notes document) that the measurement range is to be +/- 2Gauss.
+Thus:
+Assume that the sensitivy is at the max, = 1.2mV/V/Guass
+Assume that the supply voltage on the bridge is 1.8V
+Then the swing in the output due to +/-2 GUASS field will be
+Vout = +/- (1.2mV * 1.8 * 2) = +/- 4.32mV
+
+Now assume a max offset of 1.25mV/V, = +/- 2.25mV
+Thus the maximum output swing differential will be +/- (4.32mV+2.25mV) = +/-6.57mV
+The maximum gain of the amplifiers should be
+2.5V / (6.57mV – (-6.57mV)) = 2.5V / 13.14mV = 190
+
+So set the gain to 170. 
+Rf = 4.7k * 170 = 799k
+Let Rf = 820k
+
+Require the LPF to be 100Hz. Since there are two stages, set both to 120Hz.
+Cf = 1/(2pi*120*820k) = 1.62nF
+Let Cf = 1.5nF
+
+For the 2nd stage, use 100nF X7R. Set Fc = 150Hz, then 
+R = 1/(2pi*150*100n) = 10.6k
+Let R = 10k
+
+
+Setting the Magnetometer reference voltage
+
+
+
+How high can the reference impedance be?
+Only thing inhibiting this is cross talk between the different axes.
+
+
+The arm of the magenetometer can change by = 1.2mV/V/Guass
+Which is a total of ~= 4mV
+This will give rise to a difference in current flowing into the reference impedance of
+I ~= 4mV / (825k) = 4.8nA
+Assuming that the reference impedance << 820k
+
+Require the crosstalk to be less than 1LSB = 2.5V/4096 = 6.1mV
+This voltage referred back to the reference is 6.1mV / (820/4.7) = 3.5uV
+
+Thus the max impedance of the reference is 3.5uV / 4.8nA = 729ohm
+
+
+
+Rb / (Rb + Rt) = 1.25V / 1.8V = 0.7
+Let Rb = 2.2k
+2.2k = 0.7 * (2.2k + Rt)
+0.7k = 0.7Rt
+Rt = 1k
+
+Later change is Rb = 2.7k since the source voltage reduced to 1.7V
+
+Setting the feed resistor for the S/R bulk cap
+
+
+In MESH this is set to 330ohm. No real reason to have it this high. I can’t envisage a situation where the reset would need to be performed more frequently than 1Hz.
+Assume 3 time constants is enough.
+Time constant = 333mS
+ Then 0.333 =  R*4.7u
+R <= 71k
+Let R58 = 4.7k
+This will allow the S/R to happen at up to about 15Hz if that rate is ever required in the future.
+
+
+Magnetometer Power supply voltage generation from reference
+
+Require approx. 1.8V from 2.5V
+Using 47k in many places already, use Rt = 47k
+1.8/2.5 = Rb /(47k+Rb)
+33.84k + 0.72Rb = Rb
+Rt = 120k
+
+Since 100k is used in many places, could use 100k and 47k,
+Then Vsupply = 2.5*(100/147) = 1.7V
+(this will save a little power to drive the magnetometers)
+
+Now the reference to the magnetometer amplifiers becomes – 
+Vrefmag = 1.7 * (2.2/3.2) = 1.17V
+Where ideally it should be 2.5V/2 = 1.25V
+This will sacrifice a little of the ADC headroom (1.17*2/2.5 = 0.935, so 6.5% wasted on average).
+
+
+
+If 2.2k is not used anywhere else, could change to 2.4k, then the
+Vrefmag = 1.7 * (2.4/3.4) = 1.2V, wasting just 4%
+
+If = 2.7k,
+Vrefmag = 1.7 * (2.7/3.7) = 1.24V, no wastage of ADC headroom.
+
+So, 
+
+
+
+17/08/2006 Comparison of op-amps suitable for this circuit?
+
+DeviceVsupply mini/p bias currentR/R out?Vio(max)Vio / degCCost / digikey / 100 / TSSOP14GBWSlew [V/uS]Ic / amp [uA]LMV8242.730nAyes3.5mV1uV0.685MHz1.9180LMV3442.71pAyes4mV1.7uV0.501MHz1100TLV24542.71nAYes +in0.3uV1.47220kHz0.1123OPA43422.7V0.2pAYes +in6mV32.261MHz1150LMV3242.7V250nAYes7mV50.541MHz180
+
+LMV824 looks like the business
+Farnell
+PF Part Number: 1053727
+Manufacturer: TEXAS INSTRUMENTS 
+Manufacturer Part Number: LMV824IPWE4
+€0.51 / 100
+
+if I use temperature compensation calibration of the unit, then there is no reason not to use the LMV344.
+==> Not available from Farnell, so using the LMV824 instead.
+
+30/08/2006 LMV344 will not work!
+
+With the LMV344, the X axis is saturated negative, and the Y and Z axes are saturated positive for normal earths magnetic field.
+Once the op-amp is substituted for the OPA2342, this offset disappears.
+
+With the LMV822 on 0607R00 pcb, the output offset is about 300 counts negative on each axis.
+
+13/09/2006 op-amp offset measurements
+
+Test consists of tying VO- and VO+ of the magnetometer to MAG_REF  and measuring the voltage on MAG_Z
+
+Gain = 1+(820/4.7) = 175
+
+LMV824 (LMV824IDGVR) – TSVOP-14
+TI 52 MV824I
+Vref = 956mV
+Vout = 890mV
+Vio ~= 66mV/175 = 0.377mV
+
+LMV344
+Marking MV344I 63KG4 H29N
+Vref = 1000mV
+Vout = 2250mV
+Vio ~= 1250mV/175 = 7.14mV
+
+OPA4342
+Marking BBOP 4342EA 34ZM
+Vref = 1038mV
+Vout = 911mV
+Vio ~= 127mV/175 = 0.72mV
+
+
+LMV824 (LMV824IPWE4) – TSSOP14
+TI 52 MV824I
+Vref = 971mV
+Vout = 986mV
+Vio ~= 15mV/175 = 0.085mV
+
+
+LMV824 (LMV824IPW) - TSSOP14
+TI 52 MV824I
+Vref = 1013mV
+Vout = 935mV
+Vio ~= 78mV/175 = 0.44mV
+
+
+25/09/2006 Changing the feedback cap to 1nF
+
+Require the LPF to be 100Hz. Since there are two stages, set both to 120Hz.
+Cf = 1/(2pi*120*820k) = 1.62nF
+Let Cf = 1.5nF
+
+For the 2nd stage, use 100nF X7R. Set Fc = 150Hz, then 
+R = 1/(2pi*150*100n) = 10.6k
+Let R = 10k
+
+
+Ie, let Cf = 1nF, leave other values as is.
+
+H(f) = Ha(f) *Hb(f)
+Ha(f) = 2pifCa/(2pifCa + Ra)
+
+Calculate in PSPICE
+
+
+
+
+
+
+For nominal values:
+-3dB = 110Hz 
+Atten @ 512Hz = -19dB
+
+For Max capacitance values (10% for 100nF and 5% for 1nF caps)
+-3dB = 104Hz
+Atten @ 512Hz = -20.7dB
+
+For Min capacitance values (10% for 100nF and 5% for 1nF caps)
+-3dB = 121.5Hz
+Atten @ 512Hz = -18.4dB
+
+
+24/10/2006 Magnetic field strength of Dublin (dun laoghaire)
+
+Using the british geological webpage survey 
+ HYPERLINK "http://www.geomag.bgs.ac.uk/gifs/wmm_calc.html" http://www.geomag.bgs.ac.uk/gifs/wmm_calc.html
+
+World Magnetic Model 2005 Results 
+ INCLUDEPICTURE "http://www.geomag.bgs.ac.uk/tmp/tmp_zmhweb_3493_000000.jpg" \* MERGEFORMATINET 
+Field Model Results 
+LocationLatitudeLongitudeAltitudeDate53 degs 17 mins-6 degs 8 mins0.00 km2005.00
+ComponentField ValueSecular VariationDeclination-5.188 degrees9.6 arcmin/yearInclination67.823 degrees-0.3 arcmin/yearHorizontal Intensity18469 nT16.7 nT/yearNorth Component18394 nT21.3 nT/yearEast Component-1670 nT50.1 nT/yearVertical Intensity45309 nT28.3 nT/yearTotal Intensity48929 nT32.5 nT/year
+
+1 G = 0.1 mT
+Thus the total intensity is 48.929uT = 489.29mGauss
+
+24/10/2006 Magnetic field strength of Dublin (dun laoghaire)
+
+Using the british geological webpage survey 
+ HYPERLINK "http://www.geomag.bgs.ac.uk/gifs/wmm_calc.html" http://www.geomag.bgs.ac.uk/gifs/wmm_calc.html
+
+World Magnetic Model 2005 Results 
+ INCLUDEPICTURE "http://www.geomag.bgs.ac.uk/tmp/tmp_zmhweb_3493_000000.jpg" \* MERGEFORMATINET 
+Field Model Results 
+LocationLatitudeLongitudeAltitudeDate53 degs 17 mins-6 degs 8 mins0.00 km2005.00
+ComponentField ValueSecular VariationDeclination-5.188 degrees9.6 arcmin/yearInclination67.823 degrees-0.3 arcmin/yearHorizontal Intensity18469 nT16.7 nT/yearNorth Component18394 nT21.3 nT/yearEast Component-1670 nT50.1 nT/yearVertical Intensity45309 nT28.3 nT/yearTotal Intensity48929 nT32.5 nT/year
+
+1 G = 0.1 mT
+Thus the total intensity is 48.929uT = 489.29mGauss
+
+
+
+
+29/10/2006 Compass heading calculations
+
+
+
+We have COS of pitch and roll as the direct outputs from the accelerometers. Need to implement a lookup table to convert these to the SINs
+The COS will have values between -1000 and 1000 after calibration of the accelerometers.
+
+Assume that the SIN and COS values have limits of 1000 units. Assume that the maximum limits for the magnetometer values is 1000 units ( in Ireland it is about 500 units (mGauss) when calibrated), so 1000 is a conservative estimate of the maximum for any location in the world)
+
+The argument for the inverse TAN function will have the limits – 
+
+( 1000 * 1000) /  (1000 * 1000)
+
+Use the taylor series to calculate the arctan – 
+arctan x = x - x3/3 + x5/5 - x7/7 + ...
+where x is in the range -1<= x <= 1
+
+if I limit the range in integers to 0 to 1000, then the x7 term will become up to 70 bits!
+
+
+If we require a resolution of minimum 0.5deg heading, then the input range to the arctan should be 0.01 to 100. This requires a factor of 10,000. Thus the actual integer input should be between 1 and 10,000
+ See
+ C:\DocControl\MyProjects\SHAKE\Firmware\SK6_1.05\compass heading algorithm notes.TXT
+
+
+This works well for 1 <= x,y <= 10000
+For quadrant I 
+Heading = 11 * ((x-y)/(x+y))^3 - 56 * ((x-y)/(x+y)) + 45
+For quadrant I I
+Heading = 11 * ((x+y)/(y-x))^3 - 56 * ((x+y)/(y-x))+ 135
+
+The terms ((x-y)/(x+y))  and ((x+y)/(y-x)) will need to be limited to 
+3rdRoot (231 ) = 1290
+If long ints are used.
+
+08/12/2006 cross axis effects:
+
+Are pretty bad between the x and y axes.
+For unit #5, X axis oriented in a constant direction
+Z = 0;
+Y = 475, X = 225
+Y = -430, X = 165
+Y = 0
+Z = 445, X = 200
+Z = -455, X = 195
+
+Thus there is negligible cross axis effect from Z
+Cross axis from Y on X is (225 – 165) / (475 –(-430)) = 0.066
+
+For unit #5, Y axis oriented in a constant direction
+Z = 0;
+X = -475, Y = -235
+X =  445, Y = -165
+X = 0
+Z = 430, Y = -200
+Z = -470, Y = -200
+
+Thus there is negligible cross axis effect from Z
+Cross axis from X on Y is (235 – 165) / (475 –(-445)) = 0.076
+
+
+
+For unit #7, X axis oriented in a constant direction
+Z = 0;
+Y = 500, X = 211
+Y = -425, X = 202
+Y = 0
+Z = 450, X = 213
+Z = -432, X = 216
+
+Thus there is negligible cross axis effect from Z
+Cross axis from Y on X is (211 – 202) / (500 –(-425)) = 0.0097
+
+For unit #7, Y axis oriented in a constant direction
+Z = 0;
+X = -482, Y = -228
+X =  467, Y = -153
+X = 0
+Z = 440, Y = -186
+Z = -455, Y = -208
+
+Cross axis from Z on Y is (208 – 186) / (440 –(-455)) = 0.0245
+Cross axis from X on Y is (228 – 153) / (467 –(-482)) = 0.079
+
+
+14/12/2006 Method to measure cross-axis coefficients
+
+HX = GX*hX + CYX*hY + CZX*hZ
+HY = GY*hY + CXY*hX + CZY*hZ
+HZ = GZ*hZ + CXZ*hX + CYZ*hY
+
+Where hX is the offset compensated magnetometer output for the X axis
+HX is the fully compensated magnetic field strength in the X axis
+GX is the X axis gain coefficient
+CYX is the cross coefficient gain from the Y axis on the X axis
+
+This assumes that the offsets are already known. If they are not, then there is a total of 12 unknowns in the equations. At present, the simple calibration that excludes cross axis coefficients requires calculating 6 unknowns, and these can be calculated by orienting the SK6 in six known orientations. By this analogy, it should be possible to calculate all 12 unknowns in the complete solution above by orienting the SK6 in 12 positions. What are the 12 positions required?
+
+6 of the positions are to orient both directions of all 3 axes in the direction of the magnetic field vector.
+(1)	SK6 long axis pointing to EMFV, text pointing to sky
+(2) 	SK6 long axis pointing to EMFV, text pointing to ground
+(3)	SK6 long axis pointing away from EMFV, text pointing to sky
+(4) 	SK6 long axis pointing away from EMFV, text pointing to ground
+
+OX = (h1x + h2x + h3x + h4x) / 4  
+
+Where  OX is the offset value for the X axis
+And h1x is the x axis magnetometer output from calibration step (1)
+
+This gives the offset with a higher precision since the offset is effectively measure twice and averaged.
+
+GX = SF / ((h1x + h2x - h3x - h4x ) / 4 )
+
+Where SF is the required scale factor, i.e. earth’s magnetic field strength in mGauss
+
+CXY = (h1y – OY ) * GY 
+
+
+At present, the simple calibration that excludes cross axis coefficients requires calculating 6 unknowns, and these can be calculated by orienting the SK6 in six known orientations, and collecting one data point for each orientation. It should be possible to calculate all 12 unknowns in the complete solution above by orienting the SK6 in 6 positions but collecting at least two data points for each orientation. If all three (x, y and z) are collected for each orientation, then this will improve the accuracy of the resulting calculated coefficients. For this procedure to work, it is paramount that the SK6 is oriented in the correct directions. This will require an angled jig with a flat base, where the angle is the hearth of the magnetic field vector, and a compass so that the whole jig can be rotated to point the principle axis to magnetic north.
+
+
+(1)	SK6 long (x) axis pointing to EMFV, text pointing to sky
+(2)	SK6 long (x) axis pointing away from EMFV, text pointing to sky
+
+OX = (h1x + h2x) / 2  
+
+Where  OX is the offset value for the X axis
+And h1x is the x axis magnetometer output from calibration step (1)
+
+IGX = 2 * SF * CF / (h1x - h2x) 
+
+Where SF is the required scale factor, i.e. earth’s magnetic field strength in mGauss
+IGX is the inverted gain for the X axis
+And CF is the calibration factor to scale the values up so that integers can be used to represent all the data. Typically its value is 8192, and it is important to keep to a power of 2 for efficiency in applying the calibration data to the output stream as it must be divided by this constant.
+
+CXY = IGY * (h1y - h2y ) / (2 * SF)  
+CXZ = IGZ * (h1z - h2z ) / (2 * SF)
+
+
+(3)	SK6 short (y) axis pointing to EMFV, text pointing to sky
+(4)	SK6 short (y) axis pointing away from EMFV, text pointing to sky
+
+OY = (h3y + h4y) / 2  
+
+IGY = 2 * SF * CF / (h3y - h4y) 
+
+CYX = IGX * (h3x – h4x ) / (2 * SF)  
+CYZ = IGZ * (h3z – h4z ) / (2 * SF)
+
+(5)	SK6 depth (z) axis pointing to EMFV, text pointing to sky
+(6)	SK6 depth (z) axis pointing away from EMFV, text pointing to ground
+
+OZ = (h5z + h6z) / 2  
+
+IGZ = 2 * SF * CF / (h5z – h6z) 
+
+CZX = IGX * (h5x – h6x ) / (2 * SF)  
+CZY = IGY * (h5y – h6y ) / (2 * SF)
+
+
+Now, to reconstruct the output data – 
+HX = ( IGX * (hX - OX)  - CYX * (hY - OY) - CZX * (hZ – OZ) ) / CF
+HY = ( IGY * (hY – OY)  - CXY * (hX – OX) - CZY * (hZ – OZ) ) / CF
+HZ = ( IGZ * (hZ – OZ)  - CXZ * (hX – OX) - CYZ * (hY – OY) ) / CF
+
+
+See
+ HYPERLINK "http://www.amazon.com/Strapdown-Navigation-Technology-Astronautics-Aeronautics/dp/1563476932/sr=8-1/qid=1171985294/ref=pd_bbs_1/103-0485859-0054221?ie=UTF8&s=books" Strapdown Inertial Navigation Technology (Progress in Astronautics and Aeronautics) by
+David H. Titterton and Jessie L. Weston (Hardcover - Feb 2005)
+
+
+
+
+
+
+21/12/2006 Calibration Jig Construction
+
+According to google Earth, the location of 15 Cruagh Rise is
+15deg15’05” N , 6deg12’15”W
+Elevation is 388ft
+Pumping this into  HYPERLINK "http://www.geomag.bgs.ac.uk/gifs/wmm_calc.html" http://www.geomag.bgs.ac.uk/gifs/wmm_calc.html
+
+
+ INCLUDEPICTURE "http://www.geomag.bgs.ac.uk/tmp/tmp_zmhweb_17107_000000.jpg" \* MERGEFORMATINET 
+Field Model Results 
+LocationLatitudeLongitudeAltitudeDateStepaside53 degs 15 mins-6 degs 12 mins0.15 km2007.00
+ComponentField ValueSecular VariationDeclination-4.888 degrees9.6 arcmin/yearInclination67.784 degrees-0.4 arcmin/yearHorizontal Intensity18519 nT17.0 nT/yearNorth Component18452 nT21.3 nT/yearEast Component-1578 nT50.1 nT/yearVertical Intensity45345 nT28.2 nT/yearTotal Intensity48981 nT32.6 nT/year
+
+tan(67.784)
+	 = 2.45
+
+Let back height = 180mm, then distance from back = 180/2.45 = 73.5
+Hyp length (excluding hinge) = 207.6mm
+Let it = 205mm
+
+82.5/186.5 = 
+Pieces of wood required:
+
+Qty 2 - Base = back = 240mm * 120mm * 30mm
+Qty 1 – Hyp = 205mm * 120mm * 30mm
+Qtyt 2 – Horiz supports – 120mm * 30mm * 30mm
+Qty 2 – Compass Guides – 100mm * 30mm * 30mm
+Qty 3 – SHAKE guides – 120mm * 60mm * 30mm
+
+
+
+
+
+IGX = 2 * SF * CF / (h1x - h2x) 
+
+
+CYX = IGX * (h1x - h2x ) / (2 * SF)  
+= IGX * Hca / (2 * SF)  
+
+
+HX = ( IGX * (hX - OX)  - CYX * (hY - OY) - CZX * (hZ – OZ) ) / CF
+
+362			iAcc2gCrossZX           										          
+ = 0x0014
+
+2/20/2007 Steve Strachans tilt compensating code (based on my MESH firmware)
+
+//load magnetometer calibration values
+       FILE *magCalfp = fopen("demo\\magcalib.txt", "r");
+       int* pInt = new int();
+       minmagx = getNextDouble(&magCalfp, pInt);
+       maxmagx = getNextDouble(&magCalfp, pInt);
+       minmagy = getNextDouble(&magCalfp, pInt);
+       maxmagy = getNextDouble(&magCalfp, pInt);
+       minmagz = getNextDouble(&magCalfp, pInt);
+       maxmagz = getNextDouble(&magCalfp, pInt);
+       fclose(magCalfp);
+
+       meshLoaded = false;
+       mcsX_cal=0.0;
+       mcsY_cal=0.0;
+       mcsZ_cal=0.0;
+
+       SetTimer(1, 10, 0);
+
+       //calibraion constants
+       zero_value_x = (minmagx+maxmagx)/2;
+       zero_value_y = (minmagy+maxmagy)/2;
+       zero_value_z = (minmagz+maxmagz)/2;
+       scale_value_x =
+(minmagx-maxmagx)/OUTPUT_UNITS_PER_EARTHS_MAGNETIC_FIELD;
+       scale_value_y =
+(minmagy-maxmagy)/OUTPUT_UNITS_PER_EARTHS_MAGNETIC_FIELD;
+       scale_value_z =
+(minmagz-maxmagz)/OUTPUT_UNITS_PER_EARTHS_MAGNETIC_FIELD;
+
+
+/////////////////////////////////////////////////
+
+/************mag compass stuff*************/
+               //calibrate the mag data
+               mcsX_cal=(mesh_getMagX()-zero_value_x)*(scale_value_x/OUTPUT_UNITS_PER_EARTHS_MAGNETIC_FIELD);
+               mcsY_cal=(mesh_getMagY()-zero_value_y)*(scale_value_y/OUTPUT_UNITS_PER_EARTHS_MAGNETIC_FIELD);
+               mcsZ_cal=(mesh_getMagZ()-zero_value_z)*(scale_value_z/OUTPUT_UNITS_PER_EARTHS_MAGNETIC_FIELD);
+
+               //weirdness
+               mcsX_cal = mcsX_cal*-1;
+               mcsY_cal = mcsY_cal*-1;
+
+               /***compensate the magnetometer values for tilt***/
+               //rotate into the horizontal plane/////////////////
+               magXh = mcsX_cal*cos(pitch/180*PI)
+                       +mcsY_cal*sin(roll/180*PI)*sin(pitch/180*PI)
+                       -mcsZ_cal*cos(roll/180*PI)*sin(pitch/180*PI);
+
+               magYh = mcsY_cal*cos(roll/180*PI) +
+mcsZ_cal*sin(roll/180*PI);
+               /*************************************************/
+
+               if(magXh<0)
+                       curHeading = 180-atan(magYh/magXh)*(180/PI);
+               if(magXh>0 && magYh<0)
+                       curHeading = -1*atan(magYh/magXh)*(180/PI);
+               if(magXh>0 && magYh>0)
+                       curHeading = 360-atan(magYh/magXh)*(180/PI);
+               if(magXh==0 && magYh<0)
+                       curHeading = 90;
+               if(magXh==0 && magYh>0)
+                       curHeading = 270;
+
+
+21/02/2007 Tilt compensation equations according to Philips app note AN00022
+
+
+
+
+
+
+The vector directions are exactly that as used in SHAKE except that roll and pitch are reversed.
+
+2/24/2007 Compass calculations – including the z-axis accelerometer for better resolution tilt sensing
+
+
+
+
+
+
+ INCLUDEPICTURE "http://upload.wikimedia.org/math/e/7/b/e7b8c103e90d3201a10be0ddfe90a2cb.png" \* MERGEFORMATINET 
+ INCLUDEPICTURE "http://upload.wikimedia.org/math/6/5/b/65b8e718cbd943d44c5c0086c0cad02f.png" \* MERGEFORMATINET 
+
+Let P = pitch angle
+
+P = arctan( X/ Sqrt(Y2  + Z2)
+
+sin(P) = sin(arctan( X/ Sqrt(Y2  + Z2)) = (X/ Sqrt(Y2  + Z2)) / sqrt( 1 + X2 / (Y2  + Z2))
+cos(P) = cos(arctan( X/ Sqrt(Y2  + Z2)) = 1 / sqrt( 1 + X2 / (Y2  + Z2))
+
+let IV1 = Y2  + Z2    uint32
+let IV2 = sqrt(IV1)  uint16
+let IV3 = X2 / IV1
+let IV4 = sqrt(1 + IV3)
+now
+
+sin(P) = (X / IV2) / IV4
+cos(P) = 1 / IV4
+
+we already have sin(P) and sin(R) so just need cos(P) and cos(R)
+
+cos(P) = 1 / sqrt( 1 + X2 / (Y2  + Z2))
+limit x,z and y to unsigned 8bit, then the square values limited to uInt16
+
+
+2/27/2007 Compass equation translation for case when SHAKE is upside down
+
+For the SHAKE the right way up, the equations are (with x axis pointing towards compass heading direction) – 
+
+Vx = HxCOS(pitch) – HySIN(pitch)SIN(roll) – HzSIN(pitch)COS(roll)
+Vy = HyCOS(roll) – HzSIN(roll)
+
+Where roll is positive when tilted right
+Pitch is positive when tilted forward
+
+Now when the SHAKE is upside down, the magnetic axes map as follows – 
+Hx -> Hx
+Hy -> -Hy
+Hz -> -Hz
+
+Also, the pitch is the same, but roll is inverted
+
+Thus
+
+Vx = HxCOS(pitch) – HySIN(pitch)SIN(roll) + HzSIN(pitch)COS(roll)
+Vy = -HyCOS(roll) – HzSIN(roll)
+
+There is only two sign changes required.
+
+
+
+Subject: DSP Trick:  Fixed-pt. Atan2 with Self Normalization
+From: Jim Shima
+Date: 1999/04/23
+Newsgroups: comp.dsp
+THIS WORK IS PLACED IN THE PUBLIC DOMAIN
+
+Name: Fast fixed-pt. atan2 calculation with self normalization 
+
+Category: Algorithmic
+
+Application: Used when one wants to compute the 4-quadrant arctangent of a complex number (or any number with x-y coordinates) with a self-normalizing function.
+
+Example Applications: digital FM demodulation, phase angle computations 
+
+Advantages: Fast
+
+Introduction:
+
+Computing a 4-quadrant arctangent on DSPs has been the subject of many discussions. Several techniques such as table lookup and polynomial expansion are well known.
+
+In fixed-point DSPs, some normalization of the complex number may be necessary, effectively implementing a hard limiter or amplitude invariance function.
+
+In fact, computing:
+
+theta=atan(y/x)
+
+includes the necessary normalization, but in a fixed-pt. DSP, the division can result in values outside the fixed-pt. range of [-1,1).
+
+Also, for certain applications, such as digital FM demodulation, any amplitude fluctuations must be removed before computing the phase angle. 
+
+The Trick:
+
+I computed a self-normalizing ratio depending on the quadrant that the complex number resides in. For a complex number z, let x=Re(z) and y=Im(z). 
+
+For a complex number in quadrant I, compute the ratio:
+
+    x-y
+r = ---     (1)
+    x+y
+
+To get the phase angle, compute: 
+
+theta1=pi/4 - pi/4*r (2)
+
+Likewise, if the complex number resides in quadrant II, compute the ratio:
+
+    x+y
+r = ---     (3)
+    y-x
+
+And to get the quadrant II phase angle, compute:
+
+theta2=3*pi/4 - pi/4*r (4)
+
+If it turns out that the complex number was really in quad IV instead of quad I, just negate the answer resulting from (2).
+
+Likewise, do the same if the number was in quad III instead of quad II. By doing this, you have a 4-quadrant arctan function.
+
+The max error using equations (2) or (4) is a little less than 0.07 rads (only at a few angles though). The accuracy of the estimator is actually quite good considering using a 1st-order polynomial to estimate the phase angle. 
+
+If you use a higher degree polynomial, it turns out that the even powers of the poly will disappear (due to the odd function), thus relaxing some of the computational load.
+
+QUICK NOTE FOR BETTER ACCURACY:
+
+To obtain better accuracy (a max error of .01 rads), one can replace equations (2) and (4) with:
+
+theta1=0.1963 * r^3 - 0.9817 * r + pi/4 (2a)
+theta2=0.1963 * r^3 - 0.9817 * r + 3*pi/4 (4a)
+
+equations (2a) or (4a) can be computed using 2 MACs, which does not involve much more computation for a 7x increase in accuracy.
+
+Here is some C pseudocode (not optimized in any fashion) using equations (1)-(4):
+
+//-----------------------------------------------
+// Fast arctan2
+float arctan2(float y, float x)
+{
+   coeff_1 = pi/4;
+   coeff_2 = 3*coeff_1;
+   abs_y = fabs(y)+1e-10      // kludge to prevent 0/0 condition
+   if (x>=0)
+   {
+      r = (x - abs_y) / (x + abs_y);
+      angle = coeff_1 - coeff_1 * r;
+   }
+   else
+   {
+      r = (x + abs_y) / (abs_y - x);
+      angle = coeff_2 - coeff_1 * r;
+   }
+   if (y < 0)
+   return(-angle);     // negate if in quad III or IV
+   else
+   return(angle);
+}
+
+Jim Shima
+
+
+
+       list    p=16C84,t=ON,c=132,n=80,st=off
+
+
+        include "P16C84.INC"
+
+  cblock   0x0C
+    temp
+    x,y,a
+    x1,y1,cnt
+    result
+  endc
+
+
+        ORG     0               ;Reset Vector
+
+        GOTO    Main
+
+        ORG     4               ;Interrupt Vector
+
+
+Main
+
+
+        CLRF    x
+	clrf	x1
+	movlw	0x30
+	movwf	y1
+	movwf	x1
+l1
+	movf	y1,w
+	movwf	y
+
+	movlw	3
+	addwf   x1,w
+	movwf	x1
+	movwf	x
+
+
+        CALL    FRAC_DIV
+
+	movf	a,w
+	movwf	x
+	CALL	arctan
+
+        goto    l1
+
+FRAC_DIV:
+;-------------------
+;Fractional division
+;
+; Given x,y this routine finds:
+;  a = 256 * y / x
+;
+
+    movlw  8    ;number of bits in the result
+    movwf  cnt
+    clrf   a    ; the result
+    movf   x,w
+
+L1:
+
+    clrc
+    rlf    y,f   ;if msb of y is set we know x<y
+    rlf    a,f   ;and that the lsb of 'a' should be set
+    subwf  y,f   ;But we still need to subtract the
+                 ;divisor from the dividend just in
+                 ;case y is less than 256.
+    skpnc        ;If y>x, but y<256
+     bsf   a,0   ; we still need to set a:0
+
+
+    btfss  a,0   ;If y<x then we shouldn't have
+     addwf y,f   ;done the subtraction
+
+    decfsz cnt,f
+     goto  L1
+
+    return
+
+
+;----------------------------------------------------------
+;
+;arctan (as adapted from the similar arcsin function)
+;
+;  The purpose of this routine is to take the arctan of an
+;8-bit number that ranges from 0 < x < 255/256. In other
+;words, the input, x, is an unsigned fraction whose implicit
+;divisor is 256.
+;  The output is in a conveniently awkward format of binary
+;radians (brads?). The output corresponds to the range of zero
+;to pi/4 for the normal arctan function. Specifically, this
+;algorithm computes:
+;
+; arctan(x) = real_arctan(x/256) * 256 / (pi/4)
+;  for 0 <= x <= 255
+;  
+;  where, real_arctan returns the real arctan of its argument
+;in radians.
+;
+;  The algorithm is a table look-up algorithm plus first order
+;linear interpolation. The psuedo code is:
+;
+;unsigned char arctan(unsigned char x)
+;{
+;  unsigned char i;
+;
+;  i = x >> 4;
+;  return(arctan[i] + ((arctan[i+1] - arctan[i]) * (x & 0xf))/16);
+;}
+;
+;
+
+
+arctan
+
+        SWAPF   x,W
+        ANDLW   0xf
+        ADDLW   1
+        MOVWF   temp                    ;Temporarily store the index
+        CALL    arc_tan_table           ;Get a2=atan( (x>>4) + 1)
+        MOVWF   result                  ;Store temporarily in result
+
+        DECF    temp,W                  ;Get the saved index
+        CALL    arc_tan_table           ;Get a1=atan( (x>>4) )
+
+        SUBWF   result,W                ;W=a2-a1, This is always positive.
+        SUBWF   result,F                ;a1 = a1 - (a1-W) = W
+
+        CLRF    temp                    ;Clear the product
+        CLRC
+
+        BTFSC   x,0
+         ADDWF  temp,F
+        RRF     temp,F
+        CLRC
+
+        BTFSC   x,1
+         ADDWF  temp,F
+        RRF     temp,F
+        CLRC
+
+        BTFSC   x,2
+         ADDWF  temp,F
+        RRF     temp,F
+        CLRC
+
+        BTFSC   x,3
+         ADDWF  temp,F
+        RRF     temp,W
+
+        ADDWF   result,F
+
+        RETURN
+
+arc_tan_table
+        ADDWF   PCL,F
+        RETLW   0
+        RETLW   20     ;atan(1/16) = 3.576deg * 256/45
+        RETLW   41
+        RETLW   60
+        RETLW   80
+        RETLW   99
+        RETLW   117
+        RETLW   134
+        RETLW   151
+        RETLW   167
+        RETLW   182
+        RETLW   196
+        RETLW   210
+        RETLW   222
+        RETLW   234
+        RETLW   245
+        RETLW   0	;atan(32/32) = 45deg * 256/45
+
+        END
+
+
+
+/*
+Caution added by Martin L. Buchanan, mlb@backgroundtask.com, Wed 11/16/2005:
+
+If number is the maximum unsigned int value, call it MAX_VAL, then the first 
+evaluation of NEXT(n, number), with n == 1, produces an overflow when 
+1 + MAX_VAL/1 is evaluated. For an unsigned type the overflow typically 
+wraps around and yields zero as the macro result and zero as the 
+overall function result.
+
+My own code for integer square root is in C# so I don't have a fix written in 
+C, but it should be fairly trivial for my fellow C programmers to add such a 
+fix and delete these comments. 
+*/
+#include <stdlib.h>
+
+#define NEXT(n, i)  (((n) + (i)/(n)) >> 1)
+
+unsigned int isqrt(int number) {
+  unsigned int n  = 1;
+  unsigned int n1 = NEXT(n, number);
+
+  while(abs(n1 - n) > 1) {
+    n  = n1;
+    n1 = NEXT(n, number);
+  }
+  while((n1*n1) > number) {
+    n1 -= 1;
+  }
+  return n1;
+}
+and a faster integer square root function: 
+
+#include <stdio.h>
+
+/*
+ * Return the truncated integer square root of "y" using longs.
+ * Return -1 on error.
+ */
+long
+lsqrt(long y)
+{
+        long    x_old, x_new;
+        long    testy;
+        int     nbits;
+        int     i;
+
+        if (y <= 0) {
+                if (y != 0) {
+                        fprintf(stderr, "Domain error in lsqrt().\n");
+                        return -1L;
+                }
+                return 0L;
+        }
+/* select a good starting value using binary logarithms: */
+        nbits = (sizeof(y) * 8) - 1;    /* subtract 1 for sign bit */
+        for (i = 4, testy = 16L;; i += 2, testy <<= 2L) {
+                if (i >= nbits || y <= testy) {
+                        x_old = (1L << (i / 2L));       /* x_old = sqrt(testy) */
+                        break;
+                }
+        }
+/* x_old >= sqrt(y) */
+/* use the Babylonian method to arrive at the integer square root: */
+        for (;;) {
+                x_new = (y / x_old + x_old) / 2L;
+                if (x_old <= x_new)
+                        break;
+                x_old = x_new;
+        }
+/* make sure that the answer is right: */
+        if ((long long) x_old * x_old > y || ((long long) x_old + 1) * ((long long) x_old + 1) <= y) {
+                fprintf(stderr, "Error in lsqrt().\n");
+                return -1L;
+        }
+        return x_old;
+}
+
+3/12/2007 Email to UG about calibrating the magnetometer for compass heading operation
+
+Hey,
+Re-calibration is only required when upgrading from a version prior to 1.14
+If the version is already 1.14 or later, upgrading to a later version will not interfere with the calibration.
+If the compass heading is not steady with different tilt values, this is likely due to the magnetometers needing calibration. When they are calibrated it can be verified by viewing the mag data - it should give peak values of + and - the value that was set for the earth's mGauss value for all rotational possibilities of the SHAKE.
+
+For example, if the value set when the SK6 displays
+
+"Select the earth's magnetic field magnitude in mGauss at your present location
+Use NAV Up / Down to adjust the value, and press centre to select
+500  mGauss"
+
+is left at 500, then the peak value for any axis should be about +500 (it may be 5% or so above or below this) and the minimum value for any axis should be -500 (+/- 5% or so). These extremes should occur when the axis being viewed is oriented towards north with a dip angle of about 70 degrees from horizontal ( 70 degrees is the approximate dip angle of earths magnetic field vector in Glasgow)
+
+Once the magnetometers are calibrated, the heading should not vary by more than 5 to 10 degrees for extremes in tilt, even if the SHAKE is upside down, or sideways down. 
+
+Please bear in mind that there may be large magnetic anomalies in indoor envoirnments, so when you calibrate in one part of a building, it may not be so in another part. The same is also true for attaching the SHAKE to another device - the SHAKE should be calibrated only after it is attached to that device.
+
+Below I have pasted  the heading calculation code, however the algorithm is the same as used by Steve Strachan and his code may be more user friendly as I use fixed point math in mine.
+
+Cheers
+steve
+
+27/09/2007 Magnetometer search for SK7 notes
+
+magnetometers:
+http://www.speakesensors.com/PDF/detail.pdf
+Intended for use in cellphones: 
+
+http://www.alps.co.jp/e/news_release/2006/0511_01.htm
+	
+	How about these AMI sensors? 
+http://www.servoflo.com/ami_acceleration_sensors/ami_products.htm 
+and their press release... 
+http://news.thomasnet.com/fullstory/496456/2399 
+I'd say 3-axis compass for less than $13 sounds a good deal!
+
+HMC1042L looks like the best option at the moment.  (need 2 per unit, one has to be mounted on a vertical board)
+
+I have sent an email to servoflo.com about the AMI302 – 
+
+Hi,
+I recently came across the AMI302, and would like to consider it for use in a new design. A pre-production of 1000 will get under way in January, what is the cost /  leadtime for 1k?
+Please can you also quote for 10k and 50k / year quantities?
+Can I obtain / Purchase samples, and is there an evaluation PCB available?
+Thanks!
+
+Dear Mr. Huges,
+
+Thank you for your inquiry.
+
+We would like to help you if we can.  Do you have some experience with these kinds of sensors?  I must be honest with you that the factory technical support is not world class.  Getting answers to questions takes days and weeks sometimes!
+
+I must be the craziest salesperson you have ever heard from.
+
+The AMI302 does have an evaluation board.  Aichi insists it has a lot of value and charges about $1800 US for it.  We have not had many takers so we are on a build to order basis... 4-5 weeks lead time.
+
+I believe I could get 1000 to you by January (we do have some samples here).  However, I could not in good conscience take your order for even 50 pieces if you had not fully tested the sensor and developed a familiarity with it.
+
+Pricing is as follows:
+
+1000 pieces:  $11.31/unit FOB Boston
+2500 pieces:  $8.80/unit FOB Boston
+5000 pieces:  $8.05/unit FOB Boston
+10,000 pieces:  $6.32/unit FOB Boston
+25,000 pieces:  $4.84/unit FOB Boston
+50,000 pieces:  $4.40/unit FOB Boston
+
+Shipping is additional.
+
+I would be willing to do the following:
+1. Send 2 free sample sensors (please provide FedEx or UPS Account number) 
+2. Credit the full value of the evaluation kit with an order of 25,000 sensors or more 
+3. Credit 50% of the kit with an order of 10,000 pieces 
+4. Credit 25% of the kit with an order of 5000 pieces
+
+Please advise what you might like to do.
+
+Thank you and best regards
+David Ezekiel
+
+Hi David,
+Thanks for the fast reply. Given the cost of the eval kit, I will just fabricate a test PCB here. The pricing however is much higher than the target I have set for this design, I need to do a cost analysis to see if it is economically viable to use this part in place of alternative magnetometers. I will be back in touch in the coming days with a decision, and will let you know if I require samples then,
+Cheers!
+Stephen
+
+Hi,
+I recently came across the AMI302, and would like to consider it for use in a new design. A pre-production of 1000 will get under way in January, what is the cost /  leadtime for 1000?
+Please can you also quote for 10k and 50k / year quantities?
+Can I obtain / Purchase samples, and is there an evaluation PCB available?
+Thanks!
+
+Stephen Hughes
+
+Dear Mr. Hughes,
+ 
+your mail was transefered to us from our Japanese Headquarters. We at Aichi Europe GmbH are the European subsidiary from Aichi Steel Corporation
+and are the soley distributor of the whole product portfolio (Stainless Steel, Nd-Magnet and MI-Sensors).
+ 
+You can obtain samples via us from Japan, however money-transfer for sampling amount to Japan will still be needed.
+ 
+AMI302
+1000pcs: 600 JPY each
+10k/year: 400 JPY each
+50k/year: 380 JPY each
+ 
+A set of three pcs for testing we offer for 12.000JPY (12.900JPY if you prefer DIP6 version). Evaluation kit (AMI302-ATD) is 150.000JPY.
+ 
+Please find attached our order catalogue. You can order directly with us.
+ 
+What kind of application do you have in mind applying the AMI302 to?
+ 
+Thanks and kind regards,
+ 
+------------------------------------------------------------------
+Sven Meise
+Sales MI Sensor & MAGFINE 
+ 
+Aichi Europe GmbH
+Immermannstr.65b
+40210 Duesseldorf, Germany
+Tel. +49-(0)-211-179343-14  
+Fax. +49-(0)-211-1711335
+ HYPERLINK "mailto:s.meise@aichi-europe.de" \o "mailto:s.meise@aichi-europe.de" s.meise@aichi-europe.de 
+
+This price is about €3.7, which could be low enough given that this part would eliminate a huge number of components, and would make manufacturing easier by esliminating the requirement to align the vertical magnetometer.
+
+
+
+Parts saved – 
+Dual FET
+Quad op-amp
+23 * 0603
+
+What is the accuracy of this part relative to the HMC?
+
+
+
+Earth field is 48.929uT in Dublin. ~= 50uT.
+Sensitivity is 2.4mV / uT, so total range for +/- earths field will be
+deltaV = 2.4mV/uT * 50uT * 2 = 240mV
+Assuming a Vref of 2.5V, and 12bit operation, this corresponds to 
+
+ADCcount = 4096 * 240mV / 2.5V ~= 400 counts. This is about the same as I have at the moment with the HMC.
+
+The dynamic range is +/- 200uT, or +/- 4 times earths magnetic field.
+The linearity is much poorer than the HMC, 1.6% compared to 0.1%.
+
+
+It is worth the investigation, but I need to champion the need for lower price. At the moment, the 1k price stands at €3.7, I need to get this 10% dropped to €3.3.
+
+
+Magnetometers
+
+ HYPERLINK "http://www.servoflo.com/ami_acceleration_sensors/ami_products.htm" http://www.servoflo.com/ami_acceleration_sensors/ami_products.htm
+
+3 Axis Electronic Compass  AMI302 
+* 3-Axis intelligent electronic compass
+* Low power, 3VDC input
+* 3.15 x 4.0 x 1.45 mm
+* Consumer, industrial applications
+* Highly accurate and sensitive
+* Data Sheet
+
+update rate may be too low. Anti-aliasing filters not included and so over sampling will be required. Non-linearity quite high at 1.6% compared with 0.1% for the honeywells
+
+
+
+
+ HYPERLINK "https://www.pnicorp.com/downloadResource/c4b9/datasheets/11/PNI+ASIC+Datasheet_rev+November+06.pdf" https://www.pnicorp.com/downloadResource/c4b9/datasheets/11/PNI+ASIC+Datasheet_rev+November+06.pdf
+
+
+This ASIC needs to be used in conjuction with their propriety magneto-inductive sensors.
+
+Note: 1 Telsa = 10,000 Gauss
+
+1 G = 0.1 mT
+Earth field total intensity in Dublin is 48.929uT = 489.29mGauss
+
+sensorresolution [ mGauss]llinearity [%] At 1 gaussrange [gauss]extra componentscurrent consumption [mA]max BW [Hz]HMC10520.120.16>20?>5 ??>1000AMI302PNI11096A
+PS = 4096PNI MS21000.551<51mAslow
+
+The HMC1042L looks good, just need a couple of external components and a HMC1041 vertical sensor.
+
+ HYPERLINK "http://www.magneticsensors.com/datasheets/hmc1042L.pdf" http://www.magneticsensors.com/datasheets/hmc1042L.pdf
+this is better than the HMC1052 as it has much better cross axis performance.
+
+magnetometers:
+http://www.speakesensors.com/PDF/detail.pdf
+Intended for use in cellphones: 
+
+http://www.alps.co.jp/e/news_release/2006/0511_01.htm
+	
+	How about these AMI sensors? 
+http://www.servoflo.com/ami_acceleration_sensors/ami_products.htm 
+and their press release... 
+http://news.thomasnet.com/fullstory/496456/2399 
+I'd say 3-axis compass for less than $13 sounds a good deal!
+
+HMC1042L looks like the best option at the moment.  (need 2 per unit, one has to be mounted on a vertical board)
+
+I have sent an email to servoflo.com about the AMI302 – 
+
+Hi,
+I recently came across the AMI302, and would like to consider it for use in a new design. A pre-production of 1000 will get under way in January, what is the cost /  leadtime for 1k?
+Please can you also quote for 10k and 50k / year quantities?
+Can I obtain / Purchase samples, and is there an evaluation PCB available?
+Thanks!
+
+Dear Mr. Huges,
+
+Thank you for your inquiry.
+
+We would like to help you if we can.  Do you have some experience with these kinds of sensors?  I must be honest with you that the factory technical support is not world class.  Getting answers to questions takes days and weeks sometimes!
+
+I must be the craziest salesperson you have ever heard from.
+
+The AMI302 does have an evaluation board.  Aichi insists it has a lot of value and charges about $1800 US for it.  We have not had many takers so we are on a build to order basis... 4-5 weeks lead time.
+
+I believe I could get 1000 to you by January (we do have some samples here).  However, I could not in good conscience take your order for even 50 pieces if you had not fully tested the sensor and developed a familiarity with it.
+
+Pricing is as follows:
+
+1000 pieces:  $11.31/unit FOB Boston
+2500 pieces:  $8.80/unit FOB Boston
+5000 pieces:  $8.05/unit FOB Boston
+10,000 pieces:  $6.32/unit FOB Boston
+25,000 pieces:  $4.84/unit FOB Boston
+50,000 pieces:  $4.40/unit FOB Boston
+
+Shipping is additional.
+
+I would be willing to do the following:
+1. Send 2 free sample sensors (please provide FedEx or UPS Account number) 
+2. Credit the full value of the evaluation kit with an order of 25,000 sensors or more 
+3. Credit 50% of the kit with an order of 10,000 pieces 
+4. Credit 25% of the kit with an order of 5000 pieces
+
+Please advise what you might like to do.
+
+Thank you and best regards
+David Ezekiel
+
+Hi David,
+Thanks for the fast reply. Given the cost of the eval kit, I will just fabricate a test PCB here. The pricing however is much higher than the target I have set for this design, I need to do a cost analysis to see if it is economically viable to use this part in place of alternative magnetometers. I will be back in touch in the coming days with a decision, and will let you know if I require samples then,
+Cheers!
+Stephen
+
+Hi,
+I recently came across the AMI302, and would like to consider it for use in a new design. A pre-production of 1000 will get under way in January, what is the cost /  leadtime for 1000?
+Please can you also quote for 10k and 50k / year quantities?
+Can I obtain / Purchase samples, and is there an evaluation PCB available?
+Thanks!
+
+Stephen Hughes
+
+Dear Mr. Hughes,
+ 
+your mail was transefered to us from our Japanese Headquarters. We at Aichi Europe GmbH are the European subsidiary from Aichi Steel Corporation
+and are the soley distributor of the whole product portfolio (Stainless Steel, Nd-Magnet and MI-Sensors).
+ 
+You can obtain samples via us from Japan, however money-transfer for sampling amount to Japan will still be needed.
+ 
+AMI302
+1000pcs: 600 JPY each
+10k/year: 400 JPY each
+50k/year: 380 JPY each
+ 
+A set of three pcs for testing we offer for 12.000JPY (12.900JPY if you prefer DIP6 version). Evaluation kit (AMI302-ATD) is 150.000JPY.
+ 
+Please find attached our order catalogue. You can order directly with us.
+ 
+What kind of application do you have in mind applying the AMI302 to?
+ 
+Thanks and kind regards,
+ 
+------------------------------------------------------------------
+Sven Meise
+Sales MI Sensor & MAGFINE 
+ 
+Aichi Europe GmbH
+Immermannstr.65b
+40210 Duesseldorf, Germany
+Tel. +49-(0)-211-179343-14  
+Fax. +49-(0)-211-1711335
+ HYPERLINK "mailto:s.meise@aichi-europe.de" \o "mailto:s.meise@aichi-europe.de" s.meise@aichi-europe.de 
+
+This price is about €3.7, which could be low enough given that this part would eliminate a huge number of components, and would make manufacturing easier by esliminating the requirement to align the vertical magnetometer.
+
+
+
+Parts saved – 
+Dual FET
+Quad op-amp
+23 * 0603
+
+What is the accuracy of this part relative to the HMC?
+
+
+
+Earth field is 48.929uT in Dublin. ~= 50uT.
+Sensitivity is 2.4mV / uT, so total range for +/- earths field will be
+deltaV = 2.4mV/uT * 50uT * 2 = 240mV
+Assuming a Vref of 2.5V, and 12bit operation, this corresponds to 
+
+ADCcount = 4096 * 240mV / 2.5V ~= 400 counts. This is about the same as I have at the moment with the HMC.
+
+The dynamic range is +/- 200uT, or +/- 4 times earths magnetic field.
+The linearity is much poorer than the HMC, 1.6% compared to 0.1%.
+
+
+It is worth the investigation, but I need to champion the need for lower price. At the moment, the 1k price stands at €3.7, I need to get this 10% dropped to €3.3.
+
+Hello Stephen,
+ 
+unfortunately I can not offer price reductions.
+ 
+DIP (Dual Inline Package), the sensor would be already soldered to a printed board for easier evaluation and processing.
+ 
+Kind regards,
+ 
+Sven Meise
+
+
+AMI302 pulse current:
+
+If we have a local decoupling cap of 4.7uF, what is the deltaV?
+
+I = CdV/dT
+deltaV = IT/C = 0.2*40n / 4.7u = 1.7mV
+
+Output filter:
+
+Since all three channels are multiplexed on the one line, there realistically can be no effective filtering up to the maximum sample rate.
+
+
+It would seem that the maximum scan rate is between 250 and 330Hz, but for this, we need a minimal delay on the external filter.
+Leave the filter out – just have a 1nF cap on the output as close to the dsPIC analog pin as possible.
+
+It is not clear whether the output is in anyway ratiometric to the power supply, however it is more than likely not as it seems as though the device has an internal reference.
+
+22/11/2007 Output scaling
+ To ensure that the output is within the range of the voltage reference – 
+
+
+
+These values will do the trick. The time constant is – 
+Tau = 2.2k * 10n  = 22uS
+
+This is well out of band.
+
+21/12/2007 AMI302 Notes
+It appears that the Vdda and Vddm pins are connected internally in the chip via a small inductance. Thus the best way to connect is to supply AVdd to Vdda pin with a local cap, and then just have another cap on the Vddm pin.
+Important: We can’t have any vias under the chip!
+
+( it appears that he Vddm pin is there to allow chip current monitoring)
+
+21/12/2007 Test Circuit
+To test the AMI302 before the SK7 main PCBs are fabricated, I will wire one up to a blank option module PCB for the SK6 and run code from within the magnetometer process.
+Once the CS pin is active ( high ) then the delay between switching a channel and sampling is stated as 1mS in the datasheet. This would imply a maximum sampling frequency of 333Hz.
+
+For the moment, I will increment the channel select every 1024Hz, ie every time the 
+void vMagnetometerProcess(void){
+is called. Just prior to the channel increment, retrieve the latest 
+
+
+Analog value from 
+
+
+Vib_AnIn_Sckt_Ring -> EXT_AIN1
+
+But C79 must be changed to 10nF or less
+
+
+Leave CS hardwired to Vdd.
+Use an option module with a built-in LDO to generate a low noise analog 3V supply.
+Use the SK6-A01 module PCB.
+
+
+
+Use OPT_GPIO1 for CH1
+Use OPT_INT for CH2
+
+
+Initial Test- with scope on OUT, Vdd = 3.0V, 
+
+CH1 = CH2 = OC so that Y channel should be selected. With earths magnetic field, Voutmax = 1.52V, Voutmin = 1.24V.
+DEltaV = 0.26V. To the ADC, this will yield a delta V of 0.26 * 5/6 = 216mV
+This is ( 216/2500 ) * 4096 counts = 354 counts. This is a shade under the above calculations from the datasheet specs.
+
+
+CH1 = CH2 = Vdd so that X channel should be selected. With earths magnetic field, Voutmax = 1.44V, Voutmin = 1.14V.
+DEltaV = 0.3V. To the ADC, this will yield a delta V of 0.3 * 5/6 = 250mV
+This is ( 250/2500 ) * 4096 counts = 410 counts. This is a shade above the above calculations from the datasheet specs.
+
+
+CH1 = H, CH2 = OC so that Z channel should be selected. With earths magnetic field, Voutmax = 1.61V, Voutmin = 1.34V.
+DEltaV = 0.27V. To the ADC, this will yield a delta V of 0.27 * 5/6 = 225mV
+This is ( 225/2500 ) * 4096 counts = 369 counts. This is a shade below the above calculations from the datasheet specs.
+
+It is important to try to achieve better resolution by oversampling. I ran into problems in the JAKE because the PIC has only 10 bit ADC, and there was not enough noise to dither the signal to obtain higher resolution after oversampling. I would not be fully confident that 12bit ADC will allow better than 12bit resolution, it remains to be seen if the actual noise of the circuit is enough to dither.
+Having looked at the signals seitching on the output of the AMI302, it would appear that it may be possible to sample at a higher rate than 333Hz per channel, perhaps 500Hz per channel with only negligible error introduced. This would allow more oversampling.
+Alternatively, I could look into taking many samples for individual channels in succession. If we limit the bandwidth for the magnetometers to 50Hz ( a reasonable value for compassing ) then we can have a cycle between all channels of 150hz, leading to each channel selected for 6.6mS.  We could sample many times in this 6.6mS window to get the desired level of oversampling ( possibly 64 times ? ).
+
+
+Sampling the Magnetometers
+
+In every entry to the ADC DMA ( every 1/1024ms ) update the magnetometer’s switch. Then the next interrupt there will be 16 samples from that axis, however, only the last few of these samples will be valid due to the time constant of the magnetometers amplifiers. For the moment, I will take the last three of 16 samples, and add them to the FIR buffer. Thus there will be 1024 samples per second of each channel ( although the effective sample rate is only about 340Hz ) but that should be enough oversampling to yield decent resolution.
+
+Normalization of magnetometer data for compass heading algorithm
+
+at the factory, the magnetometers are calibrated to be in units of mGauss, while not attached to any magnetic objects. If the SHAKE is calibrated this way and then attached to a mobile phone, the calibration will be disturbed. Since the full calibration algorithm requires special alignement , I want a simple compass calibration algorithm, that is independent of the magnetometer calibration.
+
+The easiest way to get such calibration constants is to have the user rotate the SHAKE in a full circle on a flat surface. This will provide the following – 
+
+1)	Euclidean of X and Z, min and max
+2)	Euclidean of Y and Z, min and max
+3)	Euclidean of X,Y and Z
+
+it will also be important to know the inclination angle of the earths’ magnetic field.
+
+let theta be the angle between earths magnetic field and ground.
+
+However, the calibration equations will be largely the same as those for the magnetometers. Using the raw magnetometer data as the input, use the same equations on the minimum and maximum captured values for all three axes, except use a modified calibration constant. This new constant will be 
+
+N*COS(theta) for x and y axes, and N*SIN(theta) for the z axis.
+theta can be calculated by
+
+theta = atan   ( Zmax – Zmin )
+				    (Xmax – Xmin)
+
+Compositions of trig and inverse trig functions
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+
+
+so N*COS(theta) = N / ( sqrt ( 1 + ( Zmax – Zmin )2 )  )
+				   								 (Xmax – Xmin)2
+
+so these constants, N*COS(theta) and N*SIN(theta) are used as the input constants of the regular calibration equations for the magnetometer.
+
+In order to maximise the accuracy, and minimize the time needed to perform the calibration, sample at maximu rate, and have a filter time constant at about 0.1 to 0.2 seconds ( any faster will yield higher values due to glitches, and slower will yield potentially lower values if the spinning is too fast or not smooth ).
+
+
+
+11/03/2009 determining accurate pitch and roll factors for use in compass algorithm
+
+from  HYPERLINK "http://www.kionix.com/App-Notes/AN020%20Orientations%20and%20Rotations.pdf" http://www.kionix.com/App-Notes/AN020%20Orientations%20and%20Rotations.pdf
+
+
+
+
+
+For the compassing equations, we also require the cosines of pitch and roll.
+
+COS(x) = sqrt( 1- SIN2(x) )
+
+ = sqrt ( 1 – ( Ax2 + Az2 ) / (  Ax2 + Ay2 + Az2 ) )
+
+
+
+
+a = atan( ax / euc )
+
+sin(a) = sin( atan ( ax / euc ))
+
+
+
+sin( atan
+
+12/03/2009 improved accuracy tilt compensation
+
+from  HYPERLINK "http://www.psocdeveloper.com/uploads/tx_piapappnote/an2272_01.pdf" http://www.psocdeveloper.com/uploads/tx_piapappnote/an2272_01.pdf
+
+
+
+
+
+
+
+
+lSqr = 0x10000 -(long)iAx * iAx;
+    lTmp = lSqr-(long)iAy * iAy;
+    if (lTmp > 0)
+      iSqrt = lSqrt(lTmp);
+    else
+      iSqrt = 0;
+    
+    lTmp =  lSqr * iChA;
+    lTmp -= (((LONG)iChB * iAx) * iAy);
+    lTmp -= (((LONG)iChC * iAx) * iSqrt);
+    
+    lTmp = lTmp >> 8;
+    
+    iChA = ((lTmp * RamDefaults.iXsf) >> 16) - RamDefaults.iOffsetX;
+
+    lTmp =  (LONG)iChB * iSqrt;
+    lTmp -= (LONG)iChC * iAy;
+    iChB = ((lTmp * RamDefaults.iYsf) >> 16) - RamDefaults.iOffsetY;
+    
+    iAngle = ArcTan2(iChB, iChA);
+
+( note: the term sqrt( 1 – y2 – x2 ) is actually equal to z, so this would simplify the calculations on )
+
+clearly, this is a very efficient implementation in terms of processor power. However, it does not make use of the accel z axis. Thus there is scope for improved accuracy for higher tilt levels.
+
+To make use of this in my code, I currently take the SIN(pitch) as the x accel value. This is consistent with the above. 
+Then COS(pitch) = sqrt( 1- SIN2(pitch))
+
+Now, to get SIN(roll),
+SIN(roll) = AccY /  COS(pitch)
+
+and finally COS(roll) = sqrt( 1- SIN2(roll)
+
+
+
+12/03/2009 compass calibration
+
+
+
+
+
+
+
+
+
+28/04/2009 Derivation of compasing equations ( with tilt compensation )
+
+rotation matrices are usually the preffered method of defining rotations mathematically. 
+ HYPERLINK "http://en.wikipedia.org/wiki/Rotational_matrix" http://en.wikipedia.org/wiki/Rotational_matrix
+
+
+Dimension three
+See also:  HYPERLINK "http://en.wikipedia.org/wiki/Rotation_representation" \o "Rotation representation" Rotation representation
+There are three basic rotation matrices in three dimensions:
+ INCLUDEPICTURE "http://upload.wikimedia.org/math/2/8/5/2851c9dc2031127e6dacfb84b96446d8.png" \* MERGEFORMATINET 
+These matrices represent counterclockwise rotations of an object relative to fixed coordinate axes, by an angle of ?, around the x, y, and z axes, respectively. The direction of the rotation is determined by the  HYPERLINK "http://en.wikipedia.org/wiki/Right-hand_rule" \o "Right-hand rule" right-hand rule: Rx rotates the y-axis towards the z-axis, Ry rotates the z-axis towards the x-axis, and Rz rotates the x-axis towards the y-axis. The transpose of the above matrices represents positive (right-hand sense) rotation of the coordinate axes relative to a fixed object.
+Other rotation matrices can be obtained from these three using  HYPERLINK "http://en.wikipedia.org/wiki/Matrix_multiplication" \o "Matrix multiplication" matrix multiplication. For example, the product
+ INCLUDEPICTURE "http://upload.wikimedia.org/math/7/a/d/7adea3a3d02bc99ba1b5b60f66ce1d16.png" \* MERGEFORMATINET 
+represents a rotation whose  HYPERLINK "http://en.wikipedia.org/wiki/Yaw,_pitch,_and_roll" \o "Yaw, pitch, and roll" yaw, pitch, and roll are ?, ?, and ?, respectively. Similarly, the product
+ INCLUDEPICTURE "http://upload.wikimedia.org/math/2/c/3/2c340a846930e0fc726517869cece47a.png" \* MERGEFORMATINET 
+represents a rotation whose  HYPERLINK "http://en.wikipedia.org/wiki/Euler_angles" \o "Euler angles" Euler angles are ?, ?, and ? (using the z-x-z convention for Euler angles). In both cases the matrices are assumed to act on  HYPERLINK "http://en.wikipedia.org/wiki/Column_vector" \o "Column vector" column vectors.
+
+The rotation required to rotate the SK7’s local frame to the world magnetic frame can be acvieved by two rotations – one about the y axis and one about the x axis.
+
+
+
+John’s code for computing heading – 
+
+I've attached the code for my bearing estimation. The code is in
+simpleorientation.py. Here's how it works:
+
+m=to_rotation_matrix(acc, mag)
+takes the accelerometer and magnetometer readings and returns a
+rotation matrix. It does this
+by fitting a triangle to the vectors given by the normalized acc and
+mag readings and constructing
+a rotation matrix from this.
+
+then
+(roll1, pitch1, yaw1) = rotation_to_euler(m)
+(roll2, pitch2, yaw2) = rotation_to_euler(m, parity = True)
+compute the euler represenation of that matrix
+
+and the complete heading is then given by (roll1, -pitch1, yaw2)
+
+There's also code in there to compute gyro-compensated headings (see
+compute_orientation_matrix() at the end of orientation.py) which
+auto-calibrates the gyro offsets during quiescent periods. It works
+quite well if the gyro calibration is reasonable.
+
+The script heading.py just connects to the shake and shows an example
+of using the computations for both gyro and non-gyro heading.
+
+is quite complicated, and apart from that which integrates gyro readings into the heading, it does not seem to do anything that the existing heading code does. Where it is likely to improve on is in the normalization of the magnetomter data, and perhaps also in the accuracy of the rotation calculations. Also, John defines the complete heading as having roll, pitch and yaw paramters. Currently I do not output a roll and pitch value in the SHAKE code.
+
+So in order to improve my code do the following
+1) ensure that the frames of reference and axis and rotation definitions are consistent with the standards for pitch roll and yaw
+2) derive code to accurately define the pitch and roll angles based on the accelerometer readings
+3) create a new compass packet that contains pitch roll and yaw arguments
+
+Then further improvements that can be made – 
+1) implement low pass filtering for the acceleromter data to smooth the pitch and roll angles with a view to lowering the error in heading estimation
+2) design code that monitors the acceleration ( and gyro ) data to check for movements and use this to flag uncertainty into the heading estimation. The level of incertainty could be used to supress changes in the pitch and roll values during certain periods
+3) Integrate accelerometer and gyro data to achieve a dynamic representation of pitch and roll to improve the accuracy and speed of heading computation ( the integrations can be reset during stationary periods of the device )
+4) develop code for automatically compensating the magnetomter data for changes in the field magnitude.
+
+
+10/05/2009
+
+http://www.euclideanspace.com/maths/geometry/rotations/euler/index.htm
+
+a demo kalman filter app for dsPIC, with source code 
+http://tom.pycke.be/mav/92/kalman-demo-application
+
+a masters thesis titled "Developement of a INS/GPS navigation loop for an UAV"
+http://www.essays.se/essay/3b4b050afe/
+
+
+10/05/2009 frames of reference
+
+the SK6 and SK7 both have the following reference frame – 
+
+
+
+check: on the SK7 the accels and gyros do match yaw and pitch, but not roll. Roll is inverted relative to the standard as defined in
+ HYPERLINK "http://en.wikipedia.org/wiki/Yaw,_pitch,_and_roll" http://en.wikipedia.org/wiki/Yaw,_pitch,_and_roll
+
+but, importantly, the sense of all three rotations are correct on the SK7.
+
+
+ie, when looking into each of the three axes, the positive sense of rotation is in the anticlockwise direction.
+
+
+
+10/05/2009 New Roll-Pitch-Heading output data packet
+
+to encapsulate the complete orientation and heading of the SK7 with one data packet.
+Using 
+packet ODR config address = same as compass
+packet header $RPH
+Channel ID for data logging = 5
+
+
+
+12/05/2009 Derivation of tilt compenstated compass heading based on Grygorenko article in issue 188 , 2006 of circuit cellar.
+
+
+
+
+
+
+
+
+
+
+How does this differ from the equations I used before?
+
+
+old equations – 
+
+ Vx = HxCOS(pitch) – HySIN(pitch)SIN(roll) – HzSIN(pitch)COS(roll)
+ Vy = HyCOS(roll) – HzSIN(roll)
+
+new equations – 
+Vx = HxCOS(pitch) – HySIN(pitch)SIN(roll) – HzSIN(pitch)COS(roll)
+ Vy = HyCOS(roll) – HzSIN(roll)
+
+they are the same. however, in the old equations I used different ( wrong!) definition for the pitch and roll angles.
+
+
+12/05/2009 Roll and Pitch output
+let p = PITCH
+let r = ROLL
+SIN(p) = -Ax
+Thus p = ARCSIN( -Ax )
+
+also, p = arctan( - Ax / sqrt ( Ay2 + Az2 ) )
+this is prefereable as it results in higher accuracy at larger tilt levels.
+
+SIN( r)COS(p) = Ay
+thus r = ARCSIN( Ay / COS(p) ) = ARCSIN ( Ay / ( COS (arctan( - Ax / sqrt ( Ay2 + Az2 ) )))
+
+Compositions of trig and inverse trig functions
+ INCLUDEPICTURE "http://upload.wikimedia.org/math/a/b/2/ab24dbd6c097d578b9ba6d5ef8af13da.png" \* MERGEFORMATINET  INCLUDEPICTURE "http://upload.wikimedia.org/math/4/0/0/4005da685c90f33d145f122e34baaf66.png" \* MERGEFORMATINET  INCLUDEPICTURE "http://upload.wikimedia.org/math/e/7/b/e7b8c103e90d3201a10be0ddfe90a2cb.png" \* MERGEFORMATINET  INCLUDEPICTURE "http://upload.wikimedia.org/math/7/c/4/7c4a9d034cd65dae312f3d4593636d40.png" \* MERGEFORMATINET  INCLUDEPICTURE "http://upload.wikimedia.org/math/6/5/b/65b8e718cbd943d44c5c0086c0cad02f.png" \* MERGEFORMATINET  INCLUDEPICTURE "http://upload.wikimedia.org/math/8/8/4/88435402b69aee3ce7c1e5f1ac715a4d.png" \* MERGEFORMATINET  INCLUDEPICTURE "http://upload.wikimedia.org/math/a/2/9/a29cf2e566f9cc26ed2bb5b73337799e.png" \* MERGEFORMATINET  INCLUDEPICTURE "http://upload.wikimedia.org/math/8/e/e/8ee9f8bedda57dd3f7c86e7e2f5049fe.png" \* MERGEFORMATINET 
+
+r = ARCSIN( Ay * sqrt( 1 + ( Ax2 / (Ay2 + Az2 ) ) ) )
+
+so we only need to implement an ARCSIN function, with an integer input between 0 and 1000 and an output between 0 and 90degrees.
+We could use a lookup table, if we are only interested in about 1 degree resolution, but this is not sufficient. I want a full 0.1deg resolution.
+
+
+
+where the result would be in radians.
+
+Also, the arcsin can be computed as follows – 
+
+ARCSIN(x) = ARCTAN( x/sqrt(1-x*x) )
+
+for roll - 
+
+r = ARCSIN( Ay * sqrt( 1 + ( Ax2 / (Ay2 + Az2 ) ) ) )
+r = atan( ( Ay * sqrt( 1 + ( Ax^2 / (Ay^2 + Az^2 ) ) )) / sqrt ( 1 - ( Ay * sqrt( 1 + ( Ax^2 / (Ay^2 + Az^2 ) ) ) * Ay * sqrt( 1 + ( Ax^2 / (Ay^2 + Az^2 ) ) )  ) ) )
+
+
+using Matlab to simplify – 
+atan(Ay*((Ay^2+Az^2+Ax^2)/(Ay^2+Az^2))^(1/2)/(-(-Ay^2-Az^2+Ay^4+Ay^2*Az^2+Ax^2*Ay^2)/(Ay^2+Az^2))^(1/2))
+
+that does not look in any way simplified.
+using simple() in Matlab we get 
+ans =
+atan(Ay*(1+Ax^2/(Ay^2+Az^2))^(1/2)/(1-Ay^2*(1+Ax^2/(Ay^2+Az^2)))^(1/2))
+
+= ATAN (      Ay*sqrt( 1+Ax2/(Ay2 + Az2 ))    /  ( 1 – Ay2 * ( …
+
+too long winded – better to incorporate an ARCSIN function
+
+for the moment, use the first two terms in the asin function,
+
+arcsin(x) = x + x3/6
+
+the output needs to be in the range -900 to +900 deciDegrees , whereas the above formula is for –pi/2 to +pi/2
+Also, the input x needs to be normalized to +/- 1024 units
+
+however, this will not work as it requires a lot of the terms in the series for angles greater than about 30 degrees. Even up to the x7 term there is massive error.
+So use a lookup table, with interpolation.
+
+or use this – 
+
+Abramowitz and Stegun found this polynomal approximation for arcsine: 
+a0=1.5707288 / a1=-0.2121144 / a2=0.0742610 / a3=-0.0187293 
+arcsin(x) = 180/Pi * (pi/2 - sqrt(1 - x) * (a0 + a1*x + a2*x^2 + a3*x^3)) 
+This approximation is very accurate (99.9% - 99.9999%) for angles of 45 degrees and higher. For smaller angles you can get a higher precision when you use a taylor series with 15+ iterations.
+
+arcsind(x) = 180/Pi * (pi/2 - sqrt(1 - x) * (a0 + a1*x + a2*x^2 + a3*x^3)) 
+= 90 - 180/pi * sqrt(1 - x) * (a0 + a1*x + a2*x^2 + a3*x^3))
+
+100*arcsind(x) = 9000 – 18000/pi * sqrt( 1024 – x )*
+* (a0 + a1*x + a2*x^2 + a3*x^3)) 
+
+
+intermediate calculations in units of hundreths of degree - 
+18000/pi ~= 5730
+18000/pi * a0 ~= 9000
+18000/pi * a1 ~= 1215 ( rounded down ) 
+18000/pi * a2 ~= 425  ( rounded down )
+18000/pi * a3 ~= 107 ( rounded up )
+
+int32 lTerm0 = 9000;
+int32 lTerm1 = MULSS( x , -1215 );
+int32 lTerm2 =  MULSS( (MULSS( x , x ) / 1024 ) , 425 ); 
+int32 lTerm3 = MULSS( MULSS( (MULSS( x , x ) / 1024 ) , x ) / 1024 , 107 ); 
+
+largest term is lTerm1, which can be up to 21bits ( 1024 * 1215)
+lTerm2 is next largest, only 19bits
+Thus the sum of ( lTerm0 + lTerm1 + lTerm2 + lTerm3 ) is maximum 21bits
+Therefore this term can be multiplied by the iSqrtTerm if that term is 10bits or less. Limit the iSqrt term to 10 bits ( max value 1024 ) – 
+
+int32 iSqrtTerm = iIntSqrt( 1024*1024 – MULSS( x , 1024 ) ) ;
+
+
+iOut = 900 + DIVSD(MULSS( MULSS(  ( lTerm0 + lTerm1 + lTerm2 + lTerm3 ) , iSqrtTerm )  / (1024*1024) ), 5730 ) , 10 );
+
+
+
+
+
+For the moment, define the Pitch and Roll angles to be the angles of each of the x and y SK7 axes from the earths’ reference x and y axes ( tilt angles instead of Euler angles ) -
+
+
+
+
+
+
+
+
+
+
+compensate for flipped SK7
+roll 
+{ 0 to -900 } -> { 0 to -900 }
+{ 0 to +900 } -> { 0 to 900 }
+
+{ -900 to -1800 } -> { 900 to 0 }
+{ +900 to +1800 } -> { -900 to 0 }
+
+
+Pitch
+{ 0 to -900 } -> { 0 to -900 }
+{ 0 to +900 } -> { 0 to 900 }
+
+{ -900 to -1800 } -> { -900 to 0 }      
+{ +900 to +1800 } -> { +900 to 0 }
+
+
+ 
+
+if( bUpright == false ){
+if( roll >=0 ) roll = roll – 1800; else roll = 1800 + roll;
+if( pitch >= 0 ) pitch = 1800 – pitch; else pitch = -1800 – pitch;
+}
+
+14/05/2009 compass calibration
+
+I discovered this in my notes today, from a while back – 
+
+
+
+
+
+
+will this work as a calibration procedure? can we really determine the dip angle by a rotation on a flat surface?? If so, then this should be used to replace the existing compass calibration, which only calibrates the X and Y axes of the magnetometer output.
+
+
+
+13/05/2009 Fast Compass Vibration Feedback
+
+quote”
+Hi Rod,
+I am looking into the Fast Compass Feedback you requested. Can I suggest the following, that the SHAKE can be configured with three parameters
+1) the heading window lower point ( 0 to 359 degrees )
+2) the heading window higher point ( 0 to 359 degrees )
+3) the heading trigger hysteresis ( 0 to 30 degrees )
+3) the vibration profile number that is triggered ( 0 == disabled, 1 to 255 == profile number )
+This simple method would trigger the vibration profile once when the current heading value enters the heading window. The vibration would not be re-armed until the heading value rises above the window high point plus the hysteresis or falls below the window low point minus the hysteresis value. Once re-armed the vibration can be re-triggered as normal.
+Is this functionality ok, is there anything else you would like to add?
+cheers
+steve
+
+Hi Steve,
+
+An initial thought is that we might want to add a flag which would allow the designer to choose to continue to generate the vibration profile until you left (as opposed to playing it only once).
+“
+
+one issue to solve – how to continiously trigger a vibration profile? Basically this could be done if
+1) the process that checks the compass range runs frequently
+2) that process has the ability to read the state of current vibration feedback
+3) when the process checks that the vibration has ended, it will trigger the vibration again
+
+registers:
+
+window low LSB
+window low MSB
+
+window high LSB
+window high MSB
+
+uint16 flags
+uint8 uiVibrationNumber
+uint8 uiTriggerHysteresis
+
+It actually only makes sense to have the heading range check built within the compass process, ie to run at the same frequency as the compass process. For vibration looping this may lead to slight delays between re-start, a higher compass data rate would minimize this.
+
+How do we cater for wrap around?
+if we want to set the range from -10deg to +10deg for example, then this would manifest itself as the lower limit set to 3500 and the upper limit to 100. Thus the limits are in reverse order for comparisson purposes. Perhaps it is best to have the limits as signed, so that the range can be -3600 to +3600?
+this adds it’s own complications in terms of the comparisons.
+
+what if 3600 is added to the limits
+then -10deg to +10deg would require the user to set the limits to 3500 to 3700. now the code needs to translate the limits to 
+low limit = 3500, high limit = 100
+so the comparisons are reversed again, back to where we started.
+so it seems inevitable that we need to have a conditional check to see if the low limit is higher than the high limit and apply a different set of comparisons if they are.
+
+
+
+
+19/05/2009
+
+
+Hello,
+
+I contacted Andrew, however he told me to inquire information regarding the calculation of sensor data from you: I am having difficulties to get stable tracking of the orientation of the SHAKE device. Is there an example on how to achieve this or do you have recommendations? Here is what I tried:
+- Integrate gyroscope values
+- subtract an experimentally determined bias value from the gyroscope output to compensate for the slow drift (use highpass filtering instead?)
+- calibrate the integrated "pitch" value using the gravity vector (to determine the euler angles I use the sequence yaw --> pitch --> roll)
+- calibrate the integrated "yaw" value using the compass heading - is the algorithm used for calculating the compass heading available?
+Thank you!
+
+br Hannes
+
+
+Hi Hannes,
+The SK6 gyros are based on ADXRS300 ( yaw ) and IDG300 ( pitch and roll ), where the IDG300 has poor drift and offset performance. I suggest that for integration, you should high pass filter the data first to remove the zero bias offset.
+The internal compass heading algorithm is only accurate for small values of tilt, and I hope to update the firmware soon to correct this ( it has already been corrected on the SK7 SHAKE ). To get stable pitch and roll angles from the acceleration data ideally a Kalman filter would be required, this would allow transients to be filtered due to linear accelerations of the SK7 while the orientation is stable. I hope to get to implementing such a filter on the SK7 in the coming weeks, and if successful I may port it to the SK6. However, it may not perform as well on the SK6 as on the SK7 since the gyros on the SK7 are very well calibrated and have very low drift and temperature coefficients ( it uses three on the ADXRS610 ). The equations currently used in the SK6 heading algorithm are - 
+
+Vx = HxCOS(pitch) – HySIN(pitch)SIN(roll) – HzSIN(pitch)COS(roll)
+ Vy = HyCOS(roll) – HzSIN(roll)
+
+Heading = arctan( Vy/Vx)
+
+Where Hx,Hy and Hz are the three components of the magnetometer data.
+
+However the values used for roll and pitch angles are not the same as defined here -
+ HYPERLINK "http://en.wikipedia.org/wiki/Tait-Bryan_rotations" http://en.wikipedia.org/wiki/Tait-Bryan_rotations
+hence the error for large tilts. Instead it uses the actual pitch and roll angles from flat ( not one rotation following the other ). They are calculated simply as
+Sin(pitch) = AccelX
+Sin(roll) = AccelY
+
+Cheers
+steve
+
+
+20/05/2009
+
+
+Kalman filtering for attitude on SK7 etc:
+a good video detailing the Euler Yaw, Pitch and Roll angles
+
+a good blog for the basics -
+HYPERLINK http://tom.pycke.be/mav/97/autopilot-architecture http://tom.pycke.be/mav/97/autopilot-architecture
+
+and an overview of Kalman filtering without too much complex math- HYPERLINK http://tom.pycke.be/mav/71/kalman-filtering-of-imu-data http://tom.pycke.be/mav/71/kalman-filtering-of-imu-data
+
+artificial horizon code here -
+HYPERLINK http://tom.pycke.be/mav/100/artificial-horizon http://tom.pycke.be/mav/100/artificial-horizon
+
+excellent read -
+HYPERLINK http://epubl.ltu.se/1402-1617/2000/081/LTU-EX-00081-SE.pdf http://epubl.ltu.se/1402-1617/2000/081/LTU-EX-00081-SE.pdf
+( also downloaded in reference folder )
+
+
+interesting and insightful forum post – 
+ HYPERLINK "http://www.rcgroups.com/forums/showthread.php?t=755173" http://www.rcgroups.com/forums/showthread.php?t=755173
+
+“
+Let me add to Unterhausen's comments based on my experience with the Xbow uNav and the Microbotics MIDG-II. Both of these units combine gps + 3 axis gyro + 3 axis accelerometer + 3 axis magnetometer.
+
+The conclusion is that it's really hard to get a quality estimate of your roll, pitch & heading, even with a full sensor suite like this. The math is complex and hard to derive. The results are very sensitive to tuning, it's very easy to have subtle bugs, and it takes a fair amount of cpu power to crunch out a full solution ... this is especially problematic if your code uses floating point math which often isn't available on low power embedded cpu's.
+
+The MIDG provides a pretty high quality full IMU/INS/GPS solution, but it is all closed source and relatively expensive $5-6k range.
+
+You can get the uNav up and running for somewhere in the $2k range with open source sensor integration code, but the quality of the open-source code is on the low end. You have to buy Xbow's higher end products to get something bundled with their quality math routines (but then those are all closed source.)
+
+Just to give you an idea of how much fun this all is, the uNav code uses the gravity vector to estimate pitch and roll, but this is combined with gyro data to try to keep some sensibility in the solution when you are moving and accelerating. The roll estimate seems like it tracks pretty good, but I've seen up to 30-45 degrees of pitch error during steep turns where you are pulling > 1 G.
+
+The attitude estimate is used to interpret the magnetometer data to get a heading estimate, but if pitch is 45 degrees off, the heading estimate is going to be way off as well. I've seen heading errors as high as 180 degrees ... in other words, as wrong as they can get, and I've seen the heading estimate be pretty close ... all within a single flight.
+
+The good news is that these errors combined with a reasonably tuned flight control system seem to yield a system that will converge to the right answer ... in other words, you can get usable uav flight out of this, it's just not always nearly as nice as you'd like.
+
+So essentially you have a situation where you are pretty ecstatic if your pitch and roll estimates are with in 10 degrees of the truth and you need to be able to live with maybe 20 degree errors and survive 30-45 degree errors.
+
+That said, I've been able to go out on calmer days with my xbow unav based system, fly a closed loop pattern, and get pretty repeatable flight paths. So my summary would be that you are going to get *way* more errors in your sensors than you'd expect by reading the specs and dreaming about algorithms. But if you are careful and understand the systems, the sensors, and their limitations, you can still use them to build pretty functional systems. And the hope is that as time goes forward, the sensors and the publicly available math routines will continue to improve so life will hopefully continue to get better (but maybe not at the pace we'd like to see) :-)
+“
+
