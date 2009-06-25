@@ -1954,7 +1954,7 @@ SHAKE_API int sk7_configure_heading_feedback(shake_device* sh, int lower_thresho
 	// lower threshold; msb
 	if(shake_write(sh, SK7_NV_REG_HEADING_LOWER_MSB, (lower_threshold & 0xFF00) >> 8) != SHAKE_SUCCESS)
 		return SHAKE_ERROR;
-
+	
 	// upper threshold; lsb
 	if(shake_write(sh, SK7_NV_REG_HEADING_UPPER_LSB, upper_threshold & 0x00FF) != SHAKE_SUCCESS)
 		return SHAKE_ERROR;
