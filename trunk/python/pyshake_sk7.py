@@ -258,7 +258,11 @@ class SK7(pyshake_sk_common.SHAKE):
 			for i in range(12):
 				offset = i * 3
 				self.data.cap_sk7[i] = int(packetbuf[5+offset:7+offset], 16)
-			self.data.internal_timestamps[SHAKE_SENSOR_CAP] = int(packetbuf[42:44])
+			try:
+				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = int(packetbuf[42:44])
+			except ValueError:
+				# can happen with standalone cap sensing boards
+				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = 0
 		elif packet_type == SK7_DATA_ANA0:
 			# $AI0,dddd,dd*CS
 			self.ana0 = int(packetbuf[5:9])
