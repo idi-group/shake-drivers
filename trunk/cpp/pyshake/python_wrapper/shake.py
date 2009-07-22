@@ -1553,7 +1553,7 @@ class shake_device:
 		if self.write(SK7_NV_REG_HEADING_UPPER_LSB, upper_threshold & 0x00FF) != SHAKE_SUCCESS:
 			return SHAKE_ERROR
 
-		if self.write(SK7_NV_REG_HEADING_UPPER_MSB, (upper_threshold & 0x00FF) >> 8) != SHAKE_SUCCESS:
+		if self.write(SK7_NV_REG_HEADING_UPPER_MSB, (upper_threshold & 0xFF00) >> 8) != SHAKE_SUCCESS:
 			return SHAKE_ERROR
 
 		if self.write(SK7_NV_REG_HEADING_HYSTERESIS, hysteresis) != SHAKE_SUCCESS:
