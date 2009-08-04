@@ -27,14 +27,14 @@
 /**	SHAKE power control bits
 *	@see shake_read_power_state()
 *	@see shake_write_power_state() */
-#define SHAKE_POWER_CAP		= 0x01
-#define SHAKE_POWER_ACC		= 0x02
-#define SHAKE_POWER_GYRO	= 0x04
-#define SHAKE_POWER_VIB		= 0x08
-#define SHAKE_POWER_MAG		= 0x10
-#define SHAKE_POWER_TEMP	= 0x20
-#define SHAKE_POWER_ANALOG	= 0x40
-#define SHAKE_POWER_NAV		= 0x80
+#define SHAKE_POWER_CAP		 0x01
+#define SHAKE_POWER_ACC		 0x02
+#define SHAKE_POWER_GYRO	 0x04
+#define SHAKE_POWER_VIB		 0x08
+#define SHAKE_POWER_MAG		 0x10
+#define SHAKE_POWER_TEMP	 0x20
+#define SHAKE_POWER_ANALOG	 0x40
+#define SHAKE_POWER_NAV		 0x80
 
 /**	SHAKE sensor listing. 
 *	@see shake_read_sample_rate()
