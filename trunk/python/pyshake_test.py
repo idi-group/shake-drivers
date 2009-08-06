@@ -26,6 +26,7 @@
 
 from pyshake import *
 import time
+import platform
 
 # define an callback function for events from the SHAKE
 def eventcallback(event_type):
@@ -47,7 +48,12 @@ sd = shake_device(SHAKE_SK7)
 # this is actually saying "use COM3")
 # you can also use the other forms of port identifier that pyserial supports, eg
 # sd.connect('COM3:')
-sd.connect(40)
+
+#check if underlying system is mac
+if platform.mac_ver()[0]=='':
+	sd.connect(40)
+else:
+	sd.connect('/dev/tty.SHAKESK7SN0028-SPPDev-1')
 
 import time
 time.sleep(5)
