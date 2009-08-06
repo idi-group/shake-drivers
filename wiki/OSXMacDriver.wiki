@@ -1,5 +1,7 @@
 #Macdriver
 = Introduction =
+** Use the most up to date osx,bluetooth and python shake drivers to resolve the issues. If you are using older osx versions the fix below may still be of use. 
+
 
 Minor changes to pyshake.py and new files shake_viewer.py and bootstrap.py.
 Dependency on lightblue, very easy to install. The server will sometimes
