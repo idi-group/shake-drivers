@@ -923,19 +923,19 @@ class shake_device:
 		svp += '~'
 		debug("sending upload: " + svp + "\n")
 
-		self.SHAKE.waiting_for_ack = True
-		self.SHAKE.lastaddr = -1
+		self.waiting_for_ack = True
+		self.lastaddr = -1
 
-		self.SHAKE.write_to_port(svp)
+		self.write_to_port(svp)
 		
 		elapsed = 0
-		while self.SHAKE.waiting_for_ack and elapsed < 2000:
+		while self.waiting_for_ack and elapsed < 2000:
 			ssleep(0.01)
 			elapsed += 10 
 							
-		self.SHAKE.waiting_for_ack = False
+		self.waiting_for_ack = False
 	
-		if not self.SHAKE.lastack or self.SHAKE.lastaddr == -1:
+		if not self.lastack or self.lastaddr == -1:
 			return SHAKE_ERROR
 
 		return SHAKE_SUCCESS
