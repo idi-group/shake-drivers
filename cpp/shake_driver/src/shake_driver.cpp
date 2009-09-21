@@ -234,6 +234,7 @@ shake_device* shake_init_internal(shake_conn_data* scd) {
 	devpriv->data_recv = 0;
 	devpriv->wait_for_acks = 1; // NOTE
 	devpriv->hwrev = devpriv->fwrev = devpriv->bluetoothfwrev = 0.0;
+	devpriv->device_type = scd->devtype;
 
 	sprintf(devpriv->playback_packet, "$STRW");
 
@@ -516,16 +517,16 @@ SHAKE_API int shake_factory_reset(shake_device* sh, int repeat) {
 		shake_write(sh, 0x003c, 0x00);	// R01 off
 
 		int sample1[] = { 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30 };
-		shake_upload_vib_sample(sh, 0x01, sample1, 4);
+		sk6_upload_vib_sample(sh, 0x01, sample1, 4);
 
 		int sample2[] = { 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30, 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30, 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30 };
-		shake_upload_vib_sample(sh, 0x01, sample2, 12);
+		sk6_upload_vib_sample(sh, 0x01, sample2, 12);
 
 		int sample3[] = { 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30, 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30, 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30 };
-		shake_upload_vib_sample(sh, 0x01, sample3, 12);
+		sk6_upload_vib_sample(sh, 0x01, sample3, 12);
 
 		int sample4[] = { 0xFF, 0x03, 0x00, 0x30, 0xFF, 0x03, 0x01, 0x30 };
-		shake_upload_vib_sample(sh, 0x01, sample4, 4);
+		sk6_upload_vib_sample(sh, 0x01, sample4, 4);
 	}
 
 	return SHAKE_SUCCESS;
@@ -1057,21 +1058,55 @@ SHAKE_API int shake_write_data_request(shake_device* sh, unsigned char value) {
 }
 
 SHAKE_API int shake_playvib(shake_device* sh, int channel, unsigned char profile) {
+	//printf("shake_playvib: channel = %d, profile = %d)\n", channel, profile);
 	if(!sh) return SHAKE_ERROR;
-
-	if(channel < SHAKE_VIB_MAIN || channel > SHAKE_VIB_RIGHT)
-		return SHAKE_ERROR;
 
 	if(profile < 1) 
 		return SHAKE_ERROR;
 
-	return shake_write(sh, SHAKE_VO_REG_VIB_MAIN + channel, profile);
+	shake_device_private* dev = (shake_device_private*)sh->priv;
+
+	//printf("shake_playvib: device_type = %d\n", dev->device_type);
+	if(dev->device_type == SHAKE_SK6) {
+		//printf("shake_playvib: SK6 mode\n");
+		int addr = SHAKE_VO_REG_VIB_MAIN + channel;
+		return shake_write(sh, addr, profile);
+	} else {
+		//printf("shake_playvib: SK7 mode\n");
+		char buf[5];
+		buf[4] = 0;
+		switch(channel) {
+			case SHAKE_VIB_MAIN: 
+				sprintf(buf, "vm%02X", profile);
+				break;
+			case SHAKE_VIB_LEFT: 
+				sprintf(buf, "vl%02X", profile);
+				break;
+			case SHAKE_VIB_RIGHT:
+				sprintf(buf, "vr%02X", profile);
+				break;
+			case SHAKE_VIB_FORCEREACTOR:
+				sprintf(buf, "vf%02X", profile);
+				break;
+			// TODO check what this actually means
+			case SHAKE_VIB_EXT_ACTUATOR:
+				sprintf(buf, "vd%02X", profile);
+				break;
+			default:
+				//printf("shake_playvib: unknown channel\n");
+				return SHAKE_ERROR;
+		}
+		//printf("shake_playvib: sending buf = %s\n", buf);
+		write_bytes(dev, buf, 4);
+
+	}
+	return SHAKE_SUCCESS;
 }
 
-SHAKE_API int shake_playvib_continuous(shake_device* sh, int channel, unsigned char amplitude, unsigned char time) {
+SHAKE_API int sk6_playvib_continuous(shake_device* sh, int channel, unsigned char amplitude, unsigned char time) {
 	if(!sh) return SHAKE_ERROR;
 
-	if(channel != SHAKE_VIB_LEFT && channel != SHAKE_VIB_RIGHT)
+	if(channel != SHAKE_VIB_LEFT || channel != SHAKE_VIB_RIGHT)
 		return SHAKE_ERROR;
 
 	if(amplitude != 0 && amplitude != 33 && amplitude != 66 && amplitude != 100)
@@ -1107,7 +1142,7 @@ SHAKE_API int shake_playvib_continuous(shake_device* sh, int channel, unsigned c
 	return shake_write(sh, vibaddr, vibbyte);
 }
 
-SHAKE_API int shake_upload_vib_sample(shake_device* sh, unsigned char profile, int* sample, int sample_length) {
+SHAKE_API int sk6_upload_vib_sample(shake_device* sh, unsigned char profile, int* sample, int sample_length) {
 	return shake_upload_vib_sample_extended(sh, profile, sample, sample_length, 0, 0, 0);
 }
 
@@ -1380,9 +1415,34 @@ int sk7_cap(shake_device* sh, int* prox) {
 
 	dev = (shake_device_private*)sh->priv;
 
-	memcpy(prox, &(dev->shake->data.cap_sk7), sizeof(int) * 12);
+	memcpy(prox, &(dev->shake->data.cap_sk7[0]), sizeof(int) * 12);
 	dev->shake->data.timestamps[SHAKE_SENSOR_CAP] = dev->shake->data.internal_timestamps[SHAKE_SENSOR_CAP];
 	
+	return SHAKE_SUCCESS;
+}
+
+int sk7_cap_ext(shake_device* sh, int blocks, int* prox) {
+	shake_device_private* dev;
+
+	if(!sh || !prox) return SHAKE_ERROR;
+
+	dev = (shake_device_private*)sh->priv;
+
+	switch(blocks) {
+		case 0:
+			memcpy(prox, &(dev->shake->data.cap_sk7[0]), sizeof(int) * 12);
+			break;
+		case 1:
+			memcpy(prox, &(dev->shake->data.cap_sk7[1]), sizeof(int) * 12);
+			break;
+		case 2:
+			memcpy(prox, &(dev->shake->data.cap_sk7[0]), sizeof(int) * 12);
+			memcpy(prox+12, &(dev->shake->data.cap_sk7[1]), sizeof(int) * 12);
+			break;
+		default:
+			return SHAKE_ERROR;
+	}
+	//dev->shake->data.timestamps[SHAKE_SENSOR_CAP] = dev->shake->data.internal_timestamps[SHAKE_SENSOR_CAP];
 	return SHAKE_SUCCESS;
 }
 

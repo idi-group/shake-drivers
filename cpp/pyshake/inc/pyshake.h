@@ -57,6 +57,7 @@ static PyObject* pyshake_sk6_cap0(PyObject* self, PyObject* args);
 static PyObject* pyshake_sk6_cap1(PyObject* self, PyObject* args);
 static PyObject* pyshake_sk6_cap(PyObject* self, PyObject* args);
 static PyObject* pyshake_sk7_cap(PyObject* self, PyObject* args);
+static PyObject* pyshake_sk7_cap_ext(PyObject* self, PyObject* args);
 
 static PyObject* pyshake_analog0(PyObject* self, PyObject* args);
 static PyObject* pyshake_analog1(PyObject* self, PyObject* args);
@@ -66,7 +67,8 @@ static PyObject* pyshake_read(PyObject* self, PyObject* args);
 
 static PyObject* pyshake_write(PyObject* self, PyObject* args);
 
-static PyObject* pyshake_upload_vib_sample(PyObject* self, PyObject* args);
+static PyObject* pyshake_playvib(PyObject* self, PyObject* args);
+static PyObject* pyshake_sk6_upload_vib_sample(PyObject* self, PyObject* args);
 static PyObject* pyshake_upload_vib_sample_extended(PyObject* self, PyObject* args);
 static PyObject* pyshake_read_temperature(PyObject* self, PyObject* args);
 static PyObject* pyshake_register_event_callback(PyObject* self, PyObject* args);
@@ -136,6 +138,7 @@ static PyMethodDef pyshake_methods[] = {
 	{ "sk6_cap1",			pyshake_sk6_cap1,				1,	"cap sw 1 proximity" },
 	{ "sk6_cap",			pyshake_sk6_cap,				1,	"cap sw 0+1 proximity (SK6)" },
 	{ "sk7_cap",			pyshake_sk7_cap,				1, "cap sw (SK7)" },
+	{ "sk7_cap_ext",		pyshake_sk7_cap_ext,			1, "cap sw (ext, SK7)" },
 
 	{ "analog0",		pyshake_analog0,			1,	"analog input 0" },
 	{ "analog1",		pyshake_analog1,			1,	"analog input 1" },
@@ -146,7 +149,8 @@ static PyMethodDef pyshake_methods[] = {
 	{ "read",			pyshake_read,				1,	"read a register" },
 	{ "write",			pyshake_write,				1,	"write a register" },
 
-	{ "upload_vib_sample",	pyshake_upload_vib_sample, 1, "uploads a vibration sample" },
+	{ "playvib",			pyshake_playvib,				1, "play a vibration" },
+	{ "sk6_upload_vib_sample",	pyshake_sk6_upload_vib_sample, 1, "uploads a vibration sample" },
 	{ "upload_vib_sample_extended", pyshake_upload_vib_sample_extended, 1, "uploads a vibration sample with extra parameters" },
 	{ "read_temperature", pyshake_read_temperature, 1, "reads temperature register" },
 

@@ -28,7 +28,7 @@ typedef struct {
 	short heading;
 	union  {
 		int cap_sk6[2];	// SK6
-		int cap_sk7[12];	// SK7
+		int cap_sk7[3][12];	// SK7
 	};
 	short ana0, ana1;
 	short shaking_peak_accel, shaking_direction, shaking_timestamp;

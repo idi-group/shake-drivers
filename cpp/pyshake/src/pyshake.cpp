@@ -690,6 +690,43 @@ static PyObject* pyshake_sk7_cap(PyObject* self, PyObject* args) {
 	return Py_None;
 }
 
+static PyObject* pyshake_sk7_cap_ext(PyObject* self, PyObject* args) {
+	int id, blocks;
+
+	PyArg_ParseTuple(args, "ii", &id, &blocks);
+
+	if(id < 0 || id >= MAX_SHAKES) {
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+
+	if(devicelist[id] != NULL) {
+		int prox[24];
+
+		if(sk7_cap_ext(devicelist[id], blocks, prox) == SHAKE_ERROR) {
+			Py_INCREF(Py_None);
+			return Py_None;
+		}
+		PyObject* result = NULL;
+		if(blocks == 0 || blocks == 1) {
+			result = PyList_New(12);
+			for(int j=0;j<12;j++) {
+				PyList_SetItem(result, j, PyLong_FromLong(prox[j]));
+			}
+		} else {
+			result = PyList_New(24);
+			for(int j=0;j<24;j++) {
+				PyList_SetItem(result, j, PyLong_FromLong(prox[j]));
+			}
+		}
+			
+		Py_INCREF(result);
+		return result;
+	}
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 
 static PyObject* pyshake_analog0(PyObject* self, PyObject* args) {
 	int id;
@@ -789,8 +826,24 @@ static PyObject* pyshake_write(PyObject* self, PyObject* args) {
 	return Py_None;
 }
 
+static PyObject* pyshake_playvib(PyObject* self, PyObject* args) {
+	int id;
+	int channel, profile;
 
-static PyObject* pyshake_upload_vib_sample(PyObject* self, PyObject* args) {
+	PyArg_ParseTuple(args, "iii", &id, &channel, &profile);
+
+	if(id < 0 || id >= MAX_SHAKES) {
+		return Py_BuildValue("i", SHAKE_ERROR);
+	}
+
+	if(devicelist[id] != NULL) {
+		return Py_BuildValue("i", shake_playvib(devicelist[id], channel, profile));
+	}
+
+	return Py_BuildValue("i", SHAKE_ERROR);
+}
+
+static PyObject* pyshake_sk6_upload_vib_sample(PyObject* self, PyObject* args) {
 	int id;
 	unsigned profile;
 	int sample[64], sample_length;
@@ -820,7 +873,7 @@ static PyObject* pyshake_upload_vib_sample(PyObject* self, PyObject* args) {
 			sample[pos] = PyInt_AsLong(PyList_GET_ITEM(list, pos));
 		}
 
-		ret = shake_upload_vib_sample(devicelist[id], profile, sample, sample_length / 2);
+		ret = sk6_upload_vib_sample(devicelist[id], profile, sample, sample_length / 2);
 		return Py_BuildValue("i", ret);
 	}
 

@@ -174,10 +174,11 @@ int SK7::read_ascii_packet(int packet_type, char* packetbuf) {
 int SK7::parse_raw_packet(int packet_type, char* packetbuf, int packetlen, int has_seq) {
 	SHAKE_DBG("*** Parsing raw\n");
 	extract_raw_packet(packet_type, packetbuf, has_seq);
+	// XXX Not on SK7??
 	// check if we need to send an audio packet back
-	if(packet_type == SK7_RAW_DATA_AUDIO_HEADER) {
-		shake_compress_and_send_audio(devpriv);
-	}
+	//if(packet_type == SK7_RAW_DATA_AUDIO_HEADER) {
+	//	shake_compress_and_send_audio(devpriv);
+	//}
 	return SK7_RAW_READ_OK;
 }
 
@@ -405,7 +406,7 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 			int seq;
 			char* ptr = rawpacket+5;
 			for(int i=0;i<12;i++) {
-				data.cap_sk7[i] = hex_ascii_to_int(ptr, 2, 2);
+				data.cap_sk7[0][i] = hex_ascii_to_int(ptr, 2, 2);
 				ptr += 3;
 			}
 			seq = dec_ascii_to_int(ptr, 2, 2);
@@ -413,10 +414,33 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 
 			if(playback && devpriv->log) {
 				double tsval = dec_ascii_to_int(timestamp->timestamp, 10, 10) / 100.0;
-				fprintf(devpriv->log, "%.3f,CAP,%d, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", tsval, SHAKE_SENSOR_CAP, data.cap_sk7[0], data.cap_sk7[1], 
-														data.cap_sk7[2], data.cap_sk7[3], data.cap_sk7[4], data.cap_sk7[5], data.cap_sk7[6], data.cap_sk7[7], 
-														data.cap_sk7[8], data.cap_sk7[9], data.cap_sk7[10], data.cap_sk7[11], data.cap_sk7[12]); 
+				fprintf(devpriv->log, "%.3f,CAP,%d, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", tsval, SHAKE_SENSOR_CAP, data.cap_sk7[0][0], data.cap_sk7[0][1], 
+														data.cap_sk7[0][2], data.cap_sk7[0][3], data.cap_sk7[0][4], data.cap_sk7[0][5], data.cap_sk7[0][6], data.cap_sk7[0][7], 
+														data.cap_sk7[0][8], data.cap_sk7[0][9], data.cap_sk7[0][10], data.cap_sk7[0][11], data.cap_sk7[0][12]); 
 			}
+			break;
+		}
+		case SK7_DATA_CAP_B: {
+			int seq;
+			char* ptr = rawpacket+5;
+			for(int i=0;i<12;i++) {
+				data.cap_sk7[1][i] = hex_ascii_to_int(ptr, 2, 2);
+				ptr += 3;
+			}
+			seq = dec_ascii_to_int(ptr, 2, 2);
+			data.internal_timestamps[SHAKE_SENSOR_CAP] = seq;
+
+			break;
+		}
+		case SK7_DATA_CAP_C: {
+			int seq;
+			char* ptr = rawpacket+5;
+			for(int i=0;i<12;i++) {
+				data.cap_sk7[2][i] = hex_ascii_to_int(ptr, 2, 2);
+				ptr += 3;
+			}
+			seq = dec_ascii_to_int(ptr, 2, 2);
+			data.internal_timestamps[SHAKE_SENSOR_CAP] = seq;
 			break;
 		}
 		case SK7_DATA_ANA0: {
@@ -452,6 +476,7 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 			data.rph[1] = dec_ascii_to_int(datarph->pitch.data, 5, 4);
 			data.rph[2] = dec_ascii_to_int(datarph->heading.data, 5, 4);
 			data.heading = data.rph[2];
+			seq = dec_ascii_to_int(datarph->seq.data, 2, 2);
 			data.internal_timestamps[SHAKE_SENSOR_HEADING] = seq;
 
 			if(playback && devpriv->log) {
@@ -578,10 +603,20 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 			data.heading = srps->data[0] + (srps->data[1] << 8);
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srps->seq;
 			break;
-		case SK7_RAW_DATA_CAP:
+		case SK7_RAW_DATA_CAP: 
 			// packet is just 3 bytes header + 12 bytes data
 			for(int i=0;i<12;i++)
-				data.cap_sk7[i] = rawpacket[3+i];
+				data.cap_sk7[0][i] = rawpacket[3+i];
+			break;
+		case SK7_RAW_DATA_CAP_B:
+			// packet is just 3 bytes header + 12 bytes data
+			for(int i=0;i<12;i++)
+				data.cap_sk7[1][i] = rawpacket[3+i];
+			break;
+		case SK7_RAW_DATA_CAP_C: 
+			// packet is just 3 bytes header + 12 bytes data
+			for(int i=0;i<12;i++)
+				data.cap_sk7[2][i] = rawpacket[3+i];
 			break;
 		case SK7_RAW_DATA_ANALOG0:
 			srps = (sk7_raw_packet_short*)rawpacket;
@@ -643,7 +678,7 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 		}
 
 		// this is the packet type for a microphone sample packet
-		case SK7_RAW_DATA_AUDIO: {
+		/*case SK7_RAW_DATA_AUDIO: {
 			// ignore unless callback registered
 			if(devpriv->audio_cb == NULL && devpriv->audio_cb_STDCALL == NULL)
 				break;
@@ -693,7 +728,7 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 				devpriv->audio_cb_STDCALL(dev, NULL, 0, devpriv->playbackbuf, SHAKE_AUDIO_DATA_LEN);
 			#endif
 			break;
-		}
+		}*/
 	}
 
 	return SHAKE_SUCCESS;
