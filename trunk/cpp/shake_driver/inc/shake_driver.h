@@ -558,6 +558,16 @@ SHAKE_API int sk6_cap(shake_device* sh, int* proxboth);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int sk7_cap(shake_device* sh, int* prox);
 
+/**	Read capacitive data from one or both blocks on an SK7 external capactive device. 
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param prox pointer to a 12 element int array, into which the proximity values will be placed.
+*	@param blocks the blocks to return data for;	0 for 1st block only (prox array must be >= 12 elements long),
+*													1 for 2nd block only (prox array must be >= 12 elements long),
+*													2 for both blocks (prox array must be >= 24 elements long).
+*	@param prox pointer to an array into which the proximity values will be placed (note length requirements above!)
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int sk7_cap_ext(shake_device* sh, int blocks, int* prox);
+
 /**	Read the current value of the first analog input.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@return a value in the range 0-2500 (mV), SHAKE_ERROR on error */
@@ -1441,10 +1451,10 @@ SHAKE_API int shake_write_packet_request(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_write_data_request(shake_device* sh, unsigned char value);
 
-/** Plays a vibration profile on one of the three channels supported by the SHAKE.
+/** Plays a vibration profile on one of the channels supported by the SHAKE (SK6 and SK7)
 *
 *	Note that for typical SHAKEs, the only valid channel is SHAKE_VIB_MAIN - the other channel
-*	values refer to externally connected vibrotactile units.
+*	values refer to externally connected vibrotactile units or plugin modules that may not be installed.
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param channel should be a value from the ::shake_vib_channels enumeration
@@ -1453,10 +1463,10 @@ SHAKE_API int shake_write_data_request(shake_device* sh, unsigned char value);
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_playvib(shake_device* sh, int channel, unsigned char profile);
 
-/**	Plays a continuous vibration through one of two external channels supported by the SHAKE
+/**	Plays a continuous vibration through one of two external channels supported by the SK6 (NOT SK7)
 *
-*	This function can only be used with a SHAKE that has firmware version >= 2.50, and has one or
-*	more external piezo vibrators attached. For more information see the SHAKE manual. 
+*	This function can only be used with a SHAKE SK6 that has firmware version >= 2.50, and has one or
+*	more external piezo vibrators attached. For more information see the SHAKE SK6 manual. 
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param channel should be either SHAKE_VIB_LEFT or SHAKE_VIB_RIGHT
@@ -1464,9 +1474,9 @@ SHAKE_API int shake_playvib(shake_device* sh, int channel, unsigned char profile
 *	@param time period of the vibration signal. The range is 0-63, in units of 26ms (1 = 26ms, 63 = 1.66s)
 *
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
-SHAKE_API int shake_playvib_continuous(shake_device* sh, int channel, unsigned char amplitude, unsigned char time);
+SHAKE_API int sk6_playvib_continuous(shake_device* sh, int channel, unsigned char amplitude, unsigned char time);
 
-/** This function uploads a vibration sample to the SHAKE, storing it in one of the available locations in internal memory.
+/** This function uploads a vibration sample to the SHAKE SK6, storing it in one of the available locations in internal memory.
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param profile should indicate the number of the vibration profile to store the sample in.
@@ -1482,10 +1492,12 @@ SHAKE_API int shake_playvib_continuous(shake_device* sh, int channel, unsigned c
 *	@return SHAKE_SUCCESS or SHAKE_ERROR. Note that if and when the function returns
 *	SHAKE_SUCCESS, it means that the sample has been fully uploaded and is now available
 *	for immediate playback using shake_playvib() */
-SHAKE_API int shake_upload_vib_sample(shake_device* sh, unsigned char profile, int* sample, int sample_length);
+SHAKE_API int sk6_upload_vib_sample(shake_device* sh, unsigned char profile, int* sample, int sample_length);
 
-/**	Identical to the above function except that it allows setting reserved fields in the pattern, only useful
-*	with continuous vibration support in firmware >= 2.60.
+/**	Similar to the above function except that it allows setting extra parameters in the vibration profile.
+*	This function can be used with the following device configurations:
+*		- A SHAKE SK6 with the SK6-V01 module, with continuous vibration support (firmware >= 2.60).
+*		- A SHAKE SK7
 *
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@param profile should indicate the number of the vibration profile to store the sample in.
@@ -1497,7 +1509,9 @@ SHAKE_API int shake_upload_vib_sample(shake_device* sh, unsigned char profile, i
 *	10 means 100ms. 
 *	@param sample_length should be the the number of PAIRS in the @param sample array (NOT the total number
 *	of values). The maximum number of pairs is given by SHAKE_VIB_SAMPLE_MAX_LENGTH.
-*	@param mode represents the mode of the drive when the actuation is triggered. For pulse drive must be 0x02
+*
+*	@param mode represents the mode of the drive when the actuation is triggered. For pulse drive must be 0x02 (this is the only
+*				valid option for the SK6!)
 *	@param freq frequency of the pulsed waveform. Actual output frequency is twice this value (eg 250Hz = 0x7D)
 *	@param duty ratio of the pulsed output. Range of values is 1-9, representing 10%-90% respectively.
 *	

@@ -180,6 +180,8 @@ SHAKE_SENSOR_ANA1 = 7
 SHAKE_VIB_MAIN = 0
 SHAKE_VIB_LEFT = 1
 SHAKE_VIB_RIGHT = 2
+SHAKE_VIB_FORCEREACTOR = 3
+SHAKE_VIB_EXT_ACTUATOR = 4
 
 ## Maximum number of speed/time pairs in a vibrotactile sample
 SHAKE_VIB_SAMPLE_MAX_LENGTH = 32
@@ -686,6 +688,20 @@ class shake_device:
 			return pyshake.sk6_cap(self.__shakedev)
 
 		return pyshake.sk7_cap(self.__shakedev)
+	
+	## 	Get current proximity values from an external capacitive board (SK7 only!)
+	# 	@param blocks 0 = 1st block, 2 = 2nd block, 3 = both blocks 
+	# 	@return a 12 element list (blocks = 0  or 1) or a 24 element list (blocks = 2)
+	def cap_ext(self, blocks):
+		if not self.__connected:
+			return []
+
+		if self.__devtype == SHAKE_SK6:
+			return []
+		if blocks < 0 or blocks > 2:
+			return []
+
+		return pyshake.sk7_cap_ext(self.__shakedev, blocks)
 
 	## 	Get current reading from analog input 0
 	# 	@return current reading from analog input 0
@@ -1407,15 +1423,13 @@ class shake_device:
 		if not self.__connected:
 			return SHAKE_ERROR
 
-		if channel < SHAKE_VIB_MAIN or channel > SHAKE_VIB_RIGHT:
-			return SHAKE_ERROR
-
 		if value < 0 or value > 255:
 			return SHAKE_ERROR
 
-		return self.write(SHAKE_VO_REG_VIB_MAIN + channel, value)
+		return pyshake.playvib(self.__shakedev, channel, value)
 
-	def playvib_continuous(self, channel, amplitude, time):
+	# SK6 + V01 module only
+	def sk6_playvib_continuous(self, channel, amplitude, time):
 		if not self.__connected:
 			return SHAKE_ERROR
 
@@ -1445,14 +1459,15 @@ class shake_device:
 			vibaddr = SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS;
 		return self.write(vibaddr, vibbyte)
 
-	def upload_vib_sample(self, profile_number, sample_list):
+	# Simple upload format for SK6 (can also be used on SK7 if you don't care about mode/duty/freq parameters)
+	def sk6_upload_vib_sample(self, profile_number, sample_list):
 		if not self.__connected:
 			return SHAKE_ERROR
 	
 		if len(sample_list) > 64 or len(sample_list) < 2:
 			return SHAKE_ERROR
 
-		return pyshake.upload_vib_sample(self.__shakedev, profile_number, sample_list)
+		return pyshake.sk6_upload_vib_sample(self.__shakedev, profile_number, sample_list)
 
 	def upload_vib_sample_extended(self, profile_number, sample_list, mode, freq, duty):
 		if not self.__connected:

@@ -71,6 +71,10 @@ enum shake_vib_channels {
 	SHAKE_VIB_LEFT = 1,
 	/** External vibrator #2 */
 	SHAKE_VIB_RIGHT	= 2,
+	/** internal ForceReactor module */
+	SHAKE_VIB_FORCEREACTOR = 3,
+	/**	external vibration actuator (pulsed vibration) */
+	SHAKE_VIB_EXT_ACTUATOR = 4,
 };
 
 /** Maximum length of a vibration sample (in pairs of speed,time values) */

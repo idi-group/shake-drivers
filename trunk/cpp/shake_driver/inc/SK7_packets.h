@@ -33,7 +33,7 @@ extern "C" {
 #define SK7_DEFAULT_CHECKSUM 0x00
 
 #define SK7_MAX_PACKET_SIZE 	64
-#define SK7_NUM_PACKET_TYPES	59
+#define SK7_NUM_PACKET_TYPES	60
 
 #define SK7_HEADER_LEN		4	// "$pid," == 4 chars
 #define SK7_RAW_HEADER_LEN	3
@@ -50,6 +50,8 @@ enum sk7_packet_types {
 	SK7_DATA_MAG, 					// magnetometer
 	SK7_DATA_HEADING,					// compass heading
 	SK7_DATA_CAP,					// capacitive sensors
+	SK7_DATA_CAP_B,	
+	SK7_DATA_CAP_C,
 	SK7_DATA_ANA0,					// analog input 0
 	SK7_DATA_ANA1,					// analog input 1
 	SK7_DATA_RPH,					// roll-pitch-heading
@@ -108,17 +110,16 @@ enum sk7_packet_types {
 	SK7_RAW_DATA_MAG,
 	SK7_RAW_DATA_HEADING,
 	SK7_RAW_DATA_CAP,
+	SK7_RAW_DATA_CAP_B,
+	SK7_RAW_DATA_CAP_C,
 	SK7_RAW_DATA_ANALOG0,
 	SK7_RAW_DATA_ANALOG1,
 	SK7_RAW_DATA_EVENT,
 	SK7_RAW_DATA_SHAKING,
 	SK7_RAW_DATA_RPH,
-	SK7_RAW_DATA_AUDIO_EXP, 
-	SK7_RAW_DATA_AUDIO_HEADER,
-	SK7_RAW_DATA_AUDIO,
 };
 
-// TODO UPDATE
+// TODO UPDATE (only for debugging anyway)
 static char* sk7_packet_type_names[] = {
 	"ASCII/Acc",
 	"ASCII/Gyro",
@@ -170,6 +171,8 @@ static char* sk7_packet_headers[] = {
 	"$MAG", 	// data; magnetometer
 	"$HED", 	// data; heading
 	"$CSA",		// data; capacitive sensors
+	"$CSB",		// data; external capacitive sensor
+	"$CSC",		// data; external capacitive sensor
 	"$AI0",		// data; analog input 0
 	"$AI1",		// data; analog input 1
 	"$RPH",		// data; roll-pitch-heading
@@ -227,14 +230,13 @@ static char sk7_raw_packet_headers[] = {
 	124,	// raw mag
 	123,	// raw compass
 	122,	// raw cap
+	115,	// raw cap (ext)
+	114,	// raw cap (ext)
 	120,	// raw ana0
 	119,	// raw ana1
 	118,	// nav events
 	117,	// shaking events
 	116,	// roll-pitch-heading
-	114,	// expansion module audio
-	113,	// audio (headers)
-	112,	// audio (data packets)
 };
 
 // length of checksum part of packet in bytes
@@ -247,6 +249,8 @@ static unsigned sk7_packet_lengths[] = {
 	27, 		// data; magnetometer
 	14, 		// data; heading
 	45, 		// data; capacitive sensors
+	45, 		// data; capacitive sensors (ext)
+	45, 		// data; capacitive sensors (ext)
 	14,			// data: analog input 0
 	14,			// data; analog input 1
 	27,			// data; roll-pitch-heading
@@ -302,29 +306,30 @@ static unsigned sk7_packet_lengths[] = {
 	10,			// raw data; magnetometer 
 	6,			// raw data; heading
 	15,			// raw data; capacitive sensors (note no timestamp/packet counter here)
+	15,			// raw data; capacitive sensors (note no timestamp/packet counter here)
+	15,			// raw data; capacitive sensors (note no timestamp/packet counter here)
 	6,			// raw data; analog input 0
 	6,			// raw data; analog input 1
 	5,			// raw data; nav switch / cap switch events (never has timestamps/packet counter)
 	9,			// raw data; shaking event detected
 	10,			// raw data; RPH
-	35,			// raw data; audio sample (extension module contact mic)
-	3,			// raw data: audio header (for playback flow control)
-	35,			// raw data; (audio sample)
 };
 
 // TODO UPDATE
 /* indicates which packet types could have checksums */
 static int sk7_packet_has_checksum[] = {
-	1,1,1,1,1,1,1,1,1,		// these are the 8 basic sensor output channels + RPH
+	1,1,1,1,1,1,1,1,1,1,	// these are the basic sensor output channels + RPH
 
-	0,0,0,0,0,0,0,0,		// nav switch and cap switch events
+	0,0,0,0,				// nav switch events
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	// cap threshold events
 	0,0,					// logger packets
 	0,						// RFID packet
 	1,						// shaking event
 	1,						// heart rate event
 	0,0,					// commands
 	1,1,					// acks
-	0,0,0,0,0,0,0,0,0,0,0,0,0	// raw data packets
+	0,						// startup info
+	0,0,0,0,0,0,0,0,0,0,0,0	// raw data packets
 };
 
 #ifdef _WIN32
