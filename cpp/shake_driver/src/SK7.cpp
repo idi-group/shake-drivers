@@ -606,17 +606,17 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 		case SK7_RAW_DATA_CAP: 
 			// packet is just 3 bytes header + 12 bytes data
 			for(int i=0;i<12;i++)
-				data.cap_sk7[0][i] = rawpacket[3+i];
+				data.cap_sk7[0][i] = (unsigned char)rawpacket[3+i];
 			break;
 		case SK7_RAW_DATA_CAP_B:
 			// packet is just 3 bytes header + 12 bytes data
 			for(int i=0;i<12;i++)
-				data.cap_sk7[1][i] = rawpacket[3+i];
+				data.cap_sk7[1][i] = (unsigned char)rawpacket[3+i];
 			break;
 		case SK7_RAW_DATA_CAP_C: 
 			// packet is just 3 bytes header + 12 bytes data
 			for(int i=0;i<12;i++)
-				data.cap_sk7[2][i] = rawpacket[3+i];
+				data.cap_sk7[2][i] = (unsigned char)rawpacket[3+i];
 			break;
 		case SK7_RAW_DATA_ANALOG0:
 			srps = (sk7_raw_packet_short*)rawpacket;

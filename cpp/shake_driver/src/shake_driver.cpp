@@ -1430,14 +1430,14 @@ int sk7_cap_ext(shake_device* sh, int blocks, int* prox) {
 
 	switch(blocks) {
 		case 0:
-			memcpy(prox, &(dev->shake->data.cap_sk7[0]), sizeof(int) * 12);
-			break;
-		case 1:
 			memcpy(prox, &(dev->shake->data.cap_sk7[1]), sizeof(int) * 12);
 			break;
+		case 1:
+			memcpy(prox, &(dev->shake->data.cap_sk7[2]), sizeof(int) * 12);
+			break;
 		case 2:
-			memcpy(prox, &(dev->shake->data.cap_sk7[0]), sizeof(int) * 12);
-			memcpy(prox+12, &(dev->shake->data.cap_sk7[1]), sizeof(int) * 12);
+			memcpy(prox, &(dev->shake->data.cap_sk7[1]), sizeof(int) * 12);
+			memcpy(prox+12, &(dev->shake->data.cap_sk7[2]), sizeof(int) * 12);
 			break;
 		default:
 			return SHAKE_ERROR;
