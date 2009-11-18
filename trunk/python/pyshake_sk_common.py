@@ -42,10 +42,11 @@ class sk_sensor_data:
 		self.magx, self.magy, self.magz = 0,0,0
 		self.heading = 0
 		self.cap_sk6 = [0 for x in range(2)]
-		self.cap_sk7 = [0 for x in range(12)]
+		self.cap_sk7 = [[0 for x in range(12)], [0 for x in range(12)], [0 for x in range(12)]]
 		self.ana0, self.ana1 = 0,0
 		self.shaking_peak_accel, self.shaking_direction, self.shaking_timestamp = 0,0,0
 		self.hr_bpm = 0.0
+		self.rph = [0,0,0]
 		self.timestamps = [0 for x in range(8)]
 		self.internal_timestamps = [0 for x in range(8)]
 		self.sk6seq = 0

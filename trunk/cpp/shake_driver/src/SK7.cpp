@@ -270,6 +270,10 @@ int SK7::get_next_packet(char* packetbuf, int bufsize) {
 			SHAKE_DBG("ML) ASCII header/SHAKE info found, reading 4th byte\n");
 			read_bytes(devpriv, packetbuf+3, 1);
 			packet_type = classify_packet_header(packetbuf, SK7_HEADER_LEN, TRUE);
+		/* check for logging data playback complete message */
+		} else if(strncmp("Log", packetbuf, 3) == 0) {
+			read_bytes(devpriv, packetbuf+3, 1);
+			packet_type = classify_packet_header(packetbuf, SK7_HEADER_LEN, TRUE);
 		}
 	}
 

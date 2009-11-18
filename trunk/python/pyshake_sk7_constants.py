@@ -28,7 +28,7 @@
 
 SK7_DEFAULT_CHECKSUM 	= 0x00
 SK7_MAX_PACKET_SIZE = 64
-SK7_NUM_PACKET_TYPES = 57
+SK7_NUM_PACKET_TYPES = 60
 SK7_HEADER_LEN = 4
 SK7_RAW_HEADER_LEN = 3
 SK7_PACKET_IID_LEN = 3
@@ -39,8 +39,11 @@ SK7_DATA_GYRO,
 SK7_DATA_MAG, 
 SK7_DATA_HEADING, 
 SK7_DATA_CAP,
+SK7_DATA_CAP_B,
+SK7_DATA_CAP_C,
 SK7_DATA_ANA0, 
 SK7_DATA_ANA1, 
+SK7_DATA_RPH,
 
 SK7_DATA_NVU, 
 SK7_DATA_NVD, 
@@ -93,13 +96,13 @@ SK7_RAW_DATA_GYRO,
 SK7_RAW_DATA_MAG, 
 SK7_RAW_DATA_HEADING, 
 SK7_RAW_DATA_CAP, 
+SK7_RAW_DATA_CAP_B,
+SK7_RAW_DATA_CAP_C,
 SK7_RAW_DATA_ANALOG0, 
 SK7_RAW_DATA_ANALOG1,
 SK7_RAW_DATA_EVENT, 
 SK7_RAW_DATA_SHAKING, 
-SK7_RAW_DATA_AUDIO_EXP,
-SK7_RAW_DATA_AUDIO_HEADER,
-SK7_RAW_DATA_AUDIO
+SK7_RAW_DATA_RPH
 ) = range(SK7_NUM_PACKET_TYPES)
 
 # variables
@@ -109,8 +112,11 @@ sk7_packet_headers = [ 		"$ACC",
 							"$MAG", 
 							"$HED", 
 							"$CSA",
+							"$CSB",
+							"$CSC",
 							"$AI0", 
 							"$AI1", 
+							"$RPH",
 							
 							"$NVU", 
 							"$NVD", 
@@ -164,13 +170,13 @@ sk7_raw_packet_headers = [ 		126,
 								124, 
 								123, 
 								122, 
+								115,
+								114,
 								120,
 								119, 
 								118, 
-								117, 
-								114,
-								113, 
-								112 
+								117,
+								116
 							]
 
 sk7_packet_lengths = [ 
@@ -179,8 +185,11 @@ sk7_packet_lengths = [
 		27, 
 		14, 
 		45, 
+		45,
+		45,
 		14, 
-		14, 
+		14,
+		27,
 						
 		6, 
 		6, 
@@ -233,24 +242,27 @@ sk7_packet_lengths = [
 		10, 
 		6,
 		15, 
+		15,
+		15,
 		6,
 		6, 
 		5, 
 		9,
-		35,
-		3, 
-		35 
+		10
 	]
 
-sk7_packet_has_checksum = [ 	1, 1, 1, 1, 1, 1, 1,
-							 	0, 0, 0, 0,
-								0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-								0, 0,
-								0,
-								1,
-								1,
-								0, 0,
-								1, 1,
-								0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+sk7_packet_has_checksum = [ 
+	1,1,1,1,1,1,1,1,1,1,	# these are the basic sensor output channels + RPH
 
+	0,0,0,0,				# nav switch events
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	# cap threshold events
+	0,0,					# logger packets
+	0,						# RFID packet
+	1,						# shaking event
+	1,						# heart rate event
+	0,0,					# commands
+	1,1,					# acks
+	0,						# startup info
+	0,0,0,0,0,0,0,0,0,0,0,0	# raw data packets
+]		
 

@@ -1409,7 +1409,7 @@ namespace SHAKE.CS
         [DllImport("shake_driver.dll", SetLastError = true, EntryPoint = "shake_logged_packets_count")]
         private static extern int shake_logged_packets_count(IntPtr dev);
 
-        [DllImport("shake_driver.dll", SetLastError = true, EntryPoint = "shake_logging_play", CharSet=CharSet.Unicode)]
+        [DllImport("shake_driver.dll", SetLastError = true, EntryPoint = "shake_logging_play", CharSet=CharSet.Ansi)]
         private static extern int shake_logging_play(IntPtr dev, string filename);
 
         [DllImport("shake_driver.dll", SetLastError = true, EntryPoint = "shake_logging_pause")]

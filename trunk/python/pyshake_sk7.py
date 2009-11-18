@@ -257,7 +257,27 @@ class SK7(pyshake_sk_common.SHAKE):
 			# $CSA,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
 			for i in range(12):
 				offset = i * 3
-				self.data.cap_sk7[i] = int(packetbuf[5+offset:7+offset], 16)
+				self.data.cap_sk7[0][i] = int(packetbuf[5+offset:7+offset], 16)
+			try:
+				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = int(packetbuf[42:44])
+			except ValueError:
+				# can happen with standalone cap sensing boards
+				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = 0
+		elif packet_type == SK7_DATA_CAP_B:
+			# $CSB,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
+			for i in range(12):
+				offset = i * 3
+				self.data.cap_sk7[1][i] = int(packetbuf[5+offset:7+offset], 16)
+			try:
+				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = int(packetbuf[42:44])
+			except ValueError:
+				# can happen with standalone cap sensing boards
+				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = 0
+		elif packet_type == SK7_DATA_CAP_C:
+			# $CSC,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
+			for i in range(12):
+				offset = i * 3
+				self.data.cap_sk7[2][i] = int(packetbuf[5+offset:7+offset], 16)
 			try:
 				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = int(packetbuf[42:44])
 			except ValueError:
@@ -265,12 +285,16 @@ class SK7(pyshake_sk_common.SHAKE):
 				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = 0
 		elif packet_type == SK7_DATA_ANA0:
 			# $AI0,dddd,dd*CS
-			self.ana0 = int(packetbuf[5:9])
+			self.data.ana0 = int(packetbuf[5:9])
 			self.data.internal_timestamps[SHAKE_SENSOR_ANA0] = int(packetbuf[10:12])
 		elif packet_type == SK7_DATA_ANA1:
 			# $AI1,dddd,dd*CS
-			self.ana1 = int(packetbuf[5:9])
+			self.data.ana1 = int(packetbuf[5:9])
 			self.data.internal_timestamps[SHAKE_SENSOR_ANA1] = int(packetbuf[10:12])
+		elif packet_type == SK7_DATA_RPH:
+			self.data.rph[0] = int(packetbuf[5:10])
+			self.data.rph[1] = int(packetbuf[11:16])
+			self.data.rph[2] = int(packetbuf[17:22])
 		elif packet_type >= SK7_DATA_NVU and packet_type <= SK7_DATA_NVN:
 			if self.__shake.navcb != None:
 				event = -1
@@ -331,9 +355,16 @@ class SK7(pyshake_sk_common.SHAKE):
 				self.data.internal_timestamps[SHAKE_SENSOR_HEADING] = ord(packetbuf[5:6])
 		elif packet_type == SK7_RAW_DATA_CAP:
 			for i in range(12):
-				self.data.cap_sk7[i] = ord(packetbuf[SK7_RAW_HEADER_LEN+i])
-			if has_seq:
-				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = ord(packetbuf[5:6])
+				self.data.cap_sk7[0][i] = ord(packetbuf[SK7_RAW_HEADER_LEN+i])
+			
+		elif packet_type == SK7_RAW_DATA_CAP_B:
+			for i in range(12):
+				self.data.cap_sk7[1][i] = ord(packetbuf[SK7_RAW_HEADER_LEN+i])
+			
+		elif packet_type == SK7_RAW_DATA_CAP_C:
+			for i in range(12):
+				self.data.cap_sk7[2][i] = ord(packetbuf[SK7_RAW_HEADER_LEN+i])
+		
 		elif packet_type == SK7_RAW_DATA_ANALOG0:
 			self.data.ana0 = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			if has_seq:
@@ -342,6 +373,10 @@ class SK7(pyshake_sk_common.SHAKE):
 			self.data.ana1 = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			if has_seq:
 				self.data.internal_timestamps[SHAKE_SENSOR_ANA1] = ord(packetbuf[5:6])
+		elif packet_type == SK7_RAW_DATA_RPH:
+			self.data.rph[0] = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
+			self.data.rph[1] = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
+			self.data.rph[2] = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
 		elif packet_type == SK7_RAW_DATA_EVENT:
 			if self.__shake.navcb != None:
 				event = -1
