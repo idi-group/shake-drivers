@@ -343,9 +343,21 @@ class shake_device:
 			self.SHAKE.data.timestamps[SHAKE_SENSOR_CAP0] = self.SHAKE.data.cap0seq
 			self.SHAKE.data.timestamps[SHAKE_SENSOR_CAP1] = self.SHAKE.data.cap1seq
 		else:
-			cap = self.SHAKE.data.cap_sk7
+			cap = self.SHAKE.data.cap_sk7[0]
 			self.SHAKE.data.timestamps[SHAKE_SENSOR_CAP] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_CAP]
 		return cap
+
+	# 	[SK7] Returns proximity values for external capacitive board attached to an SK7
+	# 		Blocks parameter can be 0, 1 or 2. 0 = return first 12 values, 1 = return second 12 values, 2 = return all 24 values
+	def cap_ext(self, blocks):
+		if blocks == 0:
+			return self.SHAKE.data.cap_sk7[1]
+		elif blocks == 1:
+			return self.SHAKE.data.cap_sk7[2]
+		elif blocks == 2:
+			return self.SHAKE.data.cap_sk7[1] + self.SHAKE.data.cap_sk7[2]
+		else:
+			return None
 
 	# 	Returns value of analog input 0
 	def analog0(self):
@@ -374,6 +386,10 @@ class shake_device:
 
 	def shaking_timestamp(self):
 		return self.SHAKE.data.timestamp
+
+	# 	[SK7] return [roll, pitch, heading] data 
+	def sk7_roll_pitch_heading(self):
+		return self.SHAKE.data.rph
 
 	#
 	# 	Device information
@@ -865,16 +881,37 @@ class shake_device:
 	#
 
 	def playvib(self, channel, profile):
-		if channel < SHAKE_VIB_MAIN or channel > SHAKE_VIB_RIGHT:
-			return SHAKE_ERROR
-
 		if profile < 0 or profile > SHAKE_VIB_PROFILE_MAX:
 			return SHAKE_ERROR
 
-		return self.write(SHAKE_VO_REG_VIB_MAIN + channel, profile)
+		if channel < SHAKE_VIB_MAIN or channel > SHAKE_VIB_EXT_ACTUATOR:
+			return SHAKE_ERROR
+
+		if self.device_type == SHAKE_SK6:
+			addr = SHAKE_VO_REG_VIB_MAIN + channel
+			return self.write(SHAKE_VO_REG_VIB_MAIN + channel, profile)
+		else:
+			buf = None
+			if channel == SHAKE_VIB_MAIN:
+				buf = 'vm%02X' % profile
+			elif channel == SHAKE_VIB_LEFT:
+				buf = 'vl%02X' % profile
+			elif channel == SHAKE_VIB_RIGHT:
+				buf = 'vr%02X' % profile
+			elif channel == SHAKE_VIB_FORCEREACTOR:
+				buf = 'vf%02X' % profile
+			elif channel == SHAKE_VIB_EXT_ACTUATOR:
+				buf = 'vd%02X' % profile
+			else:
+				return SHAKE_ERROR
+
+			self.write_to_port(buf)
+
+		return SHAKE_SUCCESS
 	
-	def playvib_continuous(self, channel, amplitude, time):
-		if channel != SHAKE_VIB_LEFT and channel != SHAKE_VIB_RIGHT:
+	# 	[SK6] continuous vibration support
+	def sk6_playvib_continuous(self, channel, amplitude, time):
+		if channel != SHAKE_VIB_LEFT or channel != SHAKE_VIB_RIGHT:
 			return SHAKE_ERROR
 
 		if amplitude != 0 and amplitude != 33 and amplitude != 66 and amplitude != 100:
@@ -900,9 +937,11 @@ class shake_device:
 			vibaddr = SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS;
 		return self.write(vibaddr, vibbyte)
 
-	def upload_vib_sample(self, profile, samples):
+	# 	[SK6] simple vib upload for SK6s
+	def sk6_upload_vib_sample(self, profile, samples):
 		return self.upload_vib_sample_extended(profile, samples, 0, 0, 0)
 
+	# 	[SK7] full vib upload function for SK7s
 	def upload_vib_sample_extended(self, profile, samples, mode, freq, duty):
 		if profile < 0 or profile > SHAKE_VIB_PROFILE_MAX:
 			return SHAKE_ERROR

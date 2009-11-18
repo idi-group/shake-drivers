@@ -243,7 +243,7 @@ static char sk7_raw_packet_headers[] = {
 #define CHECKSUM_LENGTH			3
 
 /* packet lengths (bytes), WITHOUT INCLUDING CHECKSUMS */
-static unsigned sk7_packet_lengths[] = {
+static int sk7_packet_lengths[] = {
 	27, 		// data; accelerometer
 	27,			// data; angular rate (gyro)
 	27, 		// data; magnetometer
@@ -656,7 +656,7 @@ typedef struct sk7_ack_packet_no_checksum sk7_ack_packet_no_checksum;
 struct sk7_data_timestamp_packet {
 	sk7_packet_header hdr ;
 	char sep1 ;
-	char timestamp[8];
+	char timestamp[10];
 	char sep2 ;
 } PACKED;
 typedef struct sk7_data_timestamp_packet sk7_data_timestamp_packet;
