@@ -111,6 +111,7 @@ class shake_device:
 
 		self.checksum = False
 		self.navcb = None
+		self.data_callback = None
 
 		self.data_recv = 0L
 		self.wait_for_acks = True
@@ -390,6 +391,9 @@ class shake_device:
 	# 	[SK7] return [roll, pitch, heading] data 
 	def sk7_roll_pitch_heading(self):
 		return self.SHAKE.data.rph
+
+	def register_data_callback(self, callback):
+		self.data_callback = callback
 
 	#
 	# 	Device information
