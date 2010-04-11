@@ -136,9 +136,6 @@ class SK7(pyshake_sk_common.SHAKE):
 
 	def parse_raw_packet(self, packet_type, packetbuf, has_seq):
 		self.extract_raw_packet(packet_type, packetbuf, has_seq)
-		if packet_type == SK7_RAW_DATA_AUDIO_HEADER:
-			# TODO compress and send audio
-			pass
 
 		return SK7_RAW_READ_OK
 
@@ -237,22 +234,30 @@ class SK7(pyshake_sk_common.SHAKE):
 			self.data.accy = int(packetbuf[11:16])
 			self.data.accz = int(packetbuf[17:22])
 			self.data.internal_timestamps[SHAKE_SENSOR_ACC] = int(packetbuf[23:25])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_ACC, [self.data.accx, self.data.accy, self.data.accz], self.data.internal_timestamps[SHAKE_SENSOR_ACC])
 		elif packet_type == SK7_DATA_GYRO:
 			# fmt: $ARS,+dddd,+dddd,+dddd,ss*CS\r\n
 			self.data.gyrx = int(packetbuf[5:10])
 			self.data.gyry = int(packetbuf[11:16])
 			self.data.gyrz = int(packetbuf[17:22])
 			self.data.internal_timestamps[SHAKE_SENSOR_GYRO] = int(packetbuf[23:25])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_GYRO, [self.data.gyrx, self.data.gyry, self.data.gyrz], self.data.internal_timestamps[SHAKE_SENSOR_GYRO])
 		elif packet_type == SK7_DATA_MAG:
 			# fmt: $MAG,+dddd,+dddd,+dddd,ss*CS\r\n
 			self.data.magx = int(packetbuf[5:10])
 			self.data.magy = int(packetbuf[11:16])
 			self.data.magz = int(packetbuf[17:22])
 			self.data.internal_timestamps[SHAKE_SENSOR_MAG] = int(packetbuf[23:25])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_MAG, [self.data.magx, self.data.magy, self.data.magz], self.data.internal_timestamps[SHAKE_SENSOR_MAG])
 		elif packet_type == SK7_DATA_HEADING:
 			# $HED,dddd,dd*CS
 			self.data.heading = int(packetbuf[5:9])
 			self.data.internal_timestamps[SHAKE_SENSOR_HEADING] = int(packetbuf[10:12])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_HEADING, [self.data.heading], self.data.internal_timestamps[SHAKE_SENSOR_HEADING])
 		elif packet_type == SK7_DATA_CAP:
 			# $CSA,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
 			for i in range(12):
@@ -263,6 +268,9 @@ class SK7(pyshake_sk_common.SHAKE):
 			except ValueError:
 				# can happen with standalone cap sensing boards
 				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = 0
+
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_CAP, [self.data.cap_sk7[0], 0], self.data.internal_timestamps[SHAKE_SENSOR_CAP])
 		elif packet_type == SK7_DATA_CAP_B:
 			# $CSB,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
 			for i in range(12):
@@ -273,6 +281,9 @@ class SK7(pyshake_sk_common.SHAKE):
 			except ValueError:
 				# can happen with standalone cap sensing boards
 				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = 0
+
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_CAP, [self.data.cap_sk7[1], 1], self.data.internal_timestamps[SHAKE_SENSOR_CAP])
 		elif packet_type == SK7_DATA_CAP_C:
 			# $CSC,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
 			for i in range(12):
@@ -283,14 +294,21 @@ class SK7(pyshake_sk_common.SHAKE):
 			except ValueError:
 				# can happen with standalone cap sensing boards
 				self.data.internal_timestamps[SHAKE_SENSOR_CAP] = 0
+
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_CAP, [self.data.cap_sk7[2], 2], self.data.internal_timestamps[SHAKE_SENSOR_CAP])
 		elif packet_type == SK7_DATA_ANA0:
 			# $AI0,dddd,dd*CS
 			self.data.ana0 = int(packetbuf[5:9])
 			self.data.internal_timestamps[SHAKE_SENSOR_ANA0] = int(packetbuf[10:12])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_ANA0, [self.data.ana0], self.data.internal_timestamps[SHAKE_SENSOR_ANA0])
 		elif packet_type == SK7_DATA_ANA1:
 			# $AI1,dddd,dd*CS
 			self.data.ana1 = int(packetbuf[5:9])
 			self.data.internal_timestamps[SHAKE_SENSOR_ANA1] = int(packetbuf[10:12])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_ANA1, [self.data.ana1], self.data.internal_timestamps[SHAKE_SENSOR_ANA1])
 		elif packet_type == SK7_DATA_RPH:
 			self.data.rph[0] = int(packetbuf[5:10])
 			self.data.rph[1] = int(packetbuf[11:16])
@@ -337,42 +355,57 @@ class SK7(pyshake_sk_common.SHAKE):
 			self.data.accz = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
 			if has_seq:
 				self.data.internal_timestamps[SHAKE_SENSOR_ACC] = ord(packetbuf[9:10])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_ACC, [self.data.accx, self.data.accy, self.data.accz], self.data.internal_timestamps[SHAKE_SENSOR_ACC])
 		elif packet_type == SK7_RAW_DATA_GYRO:
 			self.data.gyrx = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			self.data.gyry = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
 			self.data.gyrz = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
 			if has_seq:
 				self.data.internal_timestamps[SHAKE_SENSOR_GYRO] = ord(packet[9:10])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_GYRO, [self.data.gyrx, self.data.gyry, self.data.gyrz], self.data.internal_timestamps[SHAKE_SENSOR_GYRO])
 		elif packet_type == SK7_RAW_DATA_MAG:
 			self.data.magx = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			self.data.magy = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
 			self.data.magz = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
 			if has_seq:
 				self.data.internal_timestamps[SHAKE_SENSOR_MAG] = ord(packetbuf[9:10])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_MAG, [self.data.magx, self.data.magy, self.data.magz], self.data.internal_timestamps[SHAKE_SENSOR_MAG])
 		elif packet_type == SK7_RAW_DATA_HEADING:
 			self.data.heading = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			if has_seq:
 				self.data.internal_timestamps[SHAKE_SENSOR_HEADING] = ord(packetbuf[5:6])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_HEADING, [self.data.heading], self.data.internal_timestamps[SHAKE_SENSOR_HEADING])
 		elif packet_type == SK7_RAW_DATA_CAP:
 			for i in range(12):
 				self.data.cap_sk7[0][i] = ord(packetbuf[SK7_RAW_HEADER_LEN+i])
-			
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_CAP, [self.data.cap_sk7[0], 0], self.data.internal_timestamps[SHAKE_SENSOR_CAP])
 		elif packet_type == SK7_RAW_DATA_CAP_B:
 			for i in range(12):
 				self.data.cap_sk7[1][i] = ord(packetbuf[SK7_RAW_HEADER_LEN+i])
-			
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_CAP, [self.data.cap_sk7[1], 1], self.data.internal_timestamps[SHAKE_SENSOR_CAP])
 		elif packet_type == SK7_RAW_DATA_CAP_C:
 			for i in range(12):
 				self.data.cap_sk7[2][i] = ord(packetbuf[SK7_RAW_HEADER_LEN+i])
-		
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_CAP, [self.data.cap_sk7[2], 2], self.data.internal_timestamps[SHAKE_SENSOR_CAP])
 		elif packet_type == SK7_RAW_DATA_ANALOG0:
 			self.data.ana0 = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			if has_seq:
 				self.data.internal_timestamps[SHAKE_SENSOR_ANA0] = ord(packetbuf[5:6])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_ANA0, [self.data.ana0], self.data.internal_timestamps[SHAKE_SENSOR_ANA0])
 		elif packet_type == SK7_RAW_DATA_ANALOG1:
 			self.data.ana1 = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			if has_seq:
 				self.data.internal_timestamps[SHAKE_SENSOR_ANA1] = ord(packetbuf[5:6])
+			if self.__shake.data_callback:
+				self.__shake.data_callback(SHAKE_SENSOR_ANA1, [self.data.ana1], self.data.internal_timestamps[SHAKE_SENSOR_ANA1])
 		elif packet_type == SK7_RAW_DATA_RPH:
 			self.data.rph[0] = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			self.data.rph[1] = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
