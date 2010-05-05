@@ -362,7 +362,7 @@ class SK7(pyshake_sk_common.SHAKE):
 			self.data.gyry = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
 			self.data.gyrz = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
 			if has_seq:
-				self.data.internal_timestamps[SHAKE_SENSOR_GYRO] = ord(packet[9:10])
+				self.data.internal_timestamps[SHAKE_SENSOR_GYRO] = ord(packetbuf[9:10])
 			if self.__shake.data_callback:
 				self.__shake.data_callback(SHAKE_SENSOR_GYRO, [self.data.gyrx, self.data.gyry, self.data.gyrz], self.data.internal_timestamps[SHAKE_SENSOR_GYRO])
 		elif packet_type == SK7_RAW_DATA_MAG:
