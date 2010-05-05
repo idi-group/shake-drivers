@@ -163,7 +163,7 @@ class SK7(pyshake_sk_common.SHAKE):
 			elif trailing_byte == '$' or trailing_byte == '\n':
 				adjtype = packet_type - SK7_RAW_DATA_ACC
 
-				if (trailing_byte == self.data.internal_timestamps[adjtype] + 1) or (trailing_byte == 0 and self.data.internal_timestamps[adjtype] == 255):
+				if (ord(trailing_byte) == self.data.internal_timestamps[adjtype] + 1) or (ord(trailing_byte) == 0 and self.data.internal_timestamps[adjtype] == 255):
 					has_seq = True
 				else:
 					self.__shake.peek_flag = True
