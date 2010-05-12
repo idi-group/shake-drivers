@@ -31,7 +31,13 @@ typedef struct {
 	DCB dcb;
 	COMMTIMEOUTS cto;
 #endif
-} shake_serial_port;
+} shake_serial_port_win32;
+
+typedef struct {
+#ifdef __APPLE__
+	int port;
+#endif
+} shake_serial_port_osx;
 
 #include "shake_btdefs.h"
 
@@ -51,7 +57,10 @@ typedef struct {
 typedef struct {
 	int comms_type;
 	#ifdef _WIN32
-	shake_serial_port serial;
+	shake_serial_port_win32 serial_win32;
+	#endif
+	#ifdef __APPLE__
+	shake_serial_port_osx serial_osx;
 	#endif
 	#ifdef SHAKE_RFCOMM_SUPPORTED
 		shake_rfcomm_socket rfcomm;
@@ -61,11 +70,12 @@ typedef struct {
 } shake_port;
 
 enum shake_connection_types {
-	SHAKE_CONN_VIRTUAL_SERIAL = 0,
+	SHAKE_CONN_VIRTUAL_SERIAL_WIN32 = 0,
 	SHAKE_CONN_RFCOMM_I64,
 	SHAKE_CONN_RFCOMM_STR,
 	SHAKE_CONN_DEBUGFILE,
 	SHAKE_CONN_S60_RFCOMM, 
+	SHAKE_CONN_USB_SERIAL_OSX,
 };
 
 typedef struct {
@@ -76,6 +86,7 @@ typedef struct {
 	char readfile[256];
 	char writefile[256];
 	int devtype;
+	char usbdev[128];
 } shake_conn_data;
 
 class SHAKE;

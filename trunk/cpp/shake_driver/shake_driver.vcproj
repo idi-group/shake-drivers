@@ -200,7 +200,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\shake_serial.cpp"
+				RelativePath=".\src\shake_serial_osx.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\shake_serial_win32.cpp"
 				>
 			</File>
 			<File
@@ -262,7 +266,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\shake_serial.h"
+				RelativePath=".\inc\shake_serial_osx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\shake_serial_win32.h"
 				>
 			</File>
 			<File

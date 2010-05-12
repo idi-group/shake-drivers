@@ -16,8 +16,8 @@
 *	LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _SHAKE_SERIAL_
-#define _SHAKE_SERIAL_
+#ifndef _SHAKE_SERIAL_OSX_
+#define _SHAKE_SERIAL_OSX_
 
 #include "shake_structs.h"
 
@@ -25,59 +25,24 @@
 extern "C" {
 #endif
 
-#ifdef _WIN32
-/* serial port parameters, only important on Windows which uses
-*	a Bluetooth COM port. */
-enum shake_serial {
-	SHAKE_SERIAL_BAUDRATE = 0,
-	SHAKE_SERIAL_PARITY,
-	SHAKE_SERIAL_STOP_BITS,
-	SHAKE_SERIAL_START_BITS,
-	SHAKE_SERIAL_HWFLOW,
-	SHAKE_SERIAL_SWFLOW,
-};
-
-/*	SHAKE serial port parameters. To get a particular parameter, just do
-*		int baudrate = shake_serial_params[SHAKE_SERIAL_BAUDRATE]
-*	etc.. */
-static unsigned sk6_serial_params[] = {
-	115200,		// baud rate
-	NOPARITY,	// no parity
-	ONESTOPBIT, // 1 stop bit
-	1,			// 1 start bit
-	1,			// hardware flow control
-	0,			// no software flow control
-};
-
-static unsigned sk7_serial_params[] = {
-	460800,		// baud rate
-	NOPARITY,	// no parity
-	ONESTOPBIT, // 1 stop bit
-	1,			// 1 start bit
-	1,			// hardware flow control
-	0,			// no software flow control
-};
-#endif
-
-/*	++ Windows only ++
-*	Opens the indicated serial port for use with a SHAKE device.
-*	<port> is a pointer to a shake_serial_port structure that will store all the
+/*	Opens the indicated USB serial port device for use with a SHAKE.
+*	<port> is a pointer to a shake_serial_port_osx structure that will store all the
 *			information about the port.
-*	<number> is the number of the COM port to open. -1 to autodetect.
+*	<usb_dev> is the name of the /dev node representing the USB serial port
 *	<device type> is either 0 for SK6 or 1 for SK7
 *	Returns the <port> pointer on success, NULL on failure. */
-shake_serial_port* shake_open_serial(shake_serial_port* port, int number, int device_type);
+shake_serial_port_osx* shake_open_serial_osx(shake_serial_port_osx* port, char* usb_dev, int device_type);
 
-int read_serial_bytes(shake_device_private* devpriv, char* buf, int bytes_to_read);
+int read_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to_read);
 
-int write_serial_bytes(shake_device_private* devpriv, char* buf, int bytes_to_write);
+int write_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to_write);
 
-int write_serial_bytes_delayed(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms);
+int write_serial_bytes_delayed_osx(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms);
 
 /*	Closes the indicated serial port
-*	<port is a pointer to a populated shake_serial_port structure.
+*	<port is a pointer to a populated shake_serial_port_osx structure.
 *	Always returns 1. */
-int shake_close_serial(shake_serial_port* port);
+int shake_close_serial_osx(shake_serial_port_osx* port);
 
 #ifdef __cplusplus
 }

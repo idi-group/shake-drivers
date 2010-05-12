@@ -49,9 +49,11 @@
 	#endif
 #endif
 
-// if not on Windows, just define macro
+// if not on Windows and not on OSX, define macro
 #ifndef _WIN32
-	#define SHAKE_RFCOMM_SUPPORTED 1
+	#ifndef __APPLE__
+		#define SHAKE_RFCOMM_SUPPORTED 1
+	#endif
 #endif
 
 #endif
