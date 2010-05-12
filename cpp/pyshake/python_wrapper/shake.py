@@ -465,6 +465,15 @@ class shake_device:
 		self.__connected = True
 		return True
 
+	def connect_osx_usb(self, usb_dev):
+		self.__shakedev = pyshake.init_device_osx_usb(usb_dev, self.__devtype)
+		if self.__shakedev == -1:
+			self.__lasterror = "Failed to connect"
+			return False
+
+		self.__connected = True
+		return True
+
 	## 	Attempts to open a "debugging connection" to a SHAKE device. This simply means that instead of making a Bluetooth
 	# 	connection, the driver will instead read data from the file given as the first parameter, and output any commands
 	# 	into the file given as the second parameter. 

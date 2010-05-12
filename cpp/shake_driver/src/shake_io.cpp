@@ -19,7 +19,8 @@
 
 #include "shake_packets.h"
 #include "shake_io.h"
-#include "shake_serial.h"
+#include "shake_serial_win32.h"
+#include "shake_serial_osx.h"
 #include "shake_rfcomm.h"
 #ifdef SHAKE_S60
 #include "shake_s60_rfcomm.h"
@@ -111,16 +112,20 @@ int read_bytes(shake_device_private* dev, char* buf, int bytes_to_read) {
 
 	switch(dev->port.comms_type) {
 		/* virtual serial port */
-		case SHAKE_CONN_VIRTUAL_SERIAL: {
-			returned_bytes += read_serial_bytes(dev, buf, bytes_to_read);
+		#ifdef _WIN32
+		case SHAKE_CONN_VIRTUAL_SERIAL_WIN32: {
+			returned_bytes += read_serial_bytes_win32(dev, buf, bytes_to_read);
 			return returned_bytes;
 		}
+		#endif
 		/* RFCOMM socket */
+		#ifdef SHAKE_RFCOMM_SUPPORTED
 		case SHAKE_CONN_RFCOMM_I64:
 		case SHAKE_CONN_RFCOMM_STR: {
 			returned_bytes += read_rfcomm_bytes(dev, buf, bytes_to_read);
 			return returned_bytes;
 		}
+		#endif
 		/* File */
 		case SHAKE_CONN_DEBUGFILE: {
 			returned_bytes += read_debug_bytes(dev, buf, bytes_to_read);
@@ -133,6 +138,12 @@ int read_bytes(shake_device_private* dev, char* buf, int bytes_to_read) {
 			return returned_bytes;
 		}
 		#endif
+		#ifdef __APPLE__
+		case SHAKE_CONN_USB_SERIAL_OSX: {
+			returned_bytes += read_serial_bytes_osx(dev, buf, bytes_to_read);
+			return returned_bytes;
+		}
+		#endif
 		default:
 			break;
 	}
@@ -141,17 +152,25 @@ int read_bytes(shake_device_private* dev, char* buf, int bytes_to_read) {
 
 int write_bytes(shake_device_private* dev, char* buf, int bytes_to_write) {
 	switch(dev->port.comms_type) {
-		case SHAKE_CONN_VIRTUAL_SERIAL:
-			return write_serial_bytes(dev, buf, bytes_to_write);
+		#ifdef _WIN32
+		case SHAKE_CONN_VIRTUAL_SERIAL_WIN32:
+			return write_serial_bytes_win32(dev, buf, bytes_to_write);
+		#endif
+		#ifdef SHAKE_RFCOMM_SUPPORTED
 		case SHAKE_CONN_RFCOMM_I64:
 		case SHAKE_CONN_RFCOMM_STR:
 			return write_rfcomm_bytes(dev, buf, bytes_to_write);
+		#endif
 		case SHAKE_CONN_DEBUGFILE:
 			return fwrite(buf, 1, bytes_to_write, dev->port.dbg_write);
 		#ifdef SHAKE_S60
 		case SHAKE_CONN_S60_RFCOMM: 
 			return write_s60_rfcomm_bytes(dev, buf, bytes_to_write);
 		#endif	
+		#ifdef __APPLE__
+		case SHAKE_CONN_USB_SERIAL_OSX:
+			return write_serial_bytes_osx(dev, buf, bytes_to_write);
+		#endif
 		default:
 			break;
 	}
@@ -164,17 +183,25 @@ int write_bytes(shake_device_private* dev, char* buf, int bytes_to_write) {
 *	between successive chunks */
 int write_bytes_delayed(shake_device_private* dev, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
 	switch(dev->port.comms_type) {
-		case SHAKE_CONN_VIRTUAL_SERIAL:
-			return write_serial_bytes_delayed(dev, buf, bytes_to_write, chunk_size, delay_ms);
+		#ifdef _WIN32
+		case SHAKE_CONN_VIRTUAL_SERIAL_WIN32:
+			return write_serial_bytes_delayed_win32(dev, buf, bytes_to_write, chunk_size, delay_ms);
+		#endif
+		#ifdef SHAKE_RFCOMM_SUPPORTED
 		case SHAKE_CONN_RFCOMM_I64:
 		case SHAKE_CONN_RFCOMM_STR:
 			return write_rfcomm_bytes_delayed(dev, buf, bytes_to_write, chunk_size, delay_ms);
+		#endif
 		// no need to delay here
 		case SHAKE_CONN_DEBUGFILE:
 			return fwrite(buf, 1, bytes_to_write, dev->port.dbg_write);
 		#ifdef SHAKE_S60
 		case SHAKE_CONN_S60_RFCOMM:
 			return write_s60_rfcomm_bytes_delayed(dev, buf, bytes_to_write, chunk_size, delay_ms);
+		#endif
+		#ifdef __APPLE__
+		case SHAKE_CONN_USB_SERIAL_OSX:
+			return write_serial_bytes_osx(dev, buf, bytes_to_write);
 		#endif
 		default:
 			break;

@@ -16,7 +16,7 @@
 *	LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "shake_serial.h"
+#include "shake_serial_win32.h"
 #include <stdio.h>
 
 #include "shake_platform.h"
@@ -97,11 +97,11 @@ SHAKE_API int shake_scan_for_comm_ports(int** ports, int* portcount) {
 			continue;
 		}
 
-		// Each serial port entry should have a GUID value of "{00001101-0000-1000-8000-00805F9B34FB}"
+		// Each serial_win32.port entry should have a GUID value of "{00001101-0000-1000-8000-00805F9B34FB}"
 		if((_tcscmp(_T("{00001101-0000-1000-8000-00805F9B34FB}"), GUIDBuf) == 0)) {
 			keyNameSize = sizeof(commPortNum);
 
-			// if it looks like this is the serial port entry, read the "ComPortNumber" value
+			// if it looks like this is the serial_win32.port entry, read the "ComPortNumber" value
 			if (__RegQueryValueEx(key, _T("ComPortNumber"), 0, &valueType, (unsigned char*) &commPortNum, &keyNameSize) == ERROR_SUCCESS) {
 				__RegCloseKey(key);
 				portarray[*portcount] = commPortNum;
@@ -122,8 +122,8 @@ SHAKE_API int shake_scan_for_comm_ports(int** ports, int* portcount) {
 }
 #endif
 
+shake_serial_port_win32* shake_open_serial_win32(shake_serial_port_win32* port, int number, int device_type) {
 #ifdef _WIN32
-shake_serial_port* shake_open_serial(shake_serial_port* port, int number, int device_type) {
 	TCHAR portname[24];
 
 	if(number == -1) {
@@ -150,7 +150,7 @@ shake_serial_port* shake_open_serial(shake_serial_port* port, int number, int de
 							NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(port->port == INVALID_HANDLE_VALUE) {
 		SHAKE_DBG("CreateFile failed (%d)\n", GetLastError());
-		//printf("*** ERROR: Failed to open serial port, error = %d\n", GetLastError());
+		//printf("*** ERROR: Failed to open serial_win32.port, error = %d\n", GetLastError());
 		return NULL;
 	}
 
@@ -196,23 +196,25 @@ shake_serial_port* shake_open_serial(shake_serial_port* port, int number, int de
 	SetupComm(port->port, 10000, 10000);
 
 	return port;
-}
+#else
+	return NULL;
 #endif
+}
 
+int shake_close_serial_win32(shake_serial_port_win32* port) {
 #ifdef _WIN32
-int shake_close_serial(shake_serial_port* port) {
 	PurgeComm(port->port, PURGE_RXABORT | PURGE_TXABORT | PURGE_RXCLEAR | PURGE_TXCLEAR);
 
 	if(CloseHandle(port->port) == 0) 
 		return 0;
+#endif
 	return 1;
 }
-#endif 
 
 /*	utility func, reads <bytes_to_read> bytes from the port associated with <devpriv> 
 *	into <buf>, handling any timeouts that occur during this operation.
 *	Returns number of bytes read. */
-int read_serial_bytes(shake_device_private* devpriv, char* buf, int bytes_to_read) {
+int read_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes_to_read) {
 #ifdef _WIN32
 	DWORD bytes_read;
 	int sleepcounter = 0;
@@ -221,7 +223,7 @@ int read_serial_bytes(shake_device_private* devpriv, char* buf, int bytes_to_rea
 
 	/* read the port in a loop to deal with timeouts */
 	while(1) {
-		int res = ReadFile(devpriv->port.serial.port, buf + (bytes_to_read - remaining_bytes), remaining_bytes, &bytes_read, NULL);
+		int res = ReadFile(devpriv->port.serial_win32.port, buf + (bytes_to_read - remaining_bytes), remaining_bytes, &bytes_read, NULL);
 		if(res != TRUE) {
 			return bytes_to_read - remaining_bytes;
 		}
@@ -260,14 +262,14 @@ int read_serial_bytes(shake_device_private* devpriv, char* buf, int bytes_to_rea
 /*	utility func, writes <bytes_to_write> bytes to the port associated with <devpriv>
 *	from <buf>, handling any timeouts that occur during this operation.
 *	Returns number of bytes written. */
-int write_serial_bytes(shake_device_private* devpriv, char* buf, int bytes_to_write) {
+int write_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes_to_write) {
 #ifdef _WIN32
 	DWORD bytes_written;
 	int remaining_bytes = bytes_to_write;
 
 	/* write the port in a loop to deal with timeouts */
 	while(1) {
-		if(!WriteFile(devpriv->port.serial.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes, &bytes_written, NULL))
+		if(!WriteFile(devpriv->port.serial_win32.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes, &bytes_written, NULL))
 			return bytes_to_write - remaining_bytes;
 
 		/* subtract the bytes we just wrote from the total amount we want */
@@ -287,7 +289,7 @@ int write_serial_bytes(shake_device_private* devpriv, char* buf, int bytes_to_wr
 #endif
 }
 
-int write_serial_bytes_delayed(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
+int write_serial_bytes_delayed_win32(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
 #ifdef _WIN32
 	DWORD bytes_written;
 	int remaining_bytes = bytes_to_write;
@@ -298,7 +300,7 @@ int write_serial_bytes_delayed(shake_device_private* devpriv, char* buf, int byt
  		int current_remaining_bytes = remaining_bytes;// ((chunk_size >= remaining_bytes) ? chunk_size : remaining_bytes);
 		if(remaining_bytes > chunk_size)
 			current_remaining_bytes = chunk_size;
-		if(!WriteFile(devpriv->port.serial.port, buf + (bytes_to_write - remaining_bytes), current_remaining_bytes, &bytes_written, NULL))
+		if(!WriteFile(devpriv->port.serial_win32.port, buf + (bytes_to_write - remaining_bytes), current_remaining_bytes, &bytes_written, NULL))
 			return bytes_to_write - remaining_bytes;
 
 		/* subtract the bytes we just wrote from the total amount we want */

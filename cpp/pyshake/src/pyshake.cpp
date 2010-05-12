@@ -229,6 +229,32 @@ static PyObject* pyshake_init_device_rfcomm_str(PyObject* self, PyObject* args) 
 	#endif
 }
 
+static PyObject* pyshake_init_device_osx_usb(PyObject* self, PyObject* args) {
+#ifdef __APPLE__
+	shake_device* dev;
+	char* usb_dev;	
+	int devtype;
+
+	if(devicelist_count >= MAX_SHAKES) {
+		PyRun_SimpleString("print 'Maximum number of SHAKES reached!'");
+		return Py_BuildValue("i", SHAKE_ERROR);
+	}
+
+	PyArg_ParseTuple(args, "si", &usb_dev, &devtype);
+	dev = shake_init_device_osx_usb(usb_dev, devtype);
+
+	if(dev == NULL)
+		return Py_BuildValue("i", SHAKE_ERROR);
+
+	devicelist[devicelist_count] = dev;
+	devicelist_count++;
+
+	return Py_BuildValue("i", devicelist_count - 1);
+#else
+	return Py_BuildValue("i", SHAKE_ERROR);
+#endif
+}
+
 static PyObject* pyshake_init_device_debug(PyObject* self, PyObject* args) {
 	shake_device* dev;
 	char* inp, *outp;

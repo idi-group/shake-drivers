@@ -74,14 +74,20 @@ extern "C" {
 
 #else
 
-/* Linux headers */
+/* Linux/OSX headers */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+/* no Bluetooth support under OS X (yet) */
+#ifndef __APPLE__
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
+#endif
 
 #define DWORD unsigned int
 #define BOOL int
