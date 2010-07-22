@@ -1,6 +1,5 @@
-
-
-import SHAKE.*;
+import ugla.shake.*;
+import ugla.shake.bluetooth.*;
 
 public class shake_test implements SHAKEListener, SHAKEDebug {
 
