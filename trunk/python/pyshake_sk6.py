@@ -268,13 +268,13 @@ class SK6(pyshake_sk_common.SHAKE):
 				self.__shake.data_callback(SHAKE_SENSOR_HEADING, [self.data.heading], self.data.internal_timestamps[SHAKE_SENSOR_HEADING])
 		elif packet_type == SK6_DATA_CAP0:
 			# $CS0,dddd,dd*CS[CR][LF]
-			self.cap_sk6[0] = int(packetbuf[5:9])
+			self.data.cap_sk6[0] = int(packetbuf[5:9])
 			self.data.internal_timestamps[SHAKE_SENSOR_CAP0] = int(packetbuf[10:12])
 			if self.__shake.data_callback:
 				self.__shake.data_callback(SHAKE_SENSOR_CAP0, [self.data.cap_sk6[0]], self.data.internal_timestamps[SHAKE_SENSOR_CAP0])
 		elif packet_type == SK6_DATA_CAP1:
 			# $CS1,dddd,dd*CS[CR][LF]
-			self.cap_sk6[1] = int(packetbuf[5:9])
+			self.data.cap_sk6[1] = int(packetbuf[5:9])
 			self.data.internal_timestamps[SHAKE_SENSOR_CAP1] = int(packetbuf[10:12])
 			if self.__shake.data_callback:
 				self.__shake.data_callback(SHAKE_SENSOR_CAP1, [self.data.cap_sk6[1]], self.data.internal_timestamps[SHAKE_SENSOR_CAP1])
