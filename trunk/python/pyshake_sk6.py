@@ -156,7 +156,7 @@ class SK6(pyshake_sk_common.SHAKE):
 		packetbuf += tmp
 
 		if bytes_left != bytes_read:
-			return SHAKE_RAW_READ_ERROR
+			return SK6_RAW_READ_ERROR
 
 		has_seq = False
 		self.__shake.peek_flag = False
