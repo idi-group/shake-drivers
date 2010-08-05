@@ -699,7 +699,7 @@ class shake_device:
 		return pyshake.sk7_cap(self.__shakedev)
 	
 	## 	Get current proximity values from an external capacitive board (SK7 only!)
-	# 	@param blocks 0 = 1st block, 2 = 2nd block, 3 = both blocks 
+	# 	@param blocks 0 = 1st block, 1 = 2nd block, 2 = both blocks 
 	# 	@return a 12 element list (blocks = 0  or 1) or a 24 element list (blocks = 2)
 	def cap_ext(self, blocks):
 		if not self.__connected:
