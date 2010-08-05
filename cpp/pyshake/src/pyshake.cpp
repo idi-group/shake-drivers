@@ -265,7 +265,7 @@ static PyObject* pyshake_init_device_debug(PyObject* self, PyObject* args) {
 		return Py_BuildValue("i", SHAKE_ERROR);
 	}
 
-	PyArg_ParseTuple(args, "ss", &inp, &outp, &devtype);
+	PyArg_ParseTuple(args, "ssi", &inp, &outp, &devtype);
 
 	printf("Connecting to: %s | %s\n", inp, outp);
 	dev = shake_init_device_DEBUGFILE(inp, outp, devtype);

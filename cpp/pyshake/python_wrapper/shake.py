@@ -485,7 +485,6 @@ class shake_device:
 	#
 	# 	@return True on success, False on failure. If False, use last_error() to obtain a string indicating the problem.
 	def connect_debug(self, inp, outp):
-		self.__devtype = t
 		self.__shakedev = pyshake.init_device_debug(inp, outp, self.__devtype)
 		if self.__shakedev == -1:
 			self.__lasterror = "Failed to connect"
