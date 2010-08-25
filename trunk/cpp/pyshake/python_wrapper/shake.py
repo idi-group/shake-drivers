@@ -7,10 +7,10 @@ import sys, atexit, os
 ext_dir = os.path.join(sys.prefix, 'lib\\site-packages\\')
 sys.path.append(ext_dir)
 
-# only supports 2.4 and 2.5
-if sys.version[:3] == "2.4":
+major, minor = sys.version_info[0], sys.version_info[1]
+if major == 2 and minor == 4:
 	import pyshake
-elif sys.version[:3] == "2.5":
+elif major == 2 and minor >= 5:
 	import imp
 	# check if on windows
 	if os.name != "posix":
@@ -18,6 +18,10 @@ elif sys.version[:3] == "2.5":
 	else:
 		# TODO distutils for this too
 		pyshake = imp.load_dynamic('pyshake', os.getcwd()+'/pyshake.so')
+else:
+	print "shake.py: Warning, unsupported Python version (%d.%d)"%(major, minor)
+	# attempt to import the pyshake module anyway
+	import pyshake
 
 # SHAKE driver constants
 
