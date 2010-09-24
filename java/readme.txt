@@ -1,1 +1,0 @@
-NOTE: to use this code on a Windows PC, you'll need the JSerial dll file which implements the serial port communication. This can be downloaded (with source code) from http://shake-drivers.googlecode.com/files/jserial.zip
