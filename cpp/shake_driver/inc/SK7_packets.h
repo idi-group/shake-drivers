@@ -33,7 +33,7 @@ extern "C" {
 #define SK7_DEFAULT_CHECKSUM 0x00
 
 #define SK7_MAX_PACKET_SIZE 	64
-#define SK7_NUM_PACKET_TYPES	60
+#define SK7_NUM_PACKET_TYPES	61
 
 #define SK7_HEADER_LEN		4	// "$pid," == 4 chars
 #define SK7_RAW_HEADER_LEN	3
@@ -117,6 +117,9 @@ enum sk7_packet_types {
 	SK7_RAW_DATA_EVENT,
 	SK7_RAW_DATA_SHAKING,
 	SK7_RAW_DATA_RPH,
+	SK7_RAW_DATA_RPH_QUATERNION,
+
+	// TODO missing raw packet types!
 };
 
 // TODO UPDATE (only for debugging anyway)
@@ -237,6 +240,7 @@ static char sk7_raw_packet_headers[] = {
 	118,	// nav events
 	117,	// shaking events
 	116,	// roll-pitch-heading
+	110,	// roll-pitch-heading (quaternion mode)
 };
 
 // length of checksum part of packet in bytes
@@ -313,6 +317,7 @@ static int sk7_packet_lengths[] = {
 	5,			// raw data; nav switch / cap switch events (never has timestamps/packet counter)
 	9,			// raw data; shaking event detected
 	10,			// raw data; RPH
+	12,			// raw data; RPH (quaternion)
 };
 
 // TODO UPDATE
@@ -329,7 +334,7 @@ static int sk7_packet_has_checksum[] = {
 	0,0,					// commands
 	1,1,					// acks
 	0,						// startup info
-	0,0,0,0,0,0,0,0,0,0,0,0	// raw data packets
+	0,0,0,0,0,0,0,0,0,0,0,0,0 // raw data packets
 };
 
 #ifdef _WIN32
@@ -554,6 +559,14 @@ struct sk7_raw_packet_long {
 	unsigned char seq;
 } PACKED;
 typedef struct sk7_raw_packet_long sk7_raw_packet_long;
+
+struct sk7_raw_packet_extra_long {
+	char fixed_header[2] ;
+	char packet_header ;
+	unsigned char data[8] ;
+	unsigned char seq;
+} PACKED;
+typedef struct sk7_raw_packet_extra_long sk7_raw_packet_extra_long;
 
 struct sk7_raw_packet_short {
 	char fixed_header[2] ;

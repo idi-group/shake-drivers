@@ -530,7 +530,7 @@ SHAKE_API int shake_mag(shake_device* sh, int* xyz);
 SHAKE_API int shake_heading(shake_device* sh);
 
 /**	SK7 only. Read current roll-pitch-heading values (requires the roll-pitch-heading packet output
-*	to be enabled first, see sk7_configure_roll_pitch_heading. If legacy heading packet output is
+*	to be enabled first, see sk7_configure_roll_pitch_heading). If legacy heading packet output is
 *	enabled, use shake_heading to retrieve that data.
 *	
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -538,6 +538,17 @@ SHAKE_API int shake_heading(shake_device* sh);
 *			will be placed (in that order). See the user manual for details of the format of each value.
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int sk7_roll_pitch_heading(shake_device* sh, int* rph);
+
+/**	SK7 only. Read current roll-pitch-heading values when in quaternion output mode. 
+*	(requires the roll-pitch-heading packet output
+*	to be enabled first, see sk7_configure_roll_pitch_heading). If legacy heading packet output is
+*	enabled, use shake_heading to retrieve that data.
+*	
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param rph pointer to a 4 element array of integers, into which the quaternions will be placed. 
+*										See the user manual for details of the format of each value.
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int sk7_roll_pitch_heading_quaternions(shake_device* sh, int* rphq);
 
 /** Read the proximity value of the first capacitive sensor.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
