@@ -524,7 +524,7 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 		case SK7_DATA_CU6: case SK7_DATA_CL6: case SK7_DATA_CU7: case SK7_DATA_CL7:
 		case SK7_DATA_CU8: case SK7_DATA_CL8: case SK7_DATA_CU9: case SK7_DATA_CL9:
 		case SK7_DATA_CUA: case SK7_DATA_CLA: case SK7_DATA_CUB: case SK7_DATA_CLB:
-			ev = SK7_CS0_UPPER + (ev - SK7_DATA_CU0);
+			ev = SK7_CS0_UPPER + (packet_type - SK7_DATA_CU0);
 			if(devpriv->navcb || devpriv->navcb_STDCALL) {
 				devpriv->lastevent = ev;
 				shake_thread_signal(&(devpriv->thread), CALLBACK_THREAD);
@@ -680,59 +680,15 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srpl->seq;
 			break;			   
 		}
-
-		// this is the packet type for a microphone sample packet
-		/*case SK7_RAW_DATA_AUDIO: {
-			// ignore unless callback registered
-			if(devpriv->audio_cb == NULL && devpriv->audio_cb_STDCALL == NULL)
-				break;
-			
-			saud = (sk7_raw_packet_audio*)rawpacket;
-			shake_mulaw_lookup(devpriv->audiobuf, saud->data, SHAKE_AUDIO_DATA_LEN);
-
-			// call audio callback to handle microphone sample data. 
-			if(devpriv->audio_cb)
-				devpriv->audio_cb(dev, devpriv->audiobuf, SHAKE_AUDIO_DATA_LEN, NULL, 0);
-			#ifdef _WIN32
-			if(devpriv->audio_cb_STDCALL)
-				devpriv->audio_cb_STDCALL(dev, devpriv->audiobuf, SHAKE_AUDIO_DATA_LEN, NULL, 0);
-			#endif
-			break;						   
-		}
-		// this is the packet type for a microphone sample packet from the extension module
-		case SK7_RAW_DATA_AUDIO_EXP: {
-			// ignore unless callback registered
-			if(devpriv->audio_cb == NULL && devpriv->audio_cb_STDCALL == NULL)
-				break;
-			
-			saud = (sk7_raw_packet_audio*)rawpacket;
-			shake_mulaw_lookup(devpriv->audiobuf, saud->data, SHAKE_AUDIO_DATA_LEN);
-
-			// call audio callback to handle microphone sample data. 
-			if(devpriv->audio_cb)
-				devpriv->audio_cb(dev, devpriv->audiobuf, SHAKE_AUDIO_DATA_LEN, NULL, 0);
-			#ifdef _WIN32
-			if(devpriv->audio_cb_STDCALL)
-				devpriv->audio_cb_STDCALL(dev, devpriv->audiobuf, SHAKE_AUDIO_DATA_LEN, NULL, 0);
-			#endif
-			break;						   
-		}
-		// this is the packet type for an audio header, indicating that the next 
-		// audio playback packet should now be sent
-		case SK7_RAW_DATA_AUDIO_HEADER: {
-			if(devpriv->audio_cb == NULL && devpriv->audio_cb_STDCALL == NULL) 
-				break;
-
-			// call audio callback to get next set of data from the application
-			// (the data will be sent after this function returns), see shake_driver.c
-			if(devpriv->audio_cb)
-				devpriv->audio_cb(dev, NULL, 0, devpriv->playbackbuf, SHAKE_AUDIO_DATA_LEN);
-			#ifdef _WIN32
-			if(devpriv->audio_cb_STDCALL)
-				devpriv->audio_cb_STDCALL(dev, NULL, 0, devpriv->playbackbuf, SHAKE_AUDIO_DATA_LEN);
-			#endif
+		case SK7_RAW_DATA_RPH_QUATERNION: {
+			sk7_raw_packet_extra_long* srpel = (sk7_raw_packet_extra_long*)rawpacket;
+			data.rphq[0] = srpel->data[0] + (srpel->data[1] << 8);
+			data.rphq[1] = srpel->data[2] + (srpel->data[3] << 8);
+			data.rphq[2] = srpel->data[4] + (srpel->data[5] << 8);
+			data.rphq[3] = srpel->data[6] + (srpel->data[7] << 8);
+			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srpel->seq;
 			break;
-		}*/
+		}
 	}
 
 	return SHAKE_SUCCESS;

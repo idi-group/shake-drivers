@@ -34,7 +34,7 @@ typedef struct {
 	short shaking_peak_accel, shaking_direction, shaking_timestamp;
 	short hr_bpm;
 	short rph[3]; // roll-pitch-heading
-
+	short rphq[4]; // roll-pitch-heading quaternions
 	/* sequence numbers from the various types of data packets */
 	unsigned char internal_timestamps[8]; 
 	unsigned char sk6seq, hrseq;
