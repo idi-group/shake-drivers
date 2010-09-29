@@ -162,7 +162,7 @@ class SK7(pyshake_sk_common.SHAKE):
 				self.__shake.peek_flag = True
 			elif trailing_byte == '$' or trailing_byte == '\n':
 				adjtype = packet_type - SK7_RAW_DATA_ACC
-
+				
 				if (ord(trailing_byte) == self.data.internal_timestamps[adjtype] + 1) or (ord(trailing_byte) == 0 and self.data.internal_timestamps[adjtype] == 255):
 					has_seq = True
 				else:
@@ -410,6 +410,11 @@ class SK7(pyshake_sk_common.SHAKE):
 			self.data.rph[0] = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
 			self.data.rph[1] = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
 			self.data.rph[2] = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
+		elif packet_type == SK7_RAW_DATA_RPH_QUATERNION:
+			self.data.rphq[0] = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
+			self.data.rphq[1] = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
+			self.data.rphq[2] = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
+			self.data.rphq[3] = pyshake_sk_common.convert_raw_data_value(packetbuf[9:11])
 		elif packet_type == SK7_RAW_DATA_EVENT:
 			if self.__shake.navcb != None:
 				event = -1
@@ -423,7 +428,7 @@ class SK7(pyshake_sk_common.SHAKE):
 				elif val == 4:
 					event = SHAKE_NAV_NORMAL
 				else:
-					event = SK6_CS0_UPPER + (val - SK6_DATA_CU0)
+					event = SK7_CS0_UPPER + (val - SK7_DATA_CU0)
 				self.__shake.navcb(event)
 		elif packet_type == SK7_RAW_DATA_SHAKING:
 			if self.__shake.navcb != None:

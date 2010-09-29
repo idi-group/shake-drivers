@@ -25,6 +25,7 @@
 
 
 from pyshake_constants import *
+from pyshake_sk7_constants import *
 
 def convert_raw_data_value(bytes):
 	lsb = ord(bytes[0])
@@ -47,8 +48,9 @@ class sk_sensor_data:
 		self.shaking_peak_accel, self.shaking_direction, self.shaking_timestamp = 0,0,0
 		self.hr_bpm = 0.0
 		self.rph = [0,0,0]
+		self.rphq = [0,0,0,0]
 		self.timestamps = [0 for x in range(8)]
-		self.internal_timestamps = [0 for x in range(8)]
+		self.internal_timestamps = [0 for x in range(SK7_RAW_DATA_RPH_QUATERNION - SK7_RAW_DATA_ACC)]
 		self.sk6seq = 0
 		self.sk7seq = 0
 		self.hrseq = 0
