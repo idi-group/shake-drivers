@@ -392,6 +392,9 @@ class shake_device:
 	def sk7_roll_pitch_heading(self):
 		return self.SHAKE.data.rph
 
+	def sk7_roll_pitch_heading_quaternions(self):
+		return self.SHAKE.data.rphq
+
 	def register_data_callback(self, callback):
 		self.data_callback = callback
 

@@ -74,6 +74,8 @@ class serial_port(base_serial_port):
 			#on a mac the system automatically sets correct baudrate
 				self.port = serial.Serial(self.target, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
 		except:
+			import sys, traceback
+			print("\n".join(traceback.format_exception(*sys.exc_info())))
 			print "exception opening port"
 			return False
 

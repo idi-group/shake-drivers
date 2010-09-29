@@ -28,7 +28,7 @@
 
 SK7_DEFAULT_CHECKSUM 	= 0x00
 SK7_MAX_PACKET_SIZE = 64
-SK7_NUM_PACKET_TYPES = 60
+SK7_NUM_PACKET_TYPES = 61
 SK7_HEADER_LEN = 4
 SK7_RAW_HEADER_LEN = 3
 SK7_PACKET_IID_LEN = 3
@@ -102,7 +102,8 @@ SK7_RAW_DATA_ANALOG0,
 SK7_RAW_DATA_ANALOG1,
 SK7_RAW_DATA_EVENT, 
 SK7_RAW_DATA_SHAKING, 
-SK7_RAW_DATA_RPH
+SK7_RAW_DATA_RPH,
+SK7_RAW_DATA_RPH_QUATERNION
 ) = range(SK7_NUM_PACKET_TYPES)
 
 # variables
@@ -176,7 +177,8 @@ sk7_raw_packet_headers = [ 		126,
 								119, 
 								118, 
 								117,
-								116
+								116,
+								110
 							]
 
 sk7_packet_lengths = [ 
@@ -248,7 +250,8 @@ sk7_packet_lengths = [
 		6, 
 		5, 
 		9,
-		10
+		10,
+		12
 	]
 
 sk7_packet_has_checksum = [ 
@@ -263,6 +266,6 @@ sk7_packet_has_checksum = [
 	0,0,					# commands
 	1,1,					# acks
 	0,						# startup info
-	0,0,0,0,0,0,0,0,0,0,0,0	# raw data packets
+	0,0,0,0,0,0,0,0,0,0,0,0,0	# raw data packets
 ]		
 
