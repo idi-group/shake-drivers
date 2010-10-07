@@ -116,7 +116,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="./inc;f:\j2sdk\include;f:\j2sdk\include\win32;&quot;c:\program files\java\jdk1.5.0_08\include&quot;;&quot;c:\program files\java\jdk1.5.0_08\include\win32&quot;;d:\j2sdk\include;d:\j2sdk\include\win32;../shake_driver/inc"
+				AdditionalIncludeDirectories="&quot;C:\Program Files (x86)\Java\jdk1.6.0_20\include&quot;;&quot;C:\Program Files (x86)\Java\jdk1.6.0_20\include\win32&quot;;./inc;f:\j2sdk\include;f:\j2sdk\include\win32;&quot;c:\program files\java\jdk1.5.0_08\include&quot;;&quot;c:\program files\java\jdk1.5.0_08\include\win32&quot;;d:\j2sdk\include;d:\j2sdk\include\win32;../shake_driver/inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SHAKE_JAVA_WRAPPER_EXPORTS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"

@@ -120,15 +120,15 @@ static int remove_callback(JNIEnv* env, __int64 dev) {
 	return 1;
 }
 
-JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device(JNIEnv* env, jclass cla, jint port) {
+JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device(JNIEnv* env, jclass cla, jint port, jint devtype) {
 	shake_device* dev = NULL;
-	dev = shake_init_device(port);
+	dev = shake_init_device(port, devtype);
 	return (jlong)dev;
 }
 
-JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1rfcomm(JNIEnv *, jclass, jlong btaddr) {
+JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1rfcomm(JNIEnv *, jclass, jlong btaddr, jint devtype) {
 	shake_device* dev = NULL;
-	dev = shake_init_device_rfcomm_i64(btaddr);
+	dev = shake_init_device_rfcomm_i64(btaddr, devtype);
 	return (jlong)dev;
 }
 
@@ -432,119 +432,119 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1midi_1waveform(JNI
 	return shake_write_midi_waveform((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1inc(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1inc(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs0_inc((shake_device*)dev, &val);
+	int ret = sk6_read_cs0_inc((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1inc(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs0_inc((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1inc(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs0_inc((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1dec(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1dec(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs0_dec((shake_device*)dev, &val);
+	int ret = sk6_read_cs0_dec((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1dec(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs0_dec((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1dec(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs0_dec((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1inc_1profile(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1inc_1profile(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs0_inc_profile((shake_device*)dev, &val);
+	int ret = sk6_read_cs0_inc_profile((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1inc_1profile(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs0_inc_profile((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1inc_1profile(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs0_inc_profile((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1dec_1profile(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1dec_1profile(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs0_dec_profile((shake_device*)dev, &val);
+	int ret = sk6_read_cs0_dec_profile((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1dec_1profile(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs0_dec_profile((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1dec_1profile(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs0_dec_profile((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1inc(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1inc(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs1_inc((shake_device*)dev, &val);
+	int ret = sk6_read_cs1_inc((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1inc(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs1_inc((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1inc(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs1_inc((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1dec(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1dec(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs1_dec((shake_device*)dev, &val);
+	int ret = sk6_read_cs1_dec((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1dec(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs1_dec((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1dec(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs1_dec((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1inc_1profile(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1inc_1profile(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs1_inc_profile((shake_device*)dev, &val);
+	int ret = sk6_read_cs1_inc_profile((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1inc_1profile(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs1_inc_profile((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1inc_1profile(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs1_inc_profile((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1dec_1profile(JNIEnv *, jclass, jlong dev) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1dec_1profile(JNIEnv *, jclass, jlong dev) {
 	unsigned char val;
-	int ret = shake_read_cs1_dec_profile((shake_device*)dev, &val);
+	int ret = sk6_read_cs1_dec_profile((shake_device*)dev, &val);
 	if(ret == SHAKE_ERROR)
 		return -1;
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1dec_1profile(JNIEnv *, jclass, jlong dev, jint val) {
-	return shake_write_cs1_dec_profile((shake_device*)dev, val);
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1dec_1profile(JNIEnv *, jclass, jlong dev, jint val) {
+	return sk6_write_cs1_dec_profile((shake_device*)dev, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cap_1thresholds(JNIEnv* env, jclass, jlong dev, jbyteArray vals) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cap_1thresholds(JNIEnv* env, jclass, jlong dev, jbyteArray vals) {
 	if(	env->GetArrayLength(vals) != 8)
 		return -1;
 
 	jbyte* vals_ptr = env->GetByteArrayElements(vals, 0);
-	int ret = shake_read_cap_thresholds((shake_device*)dev, (unsigned char*)vals_ptr);
+	int ret = sk6_read_cap_thresholds((shake_device*)dev, (unsigned char*)vals_ptr);
 	env->ReleaseByteArrayElements(vals, vals_ptr, 0);
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cap_1thresholds(JNIEnv* env, jclass, jlong dev, jbyteArray vals) {
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cap_1thresholds(JNIEnv* env, jclass, jlong dev, jbyteArray vals) {
 	if(env->GetArrayLength(vals) != 8)
 		return -1;
 
 	jbyte* vals_ptr = env->GetByteArrayElements(vals, 0);
-	int ret = shake_write_cap_thresholds((shake_device*)dev, (unsigned char*)vals_ptr);
+	int ret = sk6_write_cap_thresholds((shake_device*)dev, (unsigned char*)vals_ptr);
 	env->ReleaseByteArrayElements(vals, vals_ptr, 0);
 	return ret;
 }
@@ -661,7 +661,7 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1playvib(JNIEnv *, jclass,
 	return shake_playvib((shake_device*)dev, (shake_vib_channels)channel, val);
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1upload_1vib_1sample(JNIEnv* env, jclass, jlong dev, jbyte profile, jintArray samples) { 
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1upload_1vib_1sample(JNIEnv* env, jclass, jlong dev, jbyte profile, jintArray samples) { 
 	int sample_len = env->GetArrayLength(samples);
 	if(sample_len > 64)
 		return SHAKE_ERROR;
@@ -672,7 +672,7 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1upload_1vib_1sample(JNIEn
 		sample_arr[i] = arr[i];
 	}
 
-	int ret = shake_upload_vib_sample((shake_device*)dev, profile, sample_arr, sample_len >> 1);
+	int ret = sk6_upload_vib_sample((shake_device*)dev, profile, sample_arr, sample_len >> 1);
 	env->ReleaseIntArrayElements(samples, arr, 0);
 	return ret;
 }

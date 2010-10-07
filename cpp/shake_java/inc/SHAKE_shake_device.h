@@ -7,6 +7,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef SHAKE_shake_device_SHAKE_SK6
+#define SHAKE_shake_device_SHAKE_SK6 0L
+#undef SHAKE_shake_device_SHAKE_SK7
+#define SHAKE_shake_device_SHAKE_SK7 1L
 #undef SHAKE_shake_device_SHAKE_NAV_UP
 #define SHAKE_shake_device_SHAKE_NAV_UP 1L
 #undef SHAKE_shake_device_SHAKE_NAV_DOWN
@@ -260,18 +264,18 @@ extern "C" {
 /*
  * Class:     SHAKE_shake_device
  * Method:    shake_init_device
- * Signature: (I)J
+ * Signature: (II)J
  */
 JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device
-  (JNIEnv *, jclass, jint);
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     SHAKE_shake_device
  * Method:    shake_init_device_rfcomm
- * Signature: (J)J
+ * Signature: (JI)J
  */
 JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1rfcomm
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
@@ -803,146 +807,146 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1midi_1waveform
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs0_inc
+ * Method:    sk6_read_cs0_inc
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1inc
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1inc
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs0_inc
+ * Method:    sk6_write_cs0_inc
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1inc
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1inc
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs0_dec
+ * Method:    sk6_read_cs0_dec
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1dec
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1dec
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs0_dec
+ * Method:    sk6_write_cs0_dec
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1dec
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1dec
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs0_inc_profile
+ * Method:    sk6_read_cs0_inc_profile
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1inc_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1inc_1profile
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs0_inc_profile
+ * Method:    sk6_write_cs0_inc_profile
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1inc_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1inc_1profile
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs0_dec_profile
+ * Method:    sk6_read_cs0_dec_profile
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs0_1dec_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs0_1dec_1profile
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs0_dec_profile
+ * Method:    sk6_write_cs0_dec_profile
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs0_1dec_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs0_1dec_1profile
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs1_inc
+ * Method:    sk6_read_cs1_inc
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1inc
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1inc
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs1_inc
+ * Method:    sk6_write_cs1_inc
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1inc
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1inc
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs1_dec
+ * Method:    sk6_read_cs1_dec
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1dec
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1dec
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs1_dec
+ * Method:    sk6_write_cs1_dec
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1dec
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1dec
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs1_inc_profile
+ * Method:    sk6_read_cs1_inc_profile
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1inc_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1inc_1profile
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs1_inc_profile
+ * Method:    sk6_write_cs1_inc_profile
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1inc_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1inc_1profile
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cs1_dec_profile
+ * Method:    sk6_read_cs1_dec_profile
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cs1_1dec_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cs1_1dec_1profile
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cs1_dec_profile
+ * Method:    sk6_write_cs1_dec_profile
  * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cs1_1dec_1profile
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cs1_1dec_1profile
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_read_cap_thresholds
+ * Method:    sk6_read_cap_thresholds
  * Signature: (J[B)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1read_1cap_1thresholds
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1read_1cap_1thresholds
   (JNIEnv *, jclass, jlong, jbyteArray);
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_write_cap_thresholds
+ * Method:    sk6_write_cap_thresholds
  * Signature: (J[B)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1write_1cap_1thresholds
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1write_1cap_1thresholds
   (JNIEnv *, jclass, jlong, jbyteArray);
 
 /*
@@ -1075,10 +1079,10 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1playvib
 
 /*
  * Class:     SHAKE_shake_device
- * Method:    shake_upload_vib_sample
+ * Method:    sk6_upload_vib_sample
  * Signature: (JB[I)I
  */
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1upload_1vib_1sample
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk6_1upload_1vib_1sample
   (JNIEnv *, jclass, jlong, jbyte, jintArray);
 
 /*
