@@ -27,7 +27,7 @@ public class shake_device_test {
 		shake_device_test sdt = new shake_device_test();
 
 		// create the SHAKE device object
-		shake_device sd = new shake_device();
+		shake_device sd = new shake_device(shake_device.SHAKE_SK7);
 	
 		// attempt to connect. the -1 parameter means "try to autodetect the COM port number", but this will
 		// only work if you have WIDCOMM-based Bluetooth drivers (the type with "My Bluetooth Places")
@@ -42,7 +42,7 @@ public class shake_device_test {
 
 		sd.write_power_state(sd.SHAKE_POWER_VIB);
 		System.out.println("\nTrying to play a vibration...");
-		sd.upload_vib_sample(5, new int[] { 0x55, 0x33 });
+		sd.sk6_upload_vib_sample(5, new int[] { 0x55, 0x33 });
 		sd.playvib(sd.SHAKE_VIB_MAIN, 5);
 
 		System.out.println("Result: " + sd.write_sample_rate(shake_device.SHAKE_SENSOR_HEADING, 25));

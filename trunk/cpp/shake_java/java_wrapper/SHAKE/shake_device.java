@@ -17,6 +17,9 @@ public class shake_device {
 	private static int SHAKE_ERROR = -1;
 	private static int SHAKE_SUCCESS = 1;
 
+	public static final int SHAKE_SK6 = 0;
+	public static final int SHAKE_SK7 = 1;
+
 	// the following are the possible values for the SHAKE callback function parameter
 	public static final int SHAKE_NAV_UP = 1;
 	public static final int SHAKE_NAV_DOWN = 2;
@@ -170,10 +173,16 @@ public class shake_device {
 
 	public shake_device() {
 		dev = 0;
+		device_type = SHAKE_SK7;
+	}
+
+	public shake_device(int dev_type) {
+		dev = 0;
+		device_type = dev_type;
 	}
 
 	public boolean connect(int com_port) {
-		dev = shake_init_device(com_port);
+		dev = shake_init_device(com_port, device_type);
 		if(dev == 0)
 			return false;
 		return true;
@@ -185,7 +194,7 @@ public class shake_device {
 	}
 
 	public boolean connect_rfcomm(long btaddr) {
-		dev = shake_init_device_rfcomm(btaddr);
+		dev = shake_init_device_rfcomm(btaddr, device_type);
 		if(dev == 0)
 			return false;
 		return true;
@@ -467,76 +476,76 @@ public class shake_device {
 	}
 
 
-	public int read_cs0_inc() {
-		return shake_read_cs0_inc(dev);
+	public int sk6_read_cs0_inc() {
+		return sk6_read_cs0_inc(dev);
 	}
 
-	public int write_cs0_inc(int value) {
-		return shake_write_cs0_inc(dev, value);
+	public int sk6_write_cs0_inc(int value) {
+		return sk6_write_cs0_inc(dev, value);
 	}
 
-	public int read_cs0_dec() {
-		return shake_read_cs0_dec(dev);
+	public int sk6_read_cs0_dec() {
+		return sk6_read_cs0_dec(dev);
 	}
 
-	public int write_cs0_dec(int value) {
-		return shake_write_cs0_dec(dev, value);
+	public int sk6_write_cs0_dec(int value) {
+		return sk6_write_cs0_dec(dev, value);
 	}
 
-	public int read_cs0_inc_profile() {
-		return shake_read_cs0_inc_profile(dev);
+	public int sk6_read_cs0_inc_profile() {
+		return sk6_read_cs0_inc_profile(dev);
 	}
 
-	public int write_cs0_inc_profile(int value) {
-		return shake_write_cs0_inc_profile(dev, value);
+	public int sk6_write_cs0_inc_profile(int value) {
+		return sk6_write_cs0_inc_profile(dev, value);
 	}
 
-	public int read_cs0_dec_profile() {
-		return shake_read_cs0_dec_profile(dev);
+	public int sk6_read_cs0_dec_profile() {
+		return sk6_read_cs0_dec_profile(dev);
 	}
 
-	public int write_cs0_dec_profile(int value) {
-		return shake_write_cs0_dec_profile(dev, value);
+	public int sk6_write_cs0_dec_profile(int value) {
+		return sk6_write_cs0_dec_profile(dev, value);
 	}
 
-	public int read_cs1_inc() {
-		return shake_read_cs1_inc(dev);
+	public int sk6_cs1_inc() {
+		return sk6_read_cs1_inc(dev);
 	}
 
-	public int write_cs1_inc(int value) {
-		return shake_write_cs1_inc(dev, value);
+	public int sk6_cs1_inc(int value) {
+		return sk6_write_cs1_inc(dev, value);
 	}
 
-	public int read_cs1_dec() {
-		return shake_read_cs1_dec(dev);
+	public int sk6_cs1_dec() {
+		return sk6_read_cs1_dec(dev);
 	}
 
-	public int write_cs1_dec(int value) {
-		return shake_write_cs1_dec(dev, value);
+	public int sk6_cs1_dec(int value) {
+		return sk6_write_cs1_dec(dev, value);
 	}
 
-	public int read_cs1_inc_profile() {
-		return shake_read_cs1_inc_profile(dev);
+	public int sk6_read_cs1_inc_profile() {
+		return sk6_read_cs1_inc_profile(dev);
 	}
 
-	public int write_cs1_inc_profile(int value) {
-		return shake_write_cs1_inc_profile(dev, value);
+	public int sk6_cs1_inc_profile(int value) {
+		return sk6_write_cs1_inc_profile(dev, value);
 	}
 
-	public int read_cs1_dec_profile() {
-		return shake_read_cs1_dec_profile(dev);
+	public int sk6_cs1_dec_profile() {
+		return sk6_read_cs1_dec_profile(dev);
 	}
 
-	public int write_cs1_dec_profile(int value) {
-		return shake_write_cs1_dec_profile(dev, value);
+	public int sk6_cs1_dec_profile(int value) {
+		return sk6_write_cs1_dec_profile(dev, value);
 	}
 
-	public int read_cap_thresholds(byte[] values) {
-		return shake_read_cap_thresholds(dev, values);
+	public int sk6_read_cap_thresholds(byte[] values) {
+		return sk6_read_cap_thresholds(dev, values);
 	}
 
-	public int write_cap_thresholds(byte[] values) {
-		return shake_write_cap_thresholds(dev, values);
+	public int sk6_cap_thresholds(byte[] values) {
+		return sk6_write_cap_thresholds(dev, values);
 	}
 
 
@@ -604,8 +613,8 @@ public class shake_device {
 		return shake_playvib(dev, channel, (byte)profile);
 	}
 
-	public int upload_vib_sample(int profile, int[] samples) {
-		return shake_upload_vib_sample(dev, (byte)profile, samples);
+	public int sk6_upload_vib_sample(int profile, int[] samples) {
+		return sk6_upload_vib_sample(dev, (byte)profile, samples);
 	}
 
 	public int read_battery_level() {
@@ -654,9 +663,11 @@ public class shake_device {
 		//System.exit(1);
 	}
 
+	private int device_type;
+
 	// Startup/shutdown functions
-	private static native long shake_init_device(int com_port);
-	private static native long shake_init_device_rfcomm(long btaddr);
+	private static native long shake_init_device(int com_port, int dev_type);
+	private static native long shake_init_device_rfcomm(long btaddr, int dev_type);
 	private static native int shake_free_device(long dev);
 
 	// Information functions
@@ -759,32 +770,32 @@ public class shake_device {
 	private static native int shake_write_midi_note(long dev, int value);
 	private static native int shake_write_midi_waveform(long dev, int value);
 
-	private static native int shake_read_cs0_inc(long dev);
-	private static native int shake_write_cs0_inc(long dev, int value);
+	private static native int sk6_read_cs0_inc(long dev);
+	private static native int sk6_write_cs0_inc(long dev, int value);
 
-	private static native int shake_read_cs0_dec(long dev);
-	private static native int shake_write_cs0_dec(long dev, int value);
+	private static native int sk6_read_cs0_dec(long dev);
+	private static native int sk6_write_cs0_dec(long dev, int value);
 
-	private static native int shake_read_cs0_inc_profile(long dev);
-	private static native int shake_write_cs0_inc_profile(long dev, int value);
+	private static native int sk6_read_cs0_inc_profile(long dev);
+	private static native int sk6_write_cs0_inc_profile(long dev, int value);
 
-	private static native int shake_read_cs0_dec_profile(long dev);
-	private static native int shake_write_cs0_dec_profile(long dev, int value);
+	private static native int sk6_read_cs0_dec_profile(long dev);
+	private static native int sk6_write_cs0_dec_profile(long dev, int value);
 
-	private static native int shake_read_cs1_inc(long dev);
-	private static native int shake_write_cs1_inc(long dev, int value);
+	private static native int sk6_read_cs1_inc(long dev);
+	private static native int sk6_write_cs1_inc(long dev, int value);
 
-	private static native int shake_read_cs1_dec(long dev);
-	private static native int shake_write_cs1_dec(long dev, int value);
+	private static native int sk6_read_cs1_dec(long dev);
+	private static native int sk6_write_cs1_dec(long dev, int value);
 
-	private static native int shake_read_cs1_inc_profile(long dev);
-	private static native int shake_write_cs1_inc_profile(long dev, int value);
+	private static native int sk6_read_cs1_inc_profile(long dev);
+	private static native int sk6_write_cs1_inc_profile(long dev, int value);
 
-	private static native int shake_read_cs1_dec_profile(long dev);
-	private static native int shake_write_cs1_dec_profile(long dev, int value);
+	private static native int sk6_read_cs1_dec_profile(long dev);
+	private static native int sk6_write_cs1_dec_profile(long dev, int value);
 
-	private static native int shake_read_cap_thresholds(long dev, byte[] values);
-	private static native int shake_write_cap_thresholds(long dev, byte[] values);
+	private static native int sk6_read_cap_thresholds(long dev, byte[] values);
+	private static native int sk6_write_cap_thresholds(long dev, byte[] values);
 
 	private static native int shake_read_shaking_config(long dev);
 	private static native int shake_write_shaking_config(long dev, int value);
@@ -812,7 +823,7 @@ public class shake_device {
 
 	private static native int shake_playvib(long dev, int channel, byte profile);
 
-	private static native int shake_upload_vib_sample(long dev, byte profile, int[] samples);
+	private static native int sk6_upload_vib_sample(long dev, byte profile, int[] samples);
 
 	private static native int shake_read_battery_level(long dev);
 
