@@ -519,6 +519,30 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1shaking_1timestamp
 
 /*
  * Class:     SHAKE_shake_device
+ * Method:    sk7_roll_pitch_heading
+ * Signature: (J[I)I
+ */
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading
+  (JNIEnv *, jclass, jlong, jintArray);
+
+/*
+ * Class:     SHAKE_shake_device
+ * Method:    sk7_roll_pitch_heading_quaternions
+ * Signature: (J[I)I
+ */
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading_1quaternions
+  (JNIEnv *, jclass, jlong, jintArray);
+
+/*
+ * Class:     SHAKE_shake_device
+ * Method:    sk7_configure_roll_pitch_heading
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1configure_1roll_1pitch_1heading
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     SHAKE_shake_device
  * Method:    shake_register_event_callback
  * Signature: (Ljava/lang/Object;J)I
  */

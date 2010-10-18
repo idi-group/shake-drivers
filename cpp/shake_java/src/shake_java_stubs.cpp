@@ -751,3 +751,33 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1logging_1packets_1read(JN
 JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_shake_1data_1timestamp(JNIEnv *, jclass, jlong dev, jint sensor) {
 	return shake_data_timestamp((shake_device*)dev, sensor);
 }
+
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading(JNIEnv * env, jclass, jlong dev, jintArray rph) {
+	int foo[3];
+	jsize arraylength = env->GetArrayLength(rph);
+	jint* arr = env->GetIntArrayElements(rph, 0);
+	int ret = sk7_roll_pitch_heading((shake_device*)dev, foo);
+	arr[0] = foo[0];
+	arr[1] = foo[1];
+	arr[2] = foo[2];
+	
+	env->ReleaseIntArrayElements(rph, arr, 0);
+	return ret;
+}
+
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading_1quaternions(JNIEnv * env, jclass, jlong dev, jintArray rphq) {
+	int foo[4];
+	jsize arraylength = env->GetArrayLength(rphq);
+	jint* arr = env->GetIntArrayElements(rphq, 0);
+	int ret = sk7_roll_pitch_heading_quaternions((shake_device*)dev, foo);
+	arr[0] = foo[0];
+	arr[1] = foo[1];
+	arr[2] = foo[2];
+	arr[3] = foo[3];
+	env->ReleaseIntArrayElements(rphq, arr, 0);
+	return ret;
+}
+
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1configure_1roll_1pitch_1heading(JNIEnv *, jclass, jlong dev, jint value) {
+	return sk7_configure_roll_pitch_heading((shake_device*)dev, value);
+}

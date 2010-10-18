@@ -328,6 +328,18 @@ public class shake_device {
 		return shake_data_timestamp(dev, sensor);
 	}
 
+	public int sk7_roll_pitch_heading(int[] rph) {
+		return sk7_roll_pitch_heading(dev, rph);
+	}
+
+	public int sk7_roll_pitch_heading_quaternions(int[] rphq) {
+		return sk7_roll_pitch_heading_quaternions(dev, rphq);
+	}
+
+	public int sk7_configure_roll_pitch_heading(int value) {
+		return sk7_configure_roll_pitch_heading(dev, value);
+	}
+
 	// Pass this function a reference to an object which has a function called "callback", with the signature:
 	// void callback(int)
 	// This method of the specified object will be used as the callback from the SHAKE driver. 
@@ -708,6 +720,10 @@ public class shake_device {
 	private static native int shake_shaking_peakaccel(long dev);
 	private static native int shake_shaking_direction(long dev);
 	private static native int shake_shaking_timestamp(long dev);
+
+	private static native int sk7_roll_pitch_heading(long dev, int[] rph);
+	private static native int sk7_roll_pitch_heading_quaternions(long dev, int[] rphq);
+	private static native int sk7_configure_roll_pitch_heading(long dev, int value);
 
 	private static native int shake_register_event_callback(Object obj, long dev);
 
