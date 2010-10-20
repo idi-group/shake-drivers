@@ -31,7 +31,7 @@
 typedef struct {
 	jobject obj;
 	jmethodID mid;
-	__int64 dev;
+	SHAKE_INT64 dev;
 } callback_info;
 
 /*	global pointer to Java Virtual Machine instance */
@@ -50,7 +50,7 @@ static int num_callbacks = 0;
 *	calls the Java method specified in it with the original event parameter */
 static void SHAKE_CALLBACK main_callback(shake_device* dev, int ev) {
 	for(int i=0;i<num_callbacks;i++) {
-		if((__int64)dev == callbacks[i].dev) {
+		if((SHAKE_INT64)dev == callbacks[i].dev) {
 			// must call AttachCurrentThread to attach this thread to the JVM, otherwise
 			// it tends to cause a crash when making the callback
 			JNIEnv *env;
@@ -71,7 +71,7 @@ static void SHAKE_CALLBACK main_callback(shake_device* dev, int ev) {
 }
 
 /*	adds a new callback to the callbacks array */
-static int add_callback(JNIEnv* env, __int64 dev, jobject obj, jmethodID mid) {
+static int add_callback(JNIEnv* env, SHAKE_INT64 dev, jobject obj, jmethodID mid) {
 	if(num_callbacks >= 8)
 		return 0;
 
@@ -89,7 +89,7 @@ static int add_callback(JNIEnv* env, __int64 dev, jobject obj, jmethodID mid) {
 }
 
 /* removes a given callback from the callbacks array */
-static int remove_callback(JNIEnv* env, __int64 dev) {
+static int remove_callback(JNIEnv* env, SHAKE_INT64 dev) {
 	if(num_callbacks < 1)
 		return 0;
 
@@ -121,14 +121,38 @@ static int remove_callback(JNIEnv* env, __int64 dev) {
 }
 
 JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device(JNIEnv* env, jclass cla, jint port, jint devtype) {
-	shake_device* dev = NULL;
+	shake_device* dev = NULL;	
+#ifdef _WIN32
 	dev = shake_init_device(port, devtype);
+#else
+	dev = 0;
+#endif
 	return (jlong)dev;
 }
 
 JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1rfcomm(JNIEnv *, jclass, jlong btaddr, jint devtype) {
 	shake_device* dev = NULL;
+#ifdef _WIN32
 	dev = shake_init_device_rfcomm_i64(btaddr, devtype);
+#else
+	dev = 0;
+#endif
+	return (jlong)dev;
+}
+JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1osx(JNIEnv* env, jclass, jstring rawdevicename, jint devtype) {
+	shake_device* dev = NULL;
+#ifdef __APPLE__
+	char devicename[128];
+	int len = env->GetStringLength(rawdevicename);
+	if(len > 127)
+		len = 127;
+	strncpy(devicename, (char*)env->GetStringUTFChars(rawdevicename, 0), len);
+	printf("Connecting to %s\n", devicename);
+	dev = shake_init_device_osx_usb(devicename, devtype);
+	env->ReleaseStringUTFChars(rawdevicename, 0);
+#else
+	dev = 0;
+#endif
 	return (jlong)dev;
 }
 

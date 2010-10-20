@@ -6,7 +6,7 @@ public class shake_device {
 		try {
 			System.loadLibrary("shake_java");	
 		} catch (UnsatisfiedLinkError ule) {
-			System.out.println("Failed to load shake_java.dll!");
+			System.out.println("Failed to load shake_java library!");
 			System.exit(-1);
 		}
 	}
@@ -195,6 +195,13 @@ public class shake_device {
 
 	public boolean connect_rfcomm(long btaddr) {
 		dev = shake_init_device_rfcomm(btaddr, device_type);
+		if(dev == 0)
+			return false;
+		return true;
+	}
+
+	public boolean connect_osx(String devname) {
+		dev = shake_init_device_osx(devname, device_type);
 		if(dev == 0)
 			return false;
 		return true;
@@ -680,6 +687,7 @@ public class shake_device {
 	// Startup/shutdown functions
 	private static native long shake_init_device(int com_port, int dev_type);
 	private static native long shake_init_device_rfcomm(long btaddr, int dev_type);
+	private static native long shake_init_device_osx(String devname, int dev_type);
 	private static native int shake_free_device(long dev);
 
 	// Information functions
