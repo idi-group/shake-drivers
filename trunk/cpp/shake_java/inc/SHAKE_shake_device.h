@@ -279,6 +279,14 @@ JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1rfcomm
 
 /*
  * Class:     SHAKE_shake_device
+ * Method:    shake_init_device_osx
+ * Signature: (Ljava/lang/String;I)J
+ */
+JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1osx
+  (JNIEnv *, jclass, jstring, jint);
+
+/*
+ * Class:     SHAKE_shake_device
  * Method:    shake_free_device
  * Signature: (J)I
  */
