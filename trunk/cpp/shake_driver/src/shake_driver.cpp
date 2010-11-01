@@ -22,7 +22,7 @@
 #include <string.h>
 #include "shake_driver.h"
 #include "shake_serial_win32.h"
-#include "shake_serial_osx.h"
+#include "shake_serial_usb.h"
 #ifdef SHAKE_RFCOMM_SUPPORTED
 	#include "shake_rfcomm.h"
 #endif
@@ -208,17 +208,16 @@ shake_device* shake_init_internal(shake_conn_data* scd) {
 				}
 			}
 		}
-		#else
-		if(scd->type == SHAKE_CONN_USB_SERIAL_OSX) {
+		#endif
+		if(scd->type == SHAKE_CONN_USB_SERIAL) {
 			devpriv->port.comms_type = scd->type;
 			printf("Opening USB serial port: %s\n", scd->usbdev);
-			if(shake_open_serial_osx(&(devpriv->port.serial_osx), scd->usbdev, scd->devtype) == NULL) {
+			if(shake_open_serial_usb(&(devpriv->port.serial_usb), scd->usbdev, scd->devtype) == NULL) {
 				free(devpriv);
 				free(dev);
 				return NULL;
 			}
 		}
-		#endif
 	#endif
 
 	if(devpriv->port.comms_type == -1) {
@@ -307,10 +306,10 @@ SHAKE_API shake_device* shake_init_device_rfcomm_str(char* btaddr, int device_ty
 }
 #endif
 
-#ifdef __APPLE__
-SHAKE_API shake_device* shake_init_device_osx_usb(char* usb_dev, int device_type) {
+#ifndef _WIN32
+SHAKE_API shake_device* shake_init_device_usb_serial(char* usb_dev, int device_type) {
 	shake_conn_data scd = { 0 };
-	scd.type = SHAKE_CONN_USB_SERIAL_OSX;
+	scd.type = SHAKE_CONN_USB_SERIAL;
 	if(usb_dev == NULL || strlen(usb_dev) > 127) 
 		return NULL;
 	strcpy(scd.usbdev, usb_dev);
@@ -344,9 +343,9 @@ int shake_close(shake_port* port) {
 		return shake_close_rfcomm(&(port->rfcomm));
 	}
 	#endif
-	#ifdef __APPLE__
-	if(port->comms_type == SHAKE_CONN_USB_SERIAL_OSX) {
-		return shake_close_serial_osx(&(port->serial_osx));
+	#ifndef _WIN32_
+	if(port->comms_type == SHAKE_CONN_USB_SERIAL) {
+		return shake_close_serial_usb(&(port->serial_usb));
 	}
 	#endif
 	if(port->comms_type == SHAKE_CONN_DEBUGFILE) {

@@ -218,8 +218,8 @@ SHAKE_API shake_device* shake_init_device_rfcomm_i64(SHAKE_INT64 btaddr, int dev
 SHAKE_API shake_device* shake_init_device_rfcomm_str(char* btaddr, int device_type);
 #endif
 
-#ifdef __APPLE__
-SHAKE_API shake_device* shake_init_device_osx_usb(char* usb_dev, int device_type);
+#ifndef _WIN32
+SHAKE_API shake_device* shake_init_device_usb_serial(char* usb_dev, int device_type);
 #endif
 
 /**	Only for debugging use */

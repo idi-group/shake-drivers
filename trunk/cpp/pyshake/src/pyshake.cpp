@@ -14,7 +14,7 @@
 #ifdef _WIN32
 #include "Python.h"
 #else
-#include <python2.5/Python.h>
+#include <Python.h>
 #endif
 #include "pyshake.h"
 
@@ -229,8 +229,8 @@ static PyObject* pyshake_init_device_rfcomm_str(PyObject* self, PyObject* args) 
 	#endif
 }
 
-static PyObject* pyshake_init_device_osx_usb(PyObject* self, PyObject* args) {
-#ifdef __APPLE__
+static PyObject* pyshake_init_device_usb(PyObject* self, PyObject* args) {
+#ifndef _WIN32_
 	shake_device* dev;
 	char* usb_dev;	
 	int devtype;
@@ -241,7 +241,7 @@ static PyObject* pyshake_init_device_osx_usb(PyObject* self, PyObject* args) {
 	}
 
 	PyArg_ParseTuple(args, "si", &usb_dev, &devtype);
-	dev = shake_init_device_osx_usb(usb_dev, devtype);
+	dev = shake_init_device_usb_serial(usb_dev, devtype);
 
 	if(dev == NULL)
 		return Py_BuildValue("i", SHAKE_ERROR);
