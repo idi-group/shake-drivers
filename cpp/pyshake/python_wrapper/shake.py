@@ -11,13 +11,7 @@ major, minor = sys.version_info[0], sys.version_info[1]
 if major == 2 and minor == 4:
 	import pyshake
 elif major == 2 and minor >= 5:
-	import imp
-	# check if on windows
-	if os.name != "posix":
-		import pyshake
-	else:
-		# TODO distutils for this too
-		pyshake = imp.load_dynamic('pyshake', os.getcwd()+'/pyshake.so')
+	import pyshake
 else:
 	print "shake.py: Warning, unsupported Python version (%d.%d)"%(major, minor)
 	# attempt to import the pyshake module anyway
@@ -469,8 +463,8 @@ class shake_device:
 		self.__connected = True
 		return True
 
-	def connect_osx_usb(self, usb_dev):
-		self.__shakedev = pyshake.init_device_osx_usb(usb_dev, self.__devtype)
+	def connect_usb(self, usb_dev):
+		self.__shakedev = pyshake.init_device_usb(usb_dev, self.__devtype)
 		if self.__shakedev == -1:
 			self.__lasterror = "Failed to connect"
 			return False

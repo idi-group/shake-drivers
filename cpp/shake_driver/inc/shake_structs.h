@@ -34,10 +34,10 @@ typedef struct {
 } shake_serial_port_win32;
 
 typedef struct {
-#ifdef __APPLE__
+#ifndef _WIN32
 	int port;
 #endif
-} shake_serial_port_osx;
+} shake_serial_port_usb;
 
 #include "shake_btdefs.h"
 
@@ -59,8 +59,8 @@ typedef struct {
 	#ifdef _WIN32
 	shake_serial_port_win32 serial_win32;
 	#endif
-	#ifdef __APPLE__
-	shake_serial_port_osx serial_osx;
+	#ifndef _WIN32
+	shake_serial_port_usb serial_usb;
 	#endif
 	#ifdef SHAKE_RFCOMM_SUPPORTED
 		shake_rfcomm_socket rfcomm;
@@ -75,7 +75,7 @@ enum shake_connection_types {
 	SHAKE_CONN_RFCOMM_STR,
 	SHAKE_CONN_DEBUGFILE,
 	SHAKE_CONN_S60_RFCOMM, 
-	SHAKE_CONN_USB_SERIAL_OSX,
+	SHAKE_CONN_USB_SERIAL,
 };
 
 typedef struct {

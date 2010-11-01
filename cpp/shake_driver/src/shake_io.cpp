@@ -20,7 +20,7 @@
 #include "shake_packets.h"
 #include "shake_io.h"
 #include "shake_serial_win32.h"
-#include "shake_serial_osx.h"
+#include "shake_serial_usb.h"
 #include "shake_rfcomm.h"
 #ifdef SHAKE_S60
 #include "shake_s60_rfcomm.h"
@@ -138,9 +138,9 @@ int read_bytes(shake_device_private* dev, char* buf, int bytes_to_read) {
 			return returned_bytes;
 		}
 		#endif
-		#ifdef __APPLE__
-		case SHAKE_CONN_USB_SERIAL_OSX: {
-			returned_bytes += read_serial_bytes_osx(dev, buf, bytes_to_read);
+		#ifndef _WIN32
+		case SHAKE_CONN_USB_SERIAL: {
+			returned_bytes += read_serial_bytes_usb(dev, buf, bytes_to_read);
 			return returned_bytes;
 		}
 		#endif
@@ -167,9 +167,9 @@ int write_bytes(shake_device_private* dev, char* buf, int bytes_to_write) {
 		case SHAKE_CONN_S60_RFCOMM: 
 			return write_s60_rfcomm_bytes(dev, buf, bytes_to_write);
 		#endif	
-		#ifdef __APPLE__
-		case SHAKE_CONN_USB_SERIAL_OSX:
-			return write_serial_bytes_osx(dev, buf, bytes_to_write);
+		#ifndef _WIN32
+		case SHAKE_CONN_USB_SERIAL:
+			return write_serial_bytes_usb(dev, buf, bytes_to_write);
 		#endif
 		default:
 			break;
@@ -199,9 +199,9 @@ int write_bytes_delayed(shake_device_private* dev, char* buf, int bytes_to_write
 		case SHAKE_CONN_S60_RFCOMM:
 			return write_s60_rfcomm_bytes_delayed(dev, buf, bytes_to_write, chunk_size, delay_ms);
 		#endif
-		#ifdef __APPLE__
-		case SHAKE_CONN_USB_SERIAL_OSX:
-			return write_serial_bytes_osx(dev, buf, bytes_to_write);
+		#ifndef _WIN32
+		case SHAKE_CONN_USB_SERIAL:
+			return write_serial_bytes_usb(dev, buf, bytes_to_write);
 		#endif
 		default:
 			break;
