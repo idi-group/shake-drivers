@@ -343,7 +343,7 @@ int shake_close(shake_port* port) {
 		return shake_close_rfcomm(&(port->rfcomm));
 	}
 	#endif
-	#ifndef _WIN32_
+	#ifndef _WIN32
 	if(port->comms_type == SHAKE_CONN_USB_SERIAL) {
 		return shake_close_serial_usb(&(port->serial_usb));
 	}
