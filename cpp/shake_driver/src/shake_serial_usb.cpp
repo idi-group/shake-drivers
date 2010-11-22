@@ -16,9 +16,9 @@
 *	LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "shake_serial_osx.h"
+#include "shake_serial_usb.h"
 
-#ifdef __APPLE__
+#ifndef _WIN32
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -29,31 +29,48 @@
 #include "shake_platform.h"
 #include "shake_driver.h"
 
-shake_serial_port_osx* shake_open_serial_osx(shake_serial_port_osx* port, char* usb_dev, int device_type) {
-#ifdef __APPLE__
-	struct termios options;
+shake_serial_port_usb* shake_open_serial_usb(shake_serial_port_usb* port, char* usb_dev, int device_type) {
+#ifndef _WIN32
+	struct termios newopt;	
+	struct termios oldopt;
 
 	port->port = open(usb_dev, O_RDWR | O_NOCTTY | O_NDELAY);
 	if(port->port == -1) {
 		return NULL;
 	}
+
+	tcgetattr(port->port, &oldopt);
+	bzero(&newopt, sizeof(newopt));
+	
+	int baudrate = (device_type == SHAKE_SK7) ? 460800 : 115200;
+
+#ifndef __APPLE__
+	newopt.c_cflag = baudrate | CRTSCTS | CS8 | CLOCAL;
+	newopt.c_iflag = 0; //IGNPAR | IGNCR | ICRNL | IGNBRK;
+	newopt.c_oflag = 0;
+	newopt.c_lflag = 0;
+
+	tcflush(port->port, TCIFLUSH);
+	tcsetattr(port->port, TCSANOW, &newopt);
+#else
 	fcntl(port->port, F_SETFL, 0);
-	tcgetattr(port->port, &options);
-	cfsetispeed(&options, device_type == SHAKE_SK7 ? 460800 : 115200);
-   cfsetospeed(&options, device_type == SHAKE_SK7 ? 460800 : 115200);
-   options.c_cflag |= (CLOCAL | CREAD);
-   options.c_cflag &= ~CSIZE; /* Mask the character size bits */
-   options.c_cflag |= CS8;    /* Select 8 data bits */
-   options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-   tcsetattr(port->port, TCSANOW, &options);
-return port;
+	tcgetattr(port->port, &oldopt);
+	cfsetispeed(&oldopt, baudrate);
+   	cfsetospeed(&oldopt, baudrate);
+  	oldopt.c_cflag |= (CLOCAL | CREAD);
+   	oldopt.c_cflag &= ~CSIZE; // Mask the character size bits 
+   	oldopt.c_cflag |= CS8;    // Select 8 data bits 
+   	oldopt.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+   	tcsetattr(port->port, TCSANOW, &oldopt);
+#endif // __APPLE__
+	return port;
 #else
 	return NULL;
 #endif
 }
 
-int shake_close_serial_osx(shake_serial_port_osx* port) {
-#ifdef __APPLE__
+int shake_close_serial_usb(shake_serial_port_usb* port) {
+#ifndef _WIN32
 	return close(port->port);
 #else
 	return 0;
@@ -63,8 +80,8 @@ int shake_close_serial_osx(shake_serial_port_osx* port) {
 /*	utility func, reads <bytes_to_read> bytes from the port associated with <devpriv> 
 *	into <buf>, handling any timeouts that occur during this operation.
 *	Returns number of bytes read. */
-int read_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to_read) {
-#ifdef __APPLE__ 
+int read_serial_bytes_usb(shake_device_private* devpriv, char* buf, int bytes_to_read) {
+#ifndef _WIN32 
 	DWORD bytes_read;
 	int sleepcounter = 0;
 	int attempts = 0;
@@ -72,8 +89,8 @@ int read_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to
 
 	/* read the port in a loop to deal with timeouts */
 	while(1) {
-		//int res = ReadFile(devpriv->port.serial_osx.port, buf + (bytes_to_read - remaining_bytes), remaining_bytes, &bytes_read, NULL);
-		bytes_read = read(devpriv->port.serial_osx.port, buf + (bytes_to_read - remaining_bytes), remaining_bytes);
+		//int res = ReadFile(devpriv->port.serial_usb.port, buf + (bytes_to_read - remaining_bytes), remaining_bytes, &bytes_read, NULL);
+		bytes_read = read(devpriv->port.serial_usb.port, buf + (bytes_to_read - remaining_bytes), remaining_bytes);
 		if(bytes_read == -1)
 			return remaining_bytes;
 
@@ -111,16 +128,16 @@ int read_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to
 /*	utility func, writes <bytes_to_write> bytes to the port associated with <devpriv>
 *	from <buf>, handling any timeouts that occur during this operation.
 *	Returns number of bytes written. */
-int write_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to_write) {
-#ifdef __APPLE__
+int write_serial_bytes_usb(shake_device_private* devpriv, char* buf, int bytes_to_write) {
+#ifndef _WIN32
 	DWORD bytes_written;
 	int remaining_bytes = bytes_to_write;
 
 	/* write the port in a loop to deal with timeouts */
 	while(1) {
-		//if(!WriteFile(devpriv->port.serial_osx.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes, &bytes_written, NULL))
+		//if(!WriteFile(devpriv->port.serial_usb.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes, &bytes_written, NULL))
 		//	return bytes_to_write - remaining_bytes;
-		bytes_written = write(devpriv->port.serial_osx.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes);
+		bytes_written = write(devpriv->port.serial_usb.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes);
 		if(bytes_written == -1)
 			return remaining_bytes;
 
@@ -141,8 +158,8 @@ int write_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_t
 #endif
 }
 
-int write_serial_bytes_delayed_osx(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
-#ifdef __APPLE__
+int write_serial_bytes_delayed_usb(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
+#ifndef _WIN32
 	DWORD bytes_written;
 	int remaining_bytes = bytes_to_write;
 
@@ -151,9 +168,9 @@ int write_serial_bytes_delayed_osx(shake_device_private* devpriv, char* buf, int
  		int current_remaining_bytes = remaining_bytes;// ((chunk_size >= remaining_bytes) ? chunk_size : remaining_bytes);
 		if(remaining_bytes > chunk_size)
 			current_remaining_bytes = chunk_size;
-		//if(!WriteFile(devpriv->port.serial_osx.port, buf + (bytes_to_write - remaining_bytes), current_remaining_bytes, &bytes_written, NULL))
+		//if(!WriteFile(devpriv->port.serial_usb.port, buf + (bytes_to_write - remaining_bytes), current_remaining_bytes, &bytes_written, NULL))
 		//	return bytes_to_write - remaining_bytes;
-		bytes_written = write(devpriv->port.serial_osx.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes);
+		bytes_written = write(devpriv->port.serial_usb.port, buf + (bytes_to_write - remaining_bytes), remaining_bytes);
 		if(bytes_written == -1)
 			return remaining_bytes;
 
