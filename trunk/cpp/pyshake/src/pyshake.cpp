@@ -230,7 +230,7 @@ static PyObject* pyshake_init_device_rfcomm_str(PyObject* self, PyObject* args) 
 }
 
 static PyObject* pyshake_init_device_usb(PyObject* self, PyObject* args) {
-#ifndef _WIN32_
+#ifndef _WIN32
 	shake_device* dev;
 	char* usb_dev;	
 	int devtype;
@@ -736,17 +736,18 @@ static PyObject* pyshake_sk7_cap_ext(PyObject* self, PyObject* args) {
 		PyObject* result = NULL;
 		if(blocks == 0 || blocks == 1) {
 			result = PyList_New(12);
+			//Py_INCREF(result);
 			for(int j=0;j<12;j++) {
 				PyList_SetItem(result, j, PyLong_FromLong(prox[j]));
 			}
 		} else {
 			result = PyList_New(24);
+			//Py_INCREF(result);
 			for(int j=0;j<24;j++) {
 				PyList_SetItem(result, j, PyLong_FromLong(prox[j]));
 			}
 		}
 			
-		Py_INCREF(result);
 		return result;
 	}
 

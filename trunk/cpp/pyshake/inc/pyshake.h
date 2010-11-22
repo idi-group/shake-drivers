@@ -23,7 +23,9 @@ extern "C" {
 static PyObject* pyshake_init_device(PyObject* self, PyObject* args);
 static PyObject* pyshake_init_device_rfcomm_i64(PyObject* self, PyObject* args);
 static PyObject* pyshake_init_device_rfcomm_str(PyObject* self, PyObject* args);
+#ifndef _WIN32
 static PyObject* pyshake_init_device_usb(PyObject* self, PyObject* args);
+#endif
 static PyObject* pyshake_init_device_debug(PyObject* self, PyObject* args);
 static PyObject* pyshake_free_device(PyObject* self, PyObject* args);
 
@@ -104,7 +106,9 @@ static PyMethodDef pyshake_methods[] = {
 	{ "init_device",	pyshake_init_device,		1,	"Initialise a SHAKE connection" },
 	{ "init_device_rfcomm_i64",	pyshake_init_device_rfcomm_i64,		1,	"Initialise a SHAKE connection over RFCOMM" },
 	{ "init_device_rfcomm_str",	pyshake_init_device_rfcomm_str,		1,	"Initialise a SHAKE connection over RFCOMM" },
+#ifndef _WIN32
 	{ "init_device_usb", pyshake_init_device_usb, 1, "Initialise a SHAKE connection using USB serial port"},
+#endif
 	{ "init_device_debug", pyshake_init_device_debug, 1, "initialise a SHAKE connection to a file (debugging)" },
 	{ "free_device",	pyshake_free_device,		1,	"Close a SHAKE connection" },
 
