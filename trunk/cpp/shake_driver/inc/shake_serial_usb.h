@@ -16,8 +16,8 @@
 *	LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _SHAKE_SERIAL_OSX_
-#define _SHAKE_SERIAL_OSX_
+#ifndef _SHAKE_SERIAL_USB_
+#define _SHAKE_SERIAL_USB_
 
 #include "shake_structs.h"
 
@@ -26,23 +26,23 @@ extern "C" {
 #endif
 
 /*	Opens the indicated USB serial port device for use with a SHAKE.
-*	<port> is a pointer to a shake_serial_port_osx structure that will store all the
+*	<port> is a pointer to a shake_serial_port_usb structure that will store all the
 *			information about the port.
 *	<usb_dev> is the name of the /dev node representing the USB serial port
 *	<device type> is either 0 for SK6 or 1 for SK7
 *	Returns the <port> pointer on success, NULL on failure. */
-shake_serial_port_osx* shake_open_serial_osx(shake_serial_port_osx* port, char* usb_dev, int device_type);
+shake_serial_port_usb* shake_open_serial_usb(shake_serial_port_usb* port, char* usb_dev, int device_type);
 
-int read_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to_read);
+int read_serial_bytes_usb(shake_device_private* devpriv, char* buf, int bytes_to_read);
 
-int write_serial_bytes_osx(shake_device_private* devpriv, char* buf, int bytes_to_write);
+int write_serial_bytes_usb(shake_device_private* devpriv, char* buf, int bytes_to_write);
 
-int write_serial_bytes_delayed_osx(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms);
+int write_serial_bytes_delayed_usb(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms);
 
 /*	Closes the indicated serial port
-*	<port is a pointer to a populated shake_serial_port_osx structure.
+*	<port is a pointer to a populated shake_serial_port_usb structure.
 *	Always returns 1. */
-int shake_close_serial_osx(shake_serial_port_osx* port);
+int shake_close_serial_usb(shake_serial_port_usb* port);
 
 #ifdef __cplusplus
 }
