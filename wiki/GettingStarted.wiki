@@ -5,9 +5,9 @@ This page gives a brief overview of the different versions of the SHAKE driver a
 
 == Driver versions ==
 The basic SHAKE driver has 3 separate versions, each written in a different language:
-  # A *C++* implementation (with interfaces to other languages such as Python, Java and C#)
-  # A pure *Python* implementation
-  # A pure *Java* implementation
+  # A *C++* implementation (with interfaces to other languages such as Python, Java and C#). This can be found in the *cpp* directory of the SVN repository.
+  # A pure *Python* implementation. This can be found in the *python* directory of the SVN repository.
+  # A pure *Java* implementation. This can be found in the *java* directory of the SVN repository.
 
 Of the 3, the C++ driver will usually be the most up to date and support most features, while the Python and Java implementations may lag behind in some places or not support more advanced functionality. All the drivers have the same general style of interface with some obvious differences due to the differences in the languages themselves. 
 
