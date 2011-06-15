@@ -139,7 +139,8 @@ JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1rfcomm(JNI
 #endif
 	return (jlong)dev;
 }
-JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1osx(JNIEnv* env, jclass, jstring rawdevicename, jint devtype) {
+JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1usb_1serial
+  (JNIEnv *env, jclass, jstring rawdevicename, jint devtype) {
 	shake_device* dev = NULL;
 #ifdef __APPLE__
 	char devicename[128];
@@ -148,7 +149,7 @@ JNIEXPORT jlong JNICALL Java_SHAKE_shake_1device_shake_1init_1device_1osx(JNIEnv
 		len = 127;
 	strncpy(devicename, (char*)env->GetStringUTFChars(rawdevicename, 0), len);
 	printf("Connecting to %s\n", devicename);
-	dev = shake_init_device_osx_usb(devicename, devtype);
+	dev = shake_init_device_usb_serial(devicename, devtype);
 	env->ReleaseStringUTFChars(rawdevicename, 0);
 #else
 	dev = 0;

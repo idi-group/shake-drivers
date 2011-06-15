@@ -200,8 +200,8 @@ public class shake_device {
 		return true;
 	}
 
-	public boolean connect_osx(String devname) {
-		dev = shake_init_device_osx(devname, device_type);
+	public boolean connect_usb(String devname) {
+		dev = shake_init_device_usb_serial(devname, device_type);
 		if(dev == 0)
 			return false;
 		return true;
@@ -687,7 +687,7 @@ public class shake_device {
 	// Startup/shutdown functions
 	private static native long shake_init_device(int com_port, int dev_type);
 	private static native long shake_init_device_rfcomm(long btaddr, int dev_type);
-	private static native long shake_init_device_osx(String devname, int dev_type);
+	private static native long shake_init_device_usb_serial(String devname, int dev_type);
 	private static native int shake_free_device(long dev);
 
 	// Information functions
