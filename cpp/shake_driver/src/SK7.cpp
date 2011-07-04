@@ -485,7 +485,7 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 
 			if(playback && devpriv->log) {
 				double tsval = dec_ascii_to_int(timestamp->timestamp, 10, 10) / 100.0;
-				fprintf(devpriv->log, "%.3f,RPH,%d,%d,%d\n", tsval, SHAKE_SENSOR_HEADING, data.rph[0], data.rph[1], data.rph[2]);
+				fprintf(devpriv->log, "%.3f,RPH,%d,%d,%d,%d\n", tsval, SHAKE_SENSOR_HEADING, data.rph[0], data.rph[1], data.rph[2]);
 			}
 			break;			   
 		}
