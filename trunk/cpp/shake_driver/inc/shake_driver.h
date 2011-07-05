@@ -545,10 +545,10 @@ SHAKE_API int sk7_roll_pitch_heading(shake_device* sh, int* rph);
 *	enabled, use shake_heading to retrieve that data.
 *	
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
-*	@param rph pointer to a 4 element array of integers, into which the quaternions will be placed. 
+*	@param rph pointer to a 4 element array of floats, into which the quaternions will be placed. 
 *										See the user manual for details of the format of each value.
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
-SHAKE_API int sk7_roll_pitch_heading_quaternions(shake_device* sh, int* rphq);
+SHAKE_API int sk7_roll_pitch_heading_quaternions(shake_device* sh, float* rphq);
 
 /** Read the proximity value of the first capacitive sensor.
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
@@ -651,6 +651,16 @@ SHAKE_API char* shake_rfid_tid(shake_device* sh);
 *	@param sh pointer to a shake_device structure as returned by shake_init_device()
 *	@return SHAKE_SUCCESS or SHAKE_ERROR */
 SHAKE_API int shake_rfid_scan(shake_device* sh);
+
+/**	Retrieves temperatures of gyro (and in binary output mode also accelerometer) sensors.
+*
+*	@param sh pointer to a shake_device structure as returned by shake_init_device()
+*	@param temps pointer to a 4 element array. On return this will be populated with the current temperatures of
+*				the gyro sensors in the following order: pitch, roll, yaw. Additionally if the SK7 is in binary
+*				output mode, the 4th element will contain the temperature of the accelerometer sensor (this is not
+*				available in ASCII output mode).
+*	@return SHAKE_SUCCESS or SHAKE_ERROR */
+SHAKE_API int shake_gyro_temperatures(shake_device* sh, float* temps);
 
 /**	Each SHAKE data packet contains a sequence number in the range 0-99. This function can be used to retrieve
 *	the sequence number from the last accessed packet for a particular sensor. For example, if the accelerometer

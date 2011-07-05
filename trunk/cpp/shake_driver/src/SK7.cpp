@@ -490,6 +490,39 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 			break;			   
 		}
 
+		case SK7_DATA_RPH_QUATERNION: {
+			sk7_data_rph_quaternion_packet* datarphq = (sk7_data_rph_quaternion_packet*)rawpacket;
+			sscanf(datarphq->data, "%f,%f,%f,%f", &(devpriv->shake->data.rphq[0]), &(devpriv->shake->data.rphq[1]), &(devpriv->shake->data.rphq[2]), &(devpriv->shake->data.rphq[3]));
+
+			int seq;
+			seq = dec_ascii_to_int(datarphq->seq.data, 2, 2);
+			data.internal_timestamps[SHAKE_SENSOR_HEADING] = seq;
+			
+			if(playback && devpriv->log) {
+				double tsval = dec_ascii_to_int(timestamp->timestamp, 10, 10) / 100.0;
+				fprintf(devpriv->log, "%.3f,QTN,%d,%f,%f,%f,%f\n", tsval, SHAKE_SENSOR_HEADING, data.rphq[0], data.rphq[1], data.rphq[2], data.rphq[3]);
+			}
+
+			break;
+		}
+
+		case SK7_DATA_GYRO_TEMP: {
+			sk7_data_gyro_temp_packet* datagyro = (sk7_data_gyro_temp_packet*)rawpacket;
+			int seq;
+			data.temps[0] = dec_ascii_to_int(datagyro->pitchtemp.data, 5, 4) / 100.0;
+			data.temps[1] = dec_ascii_to_int(datagyro->rolltemp.data, 5, 4) / 100.0;
+			data.temps[2] = dec_ascii_to_int(datagyro->yawtemp.data, 5, 4) / 100.0;
+			seq = dec_ascii_to_int(datagyro->seq.data, 2, 2);
+			// TODO data.internal_timestamps[SHAKE_SENSOR_MAG] = seq;
+			
+			if(playback && devpriv->log) {
+				double tsval = dec_ascii_to_int(timestamp->timestamp, 10, 10) / 100.0;
+				fprintf(devpriv->log, "%.3f,GOT,%d,%f,%f,%f\n", tsval, SHAKE_SENSOR_GYRO_TEMPS, data.temps[0], data.temps[1], data.temps[2]);
+			}
+
+			break;
+		}
+
 		case SK7_DATA_NVU: case SK7_DATA_NVD:
 		case SK7_DATA_NVC: case SK7_DATA_NVN:
 			if(devpriv->navcb || devpriv->navcb_STDCALL) {
@@ -682,12 +715,20 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 		}
 		case SK7_RAW_DATA_RPH_QUATERNION: {
 			sk7_raw_packet_extra_long* srpel = (sk7_raw_packet_extra_long*)rawpacket;
-			data.rphq[0] = srpel->data[0] + (srpel->data[1] << 8);
-			data.rphq[1] = srpel->data[2] + (srpel->data[3] << 8);
-			data.rphq[2] = srpel->data[4] + (srpel->data[5] << 8);
-			data.rphq[3] = srpel->data[6] + (srpel->data[7] << 8);
+			data.rphq[0] = (srpel->data[0] + (srpel->data[1] << 8)) / 16384.0;
+			data.rphq[1] = (srpel->data[2] + (srpel->data[3] << 8)) / 16384.0;
+			data.rphq[2] = (srpel->data[4] + (srpel->data[5] << 8)) / 16384.0;
+			data.rphq[3] = (srpel->data[6] + (srpel->data[7] << 8)) / 16384.0;
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srpel->seq;
 			break;
+		}
+		case SK7_RAW_DATA_GYRO_TEMP: {
+			sk7_raw_packet_extra_long* srpel = (sk7_raw_packet_extra_long*)rawpacket;
+			data.temps[0] = (srpel->data[0] + (srpel->data[1] << 8)) / 100.0;
+			data.temps[1] = (srpel->data[2] + (srpel->data[3] << 8)) / 100.0;
+			data.temps[2] = (srpel->data[4] + (srpel->data[5] << 8)) / 100.0;
+			data.temps[3] = (srpel->data[6] + (srpel->data[7] << 8)) / 100.0;
+	
 		}
 	}
 

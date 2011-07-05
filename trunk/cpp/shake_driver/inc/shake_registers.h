@@ -59,6 +59,8 @@
 /**	Capacitive sensors (SK7 only!) */
 #define SHAKE_SENSOR_CAP 4
 
+#define SHAKE_SENSOR_GYRO_TEMPS 8
+
 
 #define SHAKE_MAX_OUTPUT_RATE 0xFF
 
