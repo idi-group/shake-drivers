@@ -33,7 +33,7 @@ extern "C" {
 #define SK7_DEFAULT_CHECKSUM 0x00
 
 #define SK7_MAX_PACKET_SIZE 	64
-#define SK7_NUM_PACKET_TYPES	61
+#define SK7_NUM_PACKET_TYPES	64
 
 #define SK7_HEADER_LEN		4	// "$pid," == 4 chars
 #define SK7_RAW_HEADER_LEN	3
@@ -86,6 +86,10 @@ enum sk7_packet_types {
 	SK7_DATA_CUB,						// cap switch 11 upper threshold trigger
 	SK7_DATA_CLB,						// cap switch 11 lower threshold trigger
 
+	SK7_DATA_RPH_QUATERNION,			// RPH data, quaternion format
+
+	SK7_DATA_GYRO_TEMP,					// Gyro temperature data
+
 	SK7_DATA_TIMESTAMP,				// timestamped logged data 
 	SK7_DATA_PLAYBACK_COMPLETE,		// playback completed (special packet format)
 
@@ -118,6 +122,7 @@ enum sk7_packet_types {
 	SK7_RAW_DATA_SHAKING,
 	SK7_RAW_DATA_RPH,
 	SK7_RAW_DATA_RPH_QUATERNION,
+	SK7_RAW_DATA_GYRO_TEMP,
 
 	// TODO missing raw packet types!
 };
@@ -210,6 +215,9 @@ static char* sk7_packet_headers[] = {
 	"$CUB",		// data; cap switch 11; decreasing threshold trigger
 	"$CLB",		// data; cap switch 11; decreasing threshold trigger
 
+	"$QTN",		// data; RPH quaternions
+	"$GOT",		// data; gyro temperatures
+
 	"$TIM",		// data; timestamped logged data packet
 	"Logg",		// data; playback complete packet ("Logged Data Upload Complete.\r\n")
 
@@ -241,6 +249,7 @@ static char sk7_raw_packet_headers[] = {
 	117,	// shaking events
 	116,	// roll-pitch-heading
 	110,	// roll-pitch-heading (quaternion mode)
+	111,	// gyro temperature
 };
 
 // length of checksum part of packet in bytes
@@ -289,6 +298,9 @@ static int sk7_packet_lengths[] = {
 	6,			// data; cap switch 11; decreasing threshold trigger
 	6,			// data; cap switch 11; decreasing threshold trigger
 
+	45,			// data; RPH quaternions
+	27,			// data; gyro temperatures
+
 	16,			// data; timestamped logged data packet (length corresponds to "$TIM,1234567890," prefix)
 	31,			// data; playback complete packet ("Logged Data Upload Complete.\r\n")
 
@@ -318,6 +330,7 @@ static int sk7_packet_lengths[] = {
 	9,			// raw data; shaking event detected
 	10,			// raw data; RPH
 	12,			// raw data; RPH (quaternion)
+	12,			// raw data; gyro temperatures
 };
 
 // TODO UPDATE
@@ -334,7 +347,7 @@ static int sk7_packet_has_checksum[] = {
 	0,0,					// commands
 	1,1,					// acks
 	0,						// startup info
-	0,0,0,0,0,0,0,0,0,0,0,0,0 // raw data packets
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0 // raw data packets
 };
 
 #ifdef _WIN32
@@ -533,6 +546,34 @@ struct sk7_data_rph_packet {
 	sk7_packet_terminator term ;
 } PACKED;
 typedef struct sk7_data_rph_packet sk7_data_rph_packet;
+
+struct sk7_data_rph_quaternion_packet {
+	sk7_packet_header hdr ;
+	char sep1 ;
+	char data[35];
+	char sep4 ;
+	sk7_packet_data_2d seq ;
+	char sep5 ;
+	sk7_packet_checksum checksum ;
+	sk7_packet_terminator term ;
+} PACKED;
+typedef struct sk7_data_rph_quaternion_packet sk7_data_rph_quaternion_packet;
+
+struct sk7_data_gyro_temp_packet {
+	sk7_packet_header hdr ;
+	char sep1 ;
+	sk7_packet_data_4ds pitchtemp ;
+	char sep2 ;
+	sk7_packet_data_4ds rolltemp ;
+	char sep3 ;
+	sk7_packet_data_4ds yawtemp ;
+	char sep4 ;
+	sk7_packet_data_2d seq ;
+	char sep5 ;
+	sk7_packet_checksum checksum ;
+	sk7_packet_terminator term ;
+} PACKED;
+typedef struct sk7_data_gyro_temp_packet sk7_data_gyro_temp_packet;
 
 /* packets which never have checksums */
 

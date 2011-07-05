@@ -1399,12 +1399,22 @@ SHAKE_API int sk7_roll_pitch_heading(shake_device* sh, int* rph) {
 	return SHAKE_SUCCESS;
 }
 
-SHAKE_API int sk7_roll_pitch_heading_quaternions(shake_device* sh, int* rphq) {
+SHAKE_API int sk7_roll_pitch_heading_quaternions(shake_device* sh, float* rphq) {
 	if(!sh || !rphq) return SHAKE_ERROR;
 
 	shake_device_private* devpriv = (shake_device_private*)sh->priv;
 	for(int i=0;i<4;i++)
 		rphq[i] = devpriv->shake->data.rphq[i];
+
+	return SHAKE_SUCCESS;
+}
+
+int shake_gyro_temperatures(shake_device* sh, float* temps) {
+	if(!sh || !temps) return SHAKE_ERROR;
+
+	shake_device_private* devpriv = (shake_device_private*)sh->priv;
+	for(int i=0;i<4;i++) 
+		temps[i] = devpriv->shake->data.temps[i];
 
 	return SHAKE_SUCCESS;
 }
