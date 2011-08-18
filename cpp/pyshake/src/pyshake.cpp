@@ -463,7 +463,6 @@ static PyObject* pyshake_acc(PyObject* self, PyObject* args) {
 
 		shake_acc(devicelist[id], xyz);
 		obj = Py_BuildValue("[i, i, i]", xyz[0], xyz[1], xyz[2]);
-		Py_INCREF(obj);
 		return obj;
 	}
 
@@ -528,7 +527,6 @@ static PyObject* pyshake_gyr(PyObject* self, PyObject* args) {
 
 		shake_gyr(devicelist[id], xyz);
 		obj = Py_BuildValue("[i, i, i]", xyz[0], xyz[1], xyz[2]);
-		Py_INCREF(obj);
 		return obj;
 	}
 
@@ -594,7 +592,6 @@ static PyObject* pyshake_mag(PyObject* self, PyObject* args) {
 
 		shake_mag(devicelist[id], xyz);
 		obj = Py_BuildValue("[i, i, i]", xyz[0], xyz[1], xyz[2]);
-		Py_INCREF(obj);
 		return obj;
 	}
 
@@ -632,7 +629,6 @@ static PyObject* pyshake_sk7_roll_pitch_heading(PyObject* self, PyObject* args) 
 
 		sk7_roll_pitch_heading(devicelist[id], rph);
 		obj = Py_BuildValue("[i, i, i]", rph[0], rph[1], rph[2]);
-		Py_INCREF(obj);
 		return obj;
 	}
 
@@ -684,7 +680,6 @@ static PyObject* pyshake_sk6_cap(PyObject* self, PyObject* args) {
 
 		sk6_cap(devicelist[id], prox);
 		obj = Py_BuildValue("[i, i]", prox[0], prox[1]);
-		Py_INCREF(obj);
 		return obj;
 	}
 
@@ -708,7 +703,6 @@ static PyObject* pyshake_sk7_cap(PyObject* self, PyObject* args) {
 
 		sk7_cap(devicelist[id], prox);
 		obj = Py_BuildValue("[i, i, i, i, i, i, i, i, i, i, i, i]", prox[0], prox[1], prox[2], prox[3], prox[4], prox[5], prox[6], prox[7], prox[8], prox[9], prox[10], prox[11]);
-		Py_INCREF(obj);
 		return obj;
 	}
 
@@ -799,7 +793,6 @@ static PyObject* pyshake_analog(PyObject* self, PyObject* args) {
 
 		shake_analog(devicelist[id], a0a1);
 		obj = Py_BuildValue("[i, i]", a0a1[0], a0a1[1]);
-		Py_INCREF(obj);
 		return obj;
 	}
 
@@ -824,7 +817,6 @@ static PyObject* pyshake_read(PyObject* self, PyObject* args) {
 		value = 0;
 		ret = shake_read(devicelist[id], reg, &value);
 		obj = Py_BuildValue("[i, i]", ret, value);
-		Py_INCREF(obj);
 		return obj;
 	}
 
