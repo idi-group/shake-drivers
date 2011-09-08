@@ -339,7 +339,7 @@ public class shake_device {
 		return sk7_roll_pitch_heading(dev, rph);
 	}
 
-	public int sk7_roll_pitch_heading_quaternions(int[] rphq) {
+	public int sk7_roll_pitch_heading_quaternions(float[] rphq) {
 		return sk7_roll_pitch_heading_quaternions(dev, rphq);
 	}
 
@@ -730,7 +730,7 @@ public class shake_device {
 	private static native int shake_shaking_timestamp(long dev);
 
 	private static native int sk7_roll_pitch_heading(long dev, int[] rph);
-	private static native int sk7_roll_pitch_heading_quaternions(long dev, int[] rphq);
+	private static native int sk7_roll_pitch_heading_quaternions(long dev, float[] rphq);
 	private static native int sk7_configure_roll_pitch_heading(long dev, int value);
 
 	private static native int shake_register_event_callback(Object obj, long dev);

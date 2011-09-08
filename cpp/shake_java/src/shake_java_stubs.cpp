@@ -790,16 +790,16 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading(JNIEnv
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading_1quaternions(JNIEnv * env, jclass, jlong dev, jintArray rphq) {
-	int foo[4];
+JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading_1quaternions(JNIEnv * env, jclass, jlong dev, jfloatArray rphq) {
+	float foo[4];
 	jsize arraylength = env->GetArrayLength(rphq);
-	jint* arr = env->GetIntArrayElements(rphq, 0);
+	jfloat* arr = env->GetFloatArrayElements(rphq, 0);
 	int ret = sk7_roll_pitch_heading_quaternions((shake_device*)dev, foo);
 	arr[0] = foo[0];
 	arr[1] = foo[1];
 	arr[2] = foo[2];
 	arr[3] = foo[3];
-	env->ReleaseIntArrayElements(rphq, arr, 0);
+	env->ReleaseFloatArrayElements(rphq, arr, 0);
 	return ret;
 }
 
