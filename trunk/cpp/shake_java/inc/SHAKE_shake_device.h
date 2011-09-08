@@ -536,10 +536,10 @@ JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading
 /*
  * Class:     SHAKE_shake_device
  * Method:    sk7_roll_pitch_heading_quaternions
- * Signature: (J[I)I
+ * Signature: (J[F)I
  */
 JNIEXPORT jint JNICALL Java_SHAKE_shake_1device_sk7_1roll_1pitch_1heading_1quaternions
-  (JNIEnv *, jclass, jlong, jintArray);
+  (JNIEnv *, jclass, jlong, jfloatArray);
 
 /*
  * Class:     SHAKE_shake_device
