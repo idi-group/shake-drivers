@@ -156,6 +156,15 @@ public class ShakeDevicePrivate implements Runnable {
             return true;
 	}
 
+	public boolean write_c() {
+		// Write c to the serial port for calibration. HS
+        if(closed)
+            return false;
+        byte[] temp = {'c','\n'};
+        port.writeBytes(temp, 2, 0);
+        return true;
+     }
+
 	public void setEventListener(ShakeListener sl) {
 		shake.callback = sl;
 	}

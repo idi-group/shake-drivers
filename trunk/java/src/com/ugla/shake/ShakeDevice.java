@@ -497,6 +497,12 @@ public class ShakeDevice {
 		return dev.writeRegister(reg, val);
 	}
 	
+	public boolean calibration_c() {
+		// This write c to the output to go to the next step of calibration
+		return dev.write_c();
+		
+	}
+	
 	
 	
 
