@@ -636,6 +636,29 @@ static PyObject* pyshake_sk7_roll_pitch_heading(PyObject* self, PyObject* args) 
 	return Py_None;
 }
 
+static PyObject* pyshake_sk7_roll_pitch_heading_quaternions(PyObject* self, PyObject* args) {
+	int id;
+
+	PyArg_ParseTuple(args, "i", &id);
+
+	if(id < 0 || id >= MAX_SHAKES) {
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+
+	if(devicelist[id] != NULL) {
+		float rphq[4];
+		PyObject* obj;
+
+		sk7_roll_pitch_heading_quaternions(devicelist[id], rphq);
+		obj = Py_BuildValue("[d, d, d, d]", rphq[0], rphq[1], rphq[2], rphq[3]);
+		return obj;
+	}
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
 static PyObject* pyshake_sk6_cap0(PyObject* self, PyObject* args) {
 	int id;
 
