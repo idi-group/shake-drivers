@@ -55,6 +55,7 @@ static PyObject* pyshake_mag(PyObject* self, PyObject* args);
 
 static PyObject* pyshake_heading(PyObject* self, PyObject* args);
 static PyObject* pyshake_sk7_roll_pitch_heading(PyObject* self, PyObject* args);
+static PyObject* pyshake_sk7_roll_pitch_heading_quaternions(PyObject* self, PyObject* args);
 
 static PyObject* pyshake_sk6_cap0(PyObject* self, PyObject* args);
 static PyObject* pyshake_sk6_cap1(PyObject* self, PyObject* args);
@@ -139,6 +140,7 @@ static PyMethodDef pyshake_methods[] = {
 
 	{ "heading",		pyshake_heading,			1,	"heading" },
 	{ "sk7_roll_pitch_heading", pyshake_sk7_roll_pitch_heading, 1, "roll, pitch, heading" },
+	{ "sk7_roll_pitch_heading_quaternions", pyshake_sk7_roll_pitch_heading_quaternions, 1, "roll, pitch, heading (quaternion format)" },
 
 	{ "sk6_cap0",			pyshake_sk6_cap0,				1,	"cap sw 0 proximity" },
 	{ "sk6_cap1",			pyshake_sk6_cap1,				1,	"cap sw 1 proximity" },
