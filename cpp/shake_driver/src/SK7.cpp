@@ -715,10 +715,10 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 		}
 		case SK7_RAW_DATA_RPH_QUATERNION: {
 			sk7_raw_packet_extra_long* srpel = (sk7_raw_packet_extra_long*)rawpacket;
-			data.rphq[0] = (srpel->data[0] + (srpel->data[1] << 8)) / 16384.0;
-			data.rphq[1] = (srpel->data[2] + (srpel->data[3] << 8)) / 16384.0;
-			data.rphq[2] = (srpel->data[4] + (srpel->data[5] << 8)) / 16384.0;
-			data.rphq[3] = (srpel->data[6] + (srpel->data[7] << 8)) / 16384.0;
+			data.rphq[0] = ((short)(srpel->data[0] + (srpel->data[1] << 8))) / 16384.0;
+			data.rphq[1] = ((short)(srpel->data[2] + (srpel->data[3] << 8))) / 16384.0;
+			data.rphq[2] = ((short)(srpel->data[4] + (srpel->data[5] << 8))) / 16384.0;
+			data.rphq[3] = ((short)(srpel->data[6] + (srpel->data[7] << 8))) / 16384.0;
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srpel->seq;
 			break;
 		}
