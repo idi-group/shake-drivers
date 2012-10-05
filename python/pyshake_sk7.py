@@ -316,13 +316,13 @@ class SK7(pyshake_sk_common.SHAKE):
 		elif packet_type >= SK7_DATA_NVU and packet_type <= SK7_DATA_NVN:
 			if self.__shake.navcb != None:
 				event = -1
-				if packet[3] == 'U':
+				if packetbuf[3] == 'U':
 					event = SHAKE_NAV_UP
-				elif packet[3] == 'D':
+				elif packetbuf[3] == 'D':
 					event = SHAKE_NAV_DOWN
-				elif packet[3] == 'C':
+				elif packetbuf[3] == 'C':
 					event = SHAKE_NAV_CENTRE
-				elif packet[3] == 'N':
+				elif packetbuf[3] == 'N':
 					event = SHAKE_NAV_NORMAL
 				self.__shake.navcb(event)
 		elif packet_type >= SK7_DATA_CU0 and packet_type <= SK7_DATA_CLB:
