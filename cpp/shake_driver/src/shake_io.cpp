@@ -35,7 +35,7 @@ int read_debug_bytes(shake_device_private* devpriv, char* buf, int bytes_to_read
 	shake_sleep(10);
 
 	while(1) {
-		SHAKE_DBG("Reading %d bytes from position %d\n", remaining_bytes, ftell(devpriv->port.dbg_read));
+		SHAKE_DBG("Reading %d bytes from position %ld\n", remaining_bytes, ftell(devpriv->port.dbg_read));
 		if(devpriv->rthread_done) {
 			shake_thread_exit(102);
 		}

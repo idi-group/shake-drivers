@@ -420,7 +420,7 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 				double tsval = dec_ascii_to_int(timestamp->timestamp, 10, 10) / 100.0;
 				fprintf(devpriv->log, "%.3f,CAP,%d, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", tsval, SHAKE_SENSOR_CAP, data.cap_sk7[0][0], data.cap_sk7[0][1], 
 														data.cap_sk7[0][2], data.cap_sk7[0][3], data.cap_sk7[0][4], data.cap_sk7[0][5], data.cap_sk7[0][6], data.cap_sk7[0][7], 
-														data.cap_sk7[0][8], data.cap_sk7[0][9], data.cap_sk7[0][10], data.cap_sk7[0][11], data.cap_sk7[0][12]); 
+														data.cap_sk7[0][8], data.cap_sk7[0][9], data.cap_sk7[0][10], data.cap_sk7[0][11]); 
 			}
 			break;
 		}
