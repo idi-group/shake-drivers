@@ -390,7 +390,7 @@ def driver_version():
 class shake_device:
 
     ## Constructor
-    def __init__(self, t = SHAKE_SK6):
+    def __init__(self, t = SHAKE_SK7):
         self.__shakedev = -1;
         self.__lasterror = ""
         self.__connected = False
