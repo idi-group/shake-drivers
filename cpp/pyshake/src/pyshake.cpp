@@ -32,7 +32,6 @@ static PyObject* callbacks[MAX_SHAKES][2];
 static PyObject* audio_callbacks[MAX_SHAKES][4];
 static int devicelist_count = 0;
 
-static int event_callback_active[MAX_SHAKES] = { 0 };
 static int audio_callback_active[MAX_SHAKES] = { 0 };
 
 static void SHAKE_CALLBACK main_callback(shake_device* dev, int ev) {
@@ -143,17 +142,15 @@ static PyObject* pyshake_cleanup(PyObject* self, PyObject* args) {
 PYSHAKE_EXPORT void initpyshake(void) {
 	PyObject* mod = Py_InitModule("pyshake", pyshake_methods);
 	PyEval_InitThreads();
-	pyshake_ex = PyErr_NewException("pyshake.error", NULL, NULL);
+	char newExceptionName[] = "pyshake.error";
+	pyshake_ex = PyErr_NewException(&newExceptionName[0], NULL, NULL);
 	Py_INCREF(pyshake_ex);
 	PyModule_AddObject(mod, "PyshakeError", pyshake_ex);
 }
 
 // arguments: a COM port number or a BT addr 
 static PyObject* pyshake_init_device(PyObject* self, PyObject* args) {
-	int com_port, parsedok;
-	char* btaddr;
-	shake_device* dev;
-	int devtype;
+	shake_device* dev = NULL;
 
 	if(devicelist_count >= MAX_SHAKES) {
 		PyRun_SimpleString("print 'Maximum number of SHAKES reached!'");
@@ -161,6 +158,7 @@ static PyObject* pyshake_init_device(PyObject* self, PyObject* args) {
 	}
 
 	#ifdef _WIN32
+	int parsedok, com_port devtype;
 	parsedok = PyArg_ParseTuple(args, "ii", &com_port, &devtype);
 	dev = shake_init_device(com_port, devtype);
 	#endif
@@ -1209,10 +1207,7 @@ static PyObject* pyshake_register_audio_callback(PyObject* self, PyObject* args)
 }
 
 static PyObject* pyshake_heart_rate(PyObject* self, PyObject* args) {
-	PyObject *callback;
-	PyObject *device_object;
 	int id;
-	PyObject *result = NULL;
 
     if (PyArg_ParseTuple(args, "i", &id)) {
 		if(id < 0 || id >= MAX_SHAKES) {

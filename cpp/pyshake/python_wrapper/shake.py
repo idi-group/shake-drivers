@@ -396,7 +396,7 @@ class shake_device:
         self.__connected = False
         self.__devtype = t # default to SK6
 
-    ##  Attempts to open a connection to a SHAKE device
+    ##  Attempts to open a connection to a SHAKE device - Windows only?
     #
     #   @param p should be a COM port number on Windows (integer type) or a Bluetooth address in string format
     #       ("12:34:56:78:90") on Linux
@@ -463,6 +463,12 @@ class shake_device:
         self.__connected = True
         return True
 
+    ##  Attempts to open a connection to a SHAKE device
+    #
+    #   @param usb_dev should be the character device file related to the Shake to connect to,
+    #       for example '/dev/tty.SHAKESK7SN0075-SPPDev', passed as a string.
+    #
+    #   @return True on success, False on failure. If False, use last_error() to obtain a string indicating the problem.
     def connect_usb(self, usb_dev):
         self.__shakedev = pyshake.init_device_usb(usb_dev, self.__devtype)
         if self.__shakedev == -1:

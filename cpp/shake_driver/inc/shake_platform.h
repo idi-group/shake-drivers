@@ -101,9 +101,11 @@ extern "C" {
 #define SHAKE_CALLBACK
 
 #ifdef SHAKE_DEBUGGING
+// is that better?
+//#define SHAKE_DBG(...) do{ fprintf( stderr, __VA_ARGS__ ); } while( false )
 #define SHAKE_DBG printf
 #else
-#define SHAKE_DBG //
+#define SHAKE_DBG(...) // 
 #endif
 
 #define SHAKE_INT64 long long
