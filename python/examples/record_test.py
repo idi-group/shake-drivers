@@ -23,9 +23,11 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Simple demo of logging data to the SHAKE memory and playing it back 
+# to a local file
+
 import time, sys, platform
 from pyshake import *
-
 
 done = False
 
@@ -73,6 +75,12 @@ if __name__ == "__main__":
 
     sd.write_data_format(2)
 
+    # configure the sensors you want to log and turn off any you don't need
+    # to save memory ...
+    sd.write_power_state(0xFF)
+    sd.write_sample_rate(SHAKE_SENSOR_ACC, 20)
+    sd.write_sample_rate(SHAKE_SENSOR_MAG, 20)
+
     # register a callback so we can get the "Logging completed" event
     sd.register_event_callback(eventcallback)
 
@@ -82,7 +90,7 @@ if __name__ == "__main__":
     print "reset"
     sd.logging_record()
     print "record"
-    time.sleep(2)
+    time.sleep(3) # record for a few seconds
     sd.logging_stop()
     print "stop"
     sd.logging_play('log.txt')
