@@ -25,10 +25,10 @@
 
 
 import pyshake_sk_common
-import string
+import string, re
 from pyshake_constants import *
 
-SK7_NUM_INFO_LINES = 10
+SK7_NUM_INFO_LINES = 11
 SK7_ASCII_READ_OK = 1
 SK7_ASCII_READ_CONTINUE = 2
 SK7_ASCII_READ_ERROR = -1
@@ -36,6 +36,7 @@ SK7_RAW_READ_OK = 1
 SK7_RAW_READ_CONTINUE = 2
 SK7_RAW_READ_ERROR = -1
 
+# enum for identifying the lines in the device info message
 (
     SK7_HEADER,
     SK7_COPYRIGHT,
@@ -46,7 +47,8 @@ SK7_RAW_READ_ERROR = -1
     SK7_SLOT1,
     SK7_SLOT2,
     SK7_SLOT3,
-    SK7_BLUETOOTH_FIRMWARE
+    SK7_BLUETOOTH_FIRMWARE,
+    SK7_SLOT4
 ) = range(SK7_NUM_INFO_LINES)
 
 # TODO
@@ -466,49 +468,47 @@ class SK7(pyshake_sk_common.SHAKE):
         return type
 
     def read_device_info(self):
-        for i in range(7):
+        for i in range(SK7_NUM_INFO_LINES):
             line = self.__shake.read_info_line()
             if line == None:
                 return False
             
-            if i == SK7_FIRMWARE_REV:       # firmware revision line
-                # find start of revision number and get the value
-                pos = 0
-                while (ord(line[pos]) != 0xA and ord(line[pos]) != 0xD) and (line[pos] < '0' or line[pos] > '9'):
-                    pos += 1
-
-                try:
-                    self.__shake.fwrev = float((line[pos:pos+4]))
-                except ValueError:
+            if i == SK7_FIRMWARE_REV:   
+                # eg: Firmware Revision 02.37
+                res = re.search("\d", line)
+                if not res:
                     self.__shake.fwrev = None
-            elif i == SK7_HARDWARE_REV:     # hardware revision line
-                # find start of revision number and get the value
-                pos = 0
-                while (ord(line[pos]) != 0xA and ord(line[pos]) != 0xD) and (line[pos] < '0' or line[pos] > '9'):
-                    pos += 1
-
-                try:
-                    self.__shake.hwrev = float((line[pos:pos+4]))
-                except ValueError:
+                else:
+                    self.__shake.fwrev = float(line[res.start():res.start()+5])
+            elif i == SK7_HARDWARE_REV:     
+                # eg: Hardware Revision 01.00
+                res = re.search("\d", line)
+                if not res:
                     self.__shake.hwrev = None
-            elif i == SK7_SERIAL_NUMBER:    # serial number
-                # find start of serial number and read remainder of string
-                pos = 0
-                spacecount = 0
-                while spacecount < 2:
-                    if line[pos] == ' ':
-                        spacecount += 1
-                    pos += 1
+                else:
+                    self.__shake.hwrev = float(line[res.start():res.start()+5])
+            elif i == SK7_SERIAL_NUMBER:    
+                # eg: Serial Number 0077
 
-                self.__shake.serial = line[pos:]
-                pos = 0
-                while pos < len(self.__shake.serial):
-                    if ord(self.__shake.serial[pos]) == 0xA:
-                        break
-                    pos += 1
-
-                self.__shake.serial = self.__shake.serial[:pos]
-            # TODO other lines
+                res = re.search("\d", line)
+                if not res:
+                    self.__shake.serial = None
+                else:
+                    self.__shake.serial = line[res.start():res.start()+4]
+            elif i >= SK7_SLOT0 and i <= SK7_SLOT3:
+                # TODO just store names for now, ideally map these to an enum 
+                # instead to make testing for presence of a specific module 
+                # easier to do
+                self.__shake.modules[i - SK7_SLOT0] = line.strip()
+            elif i == SK7_BLUETOOTH_FIRMWARE:
+                # eg: Bluetooth Firmware Revision 00.02
+                res = re.search("\d", line)
+                if not res:
+                    self.__shake.bluetoothfwrev =  None
+                else:
+                    self.__shake.bluetoothfwrev = float(line[res.start():res.start()+5])
+            elif i == SK7_SLOT4:
+                self.__shake.modules[4] = line.strip()
     
         self.__shake.read_data(1)
         self.__shake.synced = True

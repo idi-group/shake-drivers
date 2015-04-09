@@ -106,7 +106,7 @@ class shake_device:
             self.modules = [SK6_MODULE_NONE for x in range(2)]
             self.SHAKE = pyshake_sk6.SK6(self, type)
         else:
-            self.modules = [SK7_MODULE_NONE for x in range(4)]
+            self.modules = [SK7_MODULE_NONE for x in range(5)]
             self.SHAKE = pyshake_sk7.SK7(self, type)
 
         self.checksum = False
@@ -428,17 +428,26 @@ class shake_device:
     def info_module(self, slotnumber):
         self.info_retrieve()
         if slotnumber < 0 or slotnumber > len(self.modules):
-            return -1
+            return None
         return self.modules[slotnumber]
     
-    def info_module_name(self, type):
+    def info_module_name(self, module):
+        # TODO supposed to receive an int enum value, but haven't got
+        # that enum completed yet so just return raw string from device 
+        if isinstance(module, str):
+            return module
+
         for i in range(SK6_MODULE_NONE, SK6_MODULE_LAST, 1):
-            if type == i:
+            if module == i:
                 return pyshake_sk6.SK6_modules[i]
         for i in range(SK7_MODULE_NONE, SK7_MODULE_LAST, 1):
-            if type == i:
+            if module == i:
                 return pyshake_sk7.SK7_modules[i-SK7_MODULE_NONE]
         return "unknown module type"
+
+    def info_bluetooth_firmware_revision(self):
+        self.info_retrieve()
+        return self.bluetoothfwrev
 
     #
     #       Register access
@@ -996,7 +1005,7 @@ class shake_device:
         while pos < 512:
             tmp = self.read_data(1)
             
-            # skip nulls
+            # skip nulls (some SHAKEs output stray nulls in the startup text)
             if ord(tmp) == 0:
                 continue
         
