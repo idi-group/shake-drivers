@@ -14,6 +14,6 @@ setup(name='pyshake',
 		description='Python module for SHAKE SK6/SK7',
 		author='University of Glasgow',
 		author_email='andrew.ramsay@glasgow.ac.uk',
-		url='http://code.google.com/p/shake-drivers',
+		url='http://github.com/andrewramsay/shake-drivers',
 		py_modules = ['pyshake', 'pyshake_sk7', 'pyshake_sk7_constants', 'pyshake_sk6', 'pyshake_sk6_constants', 'pyshake_constants', 'pyshake_serial_pc', 'pyshake_sk_common'],
 )
