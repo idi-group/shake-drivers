@@ -25,24 +25,12 @@
 
 
 import atexit, thread, re, string, os
+from time import sleep
+
 from pyshake_constants import *
 import pyshake_sk6 
 import pyshake_sk7
-
-#       Import appropriate serial port class depending on platform
-platform = "S60"
-if os.name == 'nt' or os.name == 'ce':
-    platform = "Windows"
-    from time import sleep as ssleep
-    import pyshake_serial_pc as pyshake_serial
-elif os.name == 'posix':
-    platform = "Posix"
-    from time import sleep as ssleep
-    import pyshake_serial_pc as pyshake_serial
-else:
-    from e32 import ao_callgate
-    from e32 import ao_sleep as ssleep
-    import pyshake_serial_s60 as pyshake_serial
+import pyshake_serial_pc as pyshake_serial
 
 class shake_error(Exception):
     def __init__(self, value):
@@ -149,7 +137,7 @@ class shake_device:
 
         elapsed = 0
         while elapsed < 10.0 and not self.synced:
-            ssleep(0.01)
+            sleep(0.01)
             elapsed += 0.01
 
         if self.thread_done:
@@ -199,12 +187,7 @@ class shake_device:
                 self.thread_done = True
                 return SHAKE_ERROR
 
-            #       ao_callgate sets up an Active Object that is used to trigger calls
-            #       to self.port.write from the thread the object was created in. 
-            if platform == "S60":
-                self.write_to_port = ao_callgate(self.port.write)
-            else:
-                self.write_to_port = self.port.write
+            self.write_to_port = self.port.write
         except pyshake_serial.pyshake_serial_error:
             debug('error; port creation failed')
             self.thread_done = True
@@ -414,7 +397,7 @@ class shake_device:
             
             while count < 1000 and self.fwrev == None:
                 count+=1
-                ssleep(0.001)
+                sleep(0.001)
         return SHAKE_SUCCESS
 
     def info_firmware_revision(self):
@@ -475,7 +458,7 @@ class shake_device:
         
         timeout = self.ack_timeout_ms
         while self.waiting_for_ack_signal:
-            ssleep(0.001)
+            sleep(0.001)
             timeout -= 1
             if timeout == 0:
                 break
@@ -506,7 +489,7 @@ class shake_device:
         
         timeout = self.ack_timeout_ms
         while timeout != 0 and self.waiting_for_ack_signal:
-            ssleep(0.001)
+            sleep(0.001)
             timeout -= 1
             
         debug("+++ ACK WAIT OVER timeout = " + str(timeout))
@@ -997,7 +980,7 @@ class shake_device:
         
         elapsed = 0
         while self.waiting_for_ack and elapsed < 2000:
-            ssleep(0.01)
+            sleep(0.01)
             elapsed += 10 
                             
         self.waiting_for_ack = False
