@@ -85,7 +85,7 @@ class shake_device:
 	#
 
 	# 	2nd parameter indicates type of device (SK6 or SK7). Default is SK6
-	def __init__(self, type = SHAKE_SK6):
+	def __init__(self, type = SHAKE_SK7):
 			
 		self.handle = shake_device.shake_handle_count
 		shake_device.shake_handle_count += 1
