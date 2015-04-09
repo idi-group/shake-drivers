@@ -4,7 +4,7 @@ This project contains drivers for the SHAKE SK6 and SK7 sensor packs. For more i
 
 This repo contains multiple drivers. The most feature complete implementation is a C++ driver that can be compiled for Windows, OSX and Linux (32/64-bit). This driver also has bindings for Python, C# and Java, although in some cases functionality supported by the C++ code has not yet been exposed through these bindings.
 
-In addition, there are two separate implementations, one written in Python (with a dependency on [pyserial](http://pyserial.sourceforge.net/)) and one written in Java (probably most useful as it supports Android). 
+In addition, there are two separate implementations, one written in Python (with a dependency on [pyserial](http://pyserial.sourceforge.net/)) and one written in Java (probably most useful in that it supports Android). 
 
 **NOTE 1**: If you install both the Python/C++ bindings and the pure Python implementation in the same Python environment you may encounter naming conflicts, as both include a module called "pyshake".
 
