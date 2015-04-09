@@ -94,8 +94,8 @@ if __name__ == "__main__":
     print "Serial number:", sd.info_serial_number()
     print "Firmware version:", sd.info_firmware_revision()
     print "Hardware version:", sd.info_hardware_revision()
-    print "Expansion module 1:", sd.info_module_name(sd.info_module(0))
-    print "Expansion module 2:", sd.info_module_name(sd.info_module(1))
+    for i in range(5):
+       print "Expansion module %d: %s" % (i+1, sd.info_module_name(sd.info_module(i)))
 
     # register event callback
     sd.register_event_callback(eventcallback)
