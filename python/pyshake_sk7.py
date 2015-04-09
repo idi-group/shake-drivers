@@ -476,24 +476,18 @@ class SK7(pyshake_sk_common.SHAKE):
             if i == SK7_FIRMWARE_REV:   
                 # eg: Firmware Revision 02.37
                 res = re.search("\d", line)
-                if not res:
-                    self.__shake.fwrev = None
-                else:
+                if res:
                     self.__shake.fwrev = float(line[res.start():res.start()+5])
             elif i == SK7_HARDWARE_REV:     
                 # eg: Hardware Revision 01.00
                 res = re.search("\d", line)
-                if not res:
-                    self.__shake.hwrev = None
-                else:
+                if res:
                     self.__shake.hwrev = float(line[res.start():res.start()+5])
             elif i == SK7_SERIAL_NUMBER:    
                 # eg: Serial Number 0077
 
                 res = re.search("\d", line)
-                if not res:
-                    self.__shake.serial = None
-                else:
+                if res:
                     self.__shake.serial = line[res.start():res.start()+4]
             elif i >= SK7_SLOT0 and i <= SK7_SLOT3:
                 # TODO just store names for now, ideally map these to an enum 
@@ -503,9 +497,7 @@ class SK7(pyshake_sk_common.SHAKE):
             elif i == SK7_BLUETOOTH_FIRMWARE:
                 # eg: Bluetooth Firmware Revision 00.02
                 res = re.search("\d", line)
-                if not res:
-                    self.__shake.bluetoothfwrev =  None
-                else:
+                if res:
                     self.__shake.bluetoothfwrev = float(line[res.start():res.start()+5])
             elif i == SK7_SLOT4:
                 self.__shake.modules[4] = line.strip()

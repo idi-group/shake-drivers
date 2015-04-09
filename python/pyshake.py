@@ -96,11 +96,11 @@ class shake_device:
         
         self.waiting_for_ack = False
         self.waiting_for_ack_signal = False
-        self.serial = None
-        self.fwrev = None
-        self.hwrev = None
+        self.serial = "missing"
+        self.fwrev = -1
+        self.hwrev = -1
         self.lastfid = ""
-        self.bluetoothfwrev = None
+        self.bluetoothfwrev = -1
         
         if type == SHAKE_SK6:
             self.modules = [SK6_MODULE_NONE for x in range(2)]
@@ -118,6 +118,7 @@ class shake_device:
 
         self.lastack = False
         self.lastaddr, self.lastval = 0,0
+        self.ack_timeout_ms = 500
 
         self.lastevent = 0
         self.logfp = None
@@ -469,7 +470,7 @@ class shake_device:
         self.waiting_for_ack_signal = True
         self.waiting_for_ack = True
         
-        timeout = 250
+        timeout = self.ack_timeout_ms
         while self.waiting_for_ack_signal:
             ssleep(0.001)
             timeout -= 1
@@ -500,7 +501,7 @@ class shake_device:
         self.waiting_for_ack_signal = True
         self.waiting_for_ack = True
         
-        timeout = 250
+        timeout = self.ack_timeout_ms
         while timeout != 0 and self.waiting_for_ack_signal:
             ssleep(0.001)
             timeout -= 1
@@ -998,6 +999,12 @@ class shake_device:
     #
     #       Miscellaneous functions
     #
+
+    def get_ack_timeout_ms(self):
+        return self.ack_timeout_ms
+
+    def set_ack_timeout_ms(self, new_timeout_ms):
+        self.ack_timeout_ms = new_timeout_ms
 
     def read_info_line(self):
         pos = 0
