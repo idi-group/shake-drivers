@@ -55,7 +55,7 @@ if __name__ == "__main__":
     try:
         param = int(sys.argv[1])
     except ValueError:
-        pass
+        param = sys.argv[1]
 
     if not sd.connect(param):
         print "Failed to connect!"
