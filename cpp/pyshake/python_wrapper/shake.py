@@ -444,7 +444,7 @@ class shake_device:
     #       If the address is in integer format, it should correspond directly to the target device Bluetooth address
     #           eg 00:11:22:33:44:55 could be given as 0x001122334455
     #       If the address is in string format, any of the following formats should work (note that a-f characters must be lowercase)
-    #           "00:aa:bb:cc:dd:ee:ff" OR "00aabbccddeeff"
+    #           "aa:bb:cc:dd:ee:ff" OR "aabbccddeeff"
     #
     #   @return True on success, False on failure. If False, use last_error() to obtain a string indicating the problem.
     def connect_rfcomm(self, btaddr):
