@@ -1,17 +1,17 @@
-# Copyright (c) 2006-2009, University of Glasgow
+# Copyright (c) 2006-2015, University of Glasgow
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
 #
 #    * Redistributions of source code must retain the above copyright notice, this list of 
-#		conditions and the following disclaimer.
+#               conditions and the following disclaimer.
 #    * Redistributions in binary form must reproduce the above copyright notice, this list
-#		of conditions and the following disclaimer in the documentation and/or other
-#	 	materials provided with the distribution.
+#               of conditions and the following disclaimer in the documentation and/or other
+#               materials provided with the distribution.
 #    * Neither the name of the University of Glasgow nor the names of its contributors 
-#		may be used to endorse or promote products derived from this software without
-# 		specific prior written permission.
+#               may be used to endorse or promote products derived from this software without
+#               specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -23,80 +23,86 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
+import time, sys, platform
 from pyshake import *
-import time
-import platform
 
 # define an callback function for events from the SHAKE
 def eventcallback(event_type):
-	if event_type == SHAKE_NAV_UP:
-		print "Button UP"
-	elif event_type == SHAKE_NAV_DOWN:
-		print "Button DOWN"
-	elif event_type == SHAKE_NAV_CENTRE:
-		print "Button CENTRE"
-	elif event_type == SHAKE_NAV_NORMAL:
-		print "Button RELEASE"
-	else:
-		print "Event type =", event_type
+    if event_type == SHAKE_NAV_UP:
+        print "Button UP"
+    elif event_type == SHAKE_NAV_DOWN:
+        print "Button DOWN"
+    elif event_type == SHAKE_NAV_CENTRE:
+        print "Button CENTRE"
+    elif event_type == SHAKE_NAV_NORMAL:
+        print "Button RELEASE"
+    else:
+        print "Event type =", event_type
 
-# create a shake_device object
-sd = shake_device(SHAKE_SK7)
+if __name__ == "__main__":
 
-# connect using a COM port number (pyserial uses port numbers starting at 0, so
-# this is actually saying "use COM3")
-# you can also use the other forms of port identifier that pyserial supports, eg
-# sd.connect('COM3:')
+    if len(sys.argv) != 2:
+        print "pyshake_test.py <device address>"
+        print ""
+        print "Examples:"
+        print "pyshake_test.py 4 (connect to COM port 5 on Windows (pyserial port numbers are 0-based))"
+        print "pyshake_test.py /dev/tty.SHAKESK7SN0077-SPPDev (connect to a specific device on OSX"
+        sys.exit(-1)
 
-#check if underlying system is mac
-if platform.mac_ver()[0]=='':
-	sd.connect(40)
-else:
-	sd.connect('/dev/tty.SHAKESK7SN0028-SPPDev-1')
+    # create a shake_device object and attempt to create the connection
+    sd = shake_device(SHAKE_SK7)
 
-import time
-time.sleep(5)
+    try:
+        param = int(sys.argv[1])
+    except ValueError:
+        pass
 
-sd.write_data_format(2)
+    if not sd.connect(param):
+        print "Failed to connect!"
+        sys.exit(-1)
 
-# turn on the accelerometer, capacitive sensors and button
-if sd.write_power_state(SHAKE_POWER_ACC | SHAKE_POWER_CAP | SHAKE_POWER_NAV) != SHAKE_SUCCESS:
-	print "Failed to set power state"
+    # ensure data is being streamed in the more efficient binary format
+    sd.write_data_format(2)
 
-# set accelerometer sample rate to 20Hz
-if sd.write_sample_rate(SHAKE_SENSOR_ACC, 20) != SHAKE_SUCCESS:
-	print "Failed to set sample rate (ACC)"
+    # turn on the accelerometer, capacitive sensors and button
+    if sd.write_power_state(SHAKE_POWER_ACC | SHAKE_POWER_MAG | SHAKE_POWER_NAV) != SHAKE_SUCCESS:
+        print "Failed to set power state"
 
-# set capacitive sensor sample rate to 20Hz
-if sd.write_sample_rate(SHAKE_SENSOR_CAP, 20) != SHAKE_SUCCESS:
-	print "Failed to set sample rate (CAP)"
+    # set accelerometer sample rate to 20Hz
+    if sd.write_sample_rate(SHAKE_SENSOR_ACC, 20) != SHAKE_SUCCESS:
+        print "Failed to set sample rate (ACC)"
 
-# display some accelerometer readings
-for i in range(200):
-	print "Accelerometer:", sd.acc(), "\r",
-	time.sleep(0.01)
-print "\n"
+    # set magnetometer sensor sample rate to 20Hz
+    if sd.write_sample_rate(SHAKE_SENSOR_MAG, 20) != SHAKE_SUCCESS:
+        print "Failed to set sample rate (MAG)"
 
-# display some capacitive sensor reading
-for i in range(200):
-	print "Cap sensors: ", sd.cap(), "\r",
-	time.sleep(0.01)
-print "\n"
+    # display some accelerometer readings
+    for i in range(200):
+        x, y, z = sd.acc()
+        print "Accelerometer: %04d %04d %04d \r" % (x, y, z), 
+        time.sleep(0.01)
+    print "\n"
 
-# display information about the connected SHAKE
-print "Serial number:", sd.info_serial_number()
-print "Firmware version:", sd.info_firmware_revision()
-print "Hardware version:", sd.info_hardware_revision()
-print "Expansion module 1:", sd.info_module_name(sd.info_module(0))
-print "Expansion module 2:", sd.info_module_name(sd.info_module(1))
+    # display some magnetometer readings
+    for i in range(200):
+        x, y, z = sd.mag()
+        print "Magnetometer: %04d %04d %04d \r" % (x, y, z),
+        time.sleep(0.01)
+    print "\n"
 
-# register event callback
-sd.register_event_callback(eventcallback)
+    # display information about the connected SHAKE
+    print "Serial number:", sd.info_serial_number()
+    print "Firmware version:", sd.info_firmware_revision()
+    print "Hardware version:", sd.info_hardware_revision()
+    print "Expansion module 1:", sd.info_module_name(sd.info_module(0))
+    print "Expansion module 2:", sd.info_module_name(sd.info_module(1))
 
-print "Try moving the button on the SHAKE..."
-time.sleep(5)
+    # register event callback
+    sd.register_event_callback(eventcallback)
 
-# close the connection
-sd.close()
+    print "Try moving the button on the SHAKE..."
+    time.sleep(5)
+
+    print "Closing the connection..."
+    sd.close()
 
