@@ -5,13 +5,13 @@
 # permitted provided that the following conditions are met:
 #
 #    * Redistributions of source code must retain the above copyright notice, this list of 
-#		conditions and the following disclaimer.
+#           conditions and the following disclaimer.
 #    * Redistributions in binary form must reproduce the above copyright notice, this list
-#		of conditions and the following disclaimer in the documentation and/or other
-#	 	materials provided with the distribution.
+#           of conditions and the following disclaimer in the documentation and/or other
+#           materials provided with the distribution.
 #    * Neither the name of the University of Glasgow nor the names of its contributors 
-#		may be used to endorse or promote products derived from this software without
-# 		specific prior written permission.
+#           may be used to endorse or promote products derived from this software without
+#           specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -26,14 +26,14 @@
 
 # SK7 specific constants
 
-SK7_DEFAULT_CHECKSUM 	= 0x00
+SK7_DEFAULT_CHECKSUM    = 0x00
 SK7_MAX_PACKET_SIZE = 64
 SK7_NUM_PACKET_TYPES = 61
 SK7_HEADER_LEN = 4
 SK7_RAW_HEADER_LEN = 3
 SK7_PACKET_IID_LEN = 3
 
-# 	Packet types enumeration
+#       Packet types enumeration
 (SK7_DATA_ACC, 
 SK7_DATA_GYRO, 
 SK7_DATA_MAG, 
@@ -108,164 +108,164 @@ SK7_RAW_DATA_RPH_QUATERNION
 
 # variables
 
-sk7_packet_headers = [ 		"$ACC", 
-							"$ARS", 
-							"$MAG", 
-							"$HED", 
-							"$CSA",
-							"$CSB",
-							"$CSC",
-							"$AI0", 
-							"$AI1", 
-							"$RPH",
-							
-							"$NVU", 
-							"$NVD", 
-							"$NVC", 
-							"$NVN", 
-							
-							"$CU0",
-							"$CL0", 
-							"$CU1", 
-							"$CL1", 
-							"$CU2",
-							"$CL2", 
-							"$CU3", 
-							"$CL3", 
-							"$CU4",
-							"$CL4", 
-							"$CU5", 
-							"$CL5", 
-							"$CU6",
-							"$CL6", 
-							"$CU7", 
-							"$CL7", 
-							"$CU8",
-							"$CL8", 
-							"$CU9", 
-							"$CL9", 
-							"$CUA",
-							"$CLA", 
-							"$CUB", 
-							"$CLB", 
-							
-							"$TIM", 
-							"Logg", 
-							
-							"$TID",
+sk7_packet_headers = [      "$ACC", 
+                            "$ARS", 
+                            "$MAG", 
+                            "$HED", 
+                            "$CSA",
+                            "$CSB",
+                            "$CSC",
+                            "$AI0", 
+                            "$AI1", 
+                            "$RPH",
+                            
+                            "$NVU", 
+                            "$NVD", 
+                            "$NVC", 
+                            "$NVN", 
+                            
+                            "$CU0",
+                            "$CL0", 
+                            "$CU1", 
+                            "$CL1", 
+                            "$CU2",
+                            "$CL2", 
+                            "$CU3", 
+                            "$CL3", 
+                            "$CU4",
+                            "$CL4", 
+                            "$CU5", 
+                            "$CL5", 
+                            "$CU6",
+                            "$CL6", 
+                            "$CU7", 
+                            "$CL7", 
+                            "$CU8",
+                            "$CL8", 
+                            "$CU9", 
+                            "$CL9", 
+                            "$CUA",
+                            "$CLA", 
+                            "$CUB", 
+                            "$CLB", 
+                            
+                            "$TIM", 
+                            "Logg", 
+                            
+                            "$TID",
 
-							"$SHK",
-							"$HR ",
+                            "$SHK",
+                            "$HR ",
 
-							"$REA", 
-							"$WRI",
+                            "$REA", 
+                            "$WRI",
 
-							"$ACK", 
-							"$NAK", 
-							
-							"\nSHA"
-							]
+                            "$ACK", 
+                            "$NAK", 
+                            
+                            "\nSHA"
+                            ]
 
-sk7_raw_packet_headers = [ 		126, 
-								125, 
-								124, 
-								123, 
-								122, 
-								115,
-								114,
-								120,
-								119, 
-								118, 
-								117,
-								116,
-								110
-							]
+sk7_raw_packet_headers = [          126, 
+                                125, 
+                                124, 
+                                123, 
+                                122, 
+                                115,
+                                114,
+                                120,
+                                119, 
+                                118, 
+                                117,
+                                116,
+                                110
+                            ]
 
 sk7_packet_lengths = [ 
-		27, 
-		27, 
-		27, 
-		14, 
-		45, 
-		45,
-		45,
-		14, 
-		14,
-		27,
-						
-		6, 
-		6, 
-		6, 
-		6, 
-						
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-		6, 
-		6,
-						
-		16, 
-		31,
+        27, 
+        27, 
+        27, 
+        14, 
+        45, 
+        45,
+        45,
+        14, 
+        14,
+        27,
+                        
+        6, 
+        6, 
+        6, 
+        6, 
+                        
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+        6, 
+        6,
+                        
+        16, 
+        31,
 
-		24,
+        24,
 
-		27,
-		14,
-		
-		14, 
-		14, 
-		
-		14, 
-		14,
-		
-		-1,
-						
-		10, 
-		10, 
-		10, 
-		6,
-		15, 
-		15,
-		15,
-		6,
-		6, 
-		5, 
-		9,
-		10,
-		12
-	]
+        27,
+        14,
+        
+        14, 
+        14, 
+        
+        14, 
+        14,
+        
+        -1,
+                        
+        10, 
+        10, 
+        10, 
+        6,
+        15, 
+        15,
+        15,
+        6,
+        6, 
+        5, 
+        9,
+        10,
+        12
+    ]
 
 sk7_packet_has_checksum = [ 
-	1,1,1,1,1,1,1,1,1,1,	# these are the basic sensor output channels + RPH
+    1,1,1,1,1,1,1,1,1,1,    # these are the basic sensor output channels + RPH
 
-	0,0,0,0,				# nav switch events
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	# cap threshold events
-	0,0,					# logger packets
-	0,						# RFID packet
-	1,						# shaking event
-	1,						# heart rate event
-	0,0,					# commands
-	1,1,					# acks
-	0,						# startup info
-	0,0,0,0,0,0,0,0,0,0,0,0,0	# raw data packets
-]		
+    0,0,0,0,                # nav switch events
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    # cap threshold events
+    0,0,                    # logger packets
+    0,                          # RFID packet
+    1,                          # shaking event
+    1,                          # heart rate event
+    0,0,                    # commands
+    1,1,                    # acks
+    0,                          # startup info
+    0,0,0,0,0,0,0,0,0,0,0,0,0       # raw data packets
+]           
 

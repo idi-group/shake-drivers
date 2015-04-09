@@ -5,13 +5,13 @@
 # permitted provided that the following conditions are met:
 #
 #    * Redistributions of source code must retain the above copyright notice, this list of 
-#		conditions and the following disclaimer.
+#           conditions and the following disclaimer.
 #    * Redistributions in binary form must reproduce the above copyright notice, this list
-#		of conditions and the following disclaimer in the documentation and/or other
-#	 	materials provided with the distribution.
+#           of conditions and the following disclaimer in the documentation and/or other
+#           materials provided with the distribution.
 #    * Neither the name of the University of Glasgow nor the names of its contributors 
-#		may be used to endorse or promote products derived from this software without
-# 		specific prior written permission.
+#           may be used to endorse or promote products derived from this software without
+#           specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -24,10 +24,10 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-# 	This file contains most of the constant definitions used by the Python
-# 	SHAKE code. The first set of constants are those that can be passed 
-# 	to various driver functions, the second set are usually internally
-# 	and can be ignored.
+#       This file contains most of the constant definitions used by the Python
+#       SHAKE code. The first set of constants are those that can be passed 
+#       to various driver functions, the second set are usually internally
+#       and can be ignored.
 
 # Global success code for SHAKE functions.
 SHAKE_SUCCESS = 1
@@ -122,57 +122,57 @@ SK7_MODULE_LAST = 10
 
 
 # Values passed to write_power_state function should be an OR of these values
-SHAKE_POWER_CAP 		= 0x01 		# capacitive sensor (bit 0)
-SHAKE_POWER_ACC 		= 0x02 		# accelerometer
-SHAKE_POWER_GYRO 		= 0x04 		# gyroscope
-SHAKE_POWER_VIB 		= 0x08		# vibrotactile
-SHAKE_POWER_MAG 		= 0x10 		# magnetometer
-SHAKE_POWER_TEMP 		= 0x20 		# temperature
-SHAKE_POWER_ANALOG 		= 0x40 	 	# analog
-SHAKE_POWER_NAV 		= 0x80 		# nav button (bit 7)
+SHAKE_POWER_CAP         = 0x01      # capacitive sensor (bit 0)
+SHAKE_POWER_ACC         = 0x02      # accelerometer
+SHAKE_POWER_GYRO        = 0x04      # gyroscope
+SHAKE_POWER_VIB         = 0x08      # vibrotactile
+SHAKE_POWER_MAG         = 0x10      # magnetometer
+SHAKE_POWER_TEMP        = 0x20      # temperature
+SHAKE_POWER_ANALOG          = 0x40      # analog
+SHAKE_POWER_NAV         = 0x80      # nav button (bit 7)
 
-# 	Parameters for the read/write_sample_rate functions.
-# 	Corresponding sensors: 
-# 		accelerometer, gyroscope, magnetometer,
-# 		heading, capacitive sensor 0 (SK6), capacitive sensor 1 (SK6),
-# 		analog input 0, analog input 1, capacitive sensors (SK7)
-SHAKE_SENSOR_ACC        = 0
+#       Parameters for the read/write_sample_rate functions.
+#       Corresponding sensors: 
+#           accelerometer, gyroscope, magnetometer,
+#           heading, capacitive sensor 0 (SK6), capacitive sensor 1 (SK6),
+#           analog input 0, analog input 1, capacitive sensors (SK7)
+SHAKE_SENSOR_ACC    = 0
 SHAKE_SENSOR_GYRO       = 1 
-SHAKE_SENSOR_MAG        = 2
+SHAKE_SENSOR_MAG    = 2
 SHAKE_SENSOR_HEADING    = 3
 SHAKE_SENSOR_CAP0       = 4
-SHAKE_SENSOR_CAP1   	= 5
+SHAKE_SENSOR_CAP1       = 5
 SHAKE_SENSOR_ANA0       = 6 
 SHAKE_SENSOR_ANA1       = 7
-SHAKE_SENSOR_CAP        = 4
+SHAKE_SENSOR_CAP    = 4
 
-# 	Maximum sensor output rate (Hz)
-SHAKE_MAX_OUTPUT_RATE = 	0xFF
+#       Maximum sensor output rate (Hz)
+SHAKE_MAX_OUTPUT_RATE =     0xFF
 
-# 	Possible values for the playvib function channel parameter
-SHAKE_VIB_MAIN, SHAKE_VIB_LEFT, SHAKE_VIB_RIGHT, SHAKE_VIB_FORCEREACTOR, SHAKE_VIB_EXT_ACTUATOR 	= range(5)
+#       Possible values for the playvib function channel parameter
+SHAKE_VIB_MAIN, SHAKE_VIB_LEFT, SHAKE_VIB_RIGHT, SHAKE_VIB_FORCEREACTOR, SHAKE_VIB_EXT_ACTUATOR     = range(5)
 
-# 	Maximum number of speed/time pairs in a vibration profile
+#       Maximum number of speed/time pairs in a vibration profile
 SHAKE_VIB_SAMPLE_MAX_LENGTH = 32
 
-# 	Max values for vibration profile speeds/times
+#       Max values for vibration profile speeds/times
 SHAKE_VIB_SPEED_MAX = 0xFF
 SHAKE_VIB_TIME_MAX = 0xFF
 
-#  	Min/Max value for the playvib function value parameter
-SHAKE_VIB_PROFILE_MIN 	= 0x01
-SHAKE_VIB_PROFILE_MAX 	= 0xFF
+#       Min/Max value for the playvib function value parameter
+SHAKE_VIB_PROFILE_MIN   = 0x01
+SHAKE_VIB_PROFILE_MAX   = 0xFF
 
-# 	Return value from the read_power_status function is a bitwise OR 
-# 	of these values.
-SHAKE_EXT_POWER 		= 0x01 		# external power on
-SHAKE_BAT_CHARGING 		= 0x02 		# battery charging
-SHAKE_BAT_FULL 			= 0x04 		# battery fully charged
+#       Return value from the read_power_status function is a bitwise OR 
+#       of these values.
+SHAKE_EXT_POWER         = 0x01      # external power on
+SHAKE_BAT_CHARGING          = 0x02      # battery charging
+SHAKE_BAT_FULL          = 0x04      # battery fully charged
 
 ## The contents of the SHAKE_NV_REG_RFID_CONFIG register should be a combination of zero or more of these values
-SHAKE_RFID_POWER_ON 	= 0x01
+SHAKE_RFID_POWER_ON     = 0x01
 SHAKE_RFID_VISUAL_FEEDBACK = 0x02
-SHAKE_RFID_AUTO_SCAN 	= 0x04
+SHAKE_RFID_AUTO_SCAN    = 0x04
 
 # If writing into the SHAKE_VO_REG_MIDI_WAVEFORM register, the value to write should be one of the following 
 SHAKE_MIDI_WAVEFORM_SINE = 0x00
@@ -181,25 +181,25 @@ SHAKE_MIDI_WAVEFORM_TRIANGLE = 0x02
 SHAKE_MIDI_WAVEFORM_SAWTOOTH = 0x03
 
 # When writing to the SHAKE_VO_REG_LOGGING_CTRL register, use one of these values as the parameter
-SHAKE_LOGGING_PLAY	=	0x01
-SHAKE_LOGGING_PAUSE	=	0x02
-SHAKE_LOGGING_STOP	=	0x03
-SHAKE_LOGGING_RECORD =	0x04
-SHAKE_LOGGING_RESET	=	0x05
+SHAKE_LOGGING_PLAY      =       0x01
+SHAKE_LOGGING_PAUSE     =       0x02
+SHAKE_LOGGING_STOP      =       0x03
+SHAKE_LOGGING_RECORD =  0x04
+SHAKE_LOGGING_RESET     =       0x05
 
 # The contents of the SHAKE_VO_REG_LOGGING_STATUS register should be a combination of these values 
-SHAKE_LOGGING_RECORDING	=	0x01
-SHAKE_LOGGING_PLAYING	=	0x02
-SHAKE_LOGGING_MEMORYFULL =	0x04
+SHAKE_LOGGING_RECORDING =       0x01
+SHAKE_LOGGING_PLAYING   =       0x02
+SHAKE_LOGGING_MEMORYFULL =      0x04
 
 ## RFID TID tag length
 SHAKE_RFID_TAG_LENGTH = 32
 
-# 	Max value returned by the read_battery_level function
-SHAKE_BATTERY_MAX 		= 0xFF
+#       Max value returned by the read_battery_level function
+SHAKE_BATTERY_MAX           = 0xFF
 
-SHAKE_TEMP_MIN 			= 0x00
-SHAKE_TEMP_MAX 			= 0x40
+SHAKE_TEMP_MIN          = 0x00
+SHAKE_TEMP_MAX          = 0x40
 
 # Number of samples in a SHAKE audio data packet
 SHAKE_AUDIO_DATA_LEN =  0x20
@@ -236,17 +236,17 @@ SHAKE_UPLOAD_MIN_PAGE = 0
 # Audio sample upload maximum address 
 SHAKE_UPLOAD_MAX_PAGE = 7999
 
-##	Vibration sample minimum amplitude for ext module 
-SHAKE_VIB_AMPLITUDE_MIN	= 0
+##      Vibration sample minimum amplitude for ext module 
+SHAKE_VIB_AMPLITUDE_MIN = 0
 
 ## Vibration sample maximum amplitude for ext module 
-SHAKE_VIB_AMPLITUDE_MAX	= 255
+SHAKE_VIB_AMPLITUDE_MAX = 255
 
-SHAKE_UPLOAD_CHUNK_SIZE	= 64
-SHAKE_UPLOAD_DELAY	= 30
+SHAKE_UPLOAD_CHUNK_SIZE = 64
+SHAKE_UPLOAD_DELAY      = 30
 
-# 	register address listing (only required if you want to use the
-# 	basic read/write() functions
+#       register address listing (only required if you want to use the
+#       basic read/write() functions
 
 # Non volatile register addresses
 SHAKE_NV_REG_POWER1 = 0x0000
@@ -319,12 +319,12 @@ SHAKE_VO_REG_MIDI_AMPLITUDE = 0x0111
 SHAKE_VO_REG_MIDI_NOTE = 0x0112
 SHAKE_VO_REG_MIDI_WAVEFORM = 0x0113
 SHAKE_VO_REG_RFID_SCAN = 0x011A
-SHAKE_VO_REG_EXP_PWM1	= 0x0120
-SHAKE_VO_REG_EXP_PWM2	= 0x0121
-SHAKE_VO_REG_EXP_PWM3	= 0x0122
-SHAKE_VO_REG_EXP_PWM4	= 0x0123
-SHAKE_VO_REG_EXP_PWM5	= 0x0124
-SHAKE_VO_REG_EXP_PWM6	= 0x0125
+SHAKE_VO_REG_EXP_PWM1   = 0x0120
+SHAKE_VO_REG_EXP_PWM2   = 0x0121
+SHAKE_VO_REG_EXP_PWM3   = 0x0122
+SHAKE_VO_REG_EXP_PWM4   = 0x0123
+SHAKE_VO_REG_EXP_PWM5   = 0x0124
+SHAKE_VO_REG_EXP_PWM6   = 0x0125
 
 SHAKE_VO_REG_VIB_LEFT_CONTINUOUS = 0x0126
 SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS = 0x0127
