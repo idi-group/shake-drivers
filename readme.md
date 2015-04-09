@@ -17,10 +17,10 @@ The easiest way to get up and running quickly on Windows is to use the Python im
 If you want to use the C++ driver, you'll need to compile it first. Inside the `shake-drivers/cpp` directory, you'll find:
 
  * shake\_driver (the C++ code)
- * pyshake (Python bindings for shake_driver)
- * shake\_cs (C# bindings for shake_driver)
- * shake\_java (Java bindings for shake_driver)
- * shake\_mex (Basic Matlab bindings for shake_driver)
+ * pyshake (Python bindings for shake\_driver)
+ * shake\_cs (C# bindings for shake\_driver)
+ * shake\_java (Java bindings for shake\_driver)
+ * shake\_mex (Basic Matlab bindings for shake\_driver)
 
 Each of these should have a Visual Studio project file that can be used to compile them individually depending on which parts you need. They will probably also compile with gcc/g++ from MingW, but there are no build scripts for this at the moment. 
 
@@ -49,6 +49,8 @@ For the C++/Python bindings:
  * Run `python setup.py install` from `shake-drivers/cpp/pyshake`
 
 ## A basic example
+
+(for more examples see [the wiki page](https://github.com/andrewramsay/shake-drivers/wiki/Examples)
 
 **Python / pyserial**
 
