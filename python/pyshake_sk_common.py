@@ -49,8 +49,9 @@ class sk_sensor_data:
         self.hr_bpm = 0.0
         self.rph = [0,0,0]
         self.rphq = [0,0,0,0]
+        self.temps = [0,0,0]
         self.timestamps = [0 for x in range(8)]
-        self.internal_timestamps = [0 for x in range(SK7_RAW_DATA_RPH_QUATERNION - SK7_RAW_DATA_ACC)]
+        self.internal_timestamps = [0 for x in range(SK7_RAW_DATA_GYRO_TEMP - SK7_RAW_DATA_ACC)]
         self.sk6seq = 0
         self.sk7seq = 0
         self.hrseq = 0

@@ -28,10 +28,12 @@
 
 SK7_DEFAULT_CHECKSUM    = 0x00
 SK7_MAX_PACKET_SIZE = 64
-SK7_NUM_PACKET_TYPES = 61
+SK7_NUM_PACKET_TYPES = 64
 SK7_HEADER_LEN = 4
 SK7_RAW_HEADER_LEN = 3
 SK7_PACKET_IID_LEN = 3
+
+SK7_NV_REG_RPH_CONFIG = 0x0046
 
 #       Packet types enumeration
 (SK7_DATA_ACC, 
@@ -75,6 +77,9 @@ SK7_DATA_CLA,
 SK7_DATA_CUB, 
 SK7_DATA_CLB,
 
+SK7_DATA_RPH_QUATERNION,
+SK7_DATA_GYRO_TEMP,
+
 SK7_DATA_TIMESTAMP, 
 SK7_DATA_PLAYBACK_COMPLETE,
 
@@ -103,7 +108,8 @@ SK7_RAW_DATA_ANALOG1,
 SK7_RAW_DATA_EVENT, 
 SK7_RAW_DATA_SHAKING, 
 SK7_RAW_DATA_RPH,
-SK7_RAW_DATA_RPH_QUATERNION
+SK7_RAW_DATA_RPH_QUATERNION,
+SK7_RAW_DATA_GYRO_TEMP
 ) = range(SK7_NUM_PACKET_TYPES)
 
 # variables
@@ -148,6 +154,9 @@ sk7_packet_headers = [      "$ACC",
                             "$CLA", 
                             "$CUB", 
                             "$CLB", 
+
+                            "$QTN",
+                            "$GOT",
                             
                             "$TIM", 
                             "Logg", 
@@ -166,19 +175,21 @@ sk7_packet_headers = [      "$ACC",
                             "\nSHA"
                             ]
 
-sk7_raw_packet_headers = [          126, 
-                                125, 
-                                124, 
-                                123, 
-                                122, 
-                                115,
-                                114,
-                                120,
-                                119, 
-                                118, 
-                                117,
-                                116,
-                                110
+sk7_raw_packet_headers = [          
+                                126,    # acc
+                                125,    # mag
+                                124,    # gyro
+                                123,    # compass
+                                122,    # cap
+                                115,    # cap ext1
+                                114,    # cap ext2
+                                120,    # analogue 0
+                                119,    # analogue 1
+                                118,    # events
+                                117,    # shaking events
+                                116,    # rph
+                                110,    # rph quaternion
+                                111,    # gyro temps
                             ]
 
 sk7_packet_lengths = [ 
@@ -222,6 +233,9 @@ sk7_packet_lengths = [
         6,
         6, 
         6,
+
+        45,
+        27,
                         
         16, 
         31,
@@ -251,7 +265,8 @@ sk7_packet_lengths = [
         5, 
         9,
         10,
-        12
+        12,
+        12,
     ]
 
 sk7_packet_has_checksum = [ 
@@ -259,6 +274,7 @@ sk7_packet_has_checksum = [
 
     0,0,0,0,                # nav switch events
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    # cap threshold events
+    0,0,
     0,0,                    # logger packets
     0,                          # RFID packet
     1,                          # shaking event
@@ -266,6 +282,6 @@ sk7_packet_has_checksum = [
     0,0,                    # commands
     1,1,                    # acks
     0,                          # startup info
-    0,0,0,0,0,0,0,0,0,0,0,0,0       # raw data packets
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0       # raw data packets
 ]           
 

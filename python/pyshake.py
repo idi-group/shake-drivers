@@ -396,6 +396,9 @@ class shake_device:
     def sk7_roll_pitch_heading_quaternions(self):
         return self.SHAKE.data.rphq
 
+    def sk7_configure_roll_pitch_heading(self, val):
+        return self.write(SK7_NV_REG_RPH_CONFIG, val)
+
     def register_data_callback(self, callback):
         self.data_callback = callback
 
@@ -745,13 +748,21 @@ class shake_device:
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_PAUSE)
 
     def logging_stop(self):
+        if self.logfp:
+            self.logfp.close()
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_STOP)
 
     def logging_record(self):
+        if self.logfp:
+            self.logfp.close()
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RECORD)
 
     def logging_reset(self):
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RESET)
+
+    def logging_play(self, filename):
+        self.logfp = open(filename, 'w')
+        return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_PLAY)
 
     def logging_status(self):
         ret = self.read(SHAKE_VO_REG_LOGGING_STATUS)

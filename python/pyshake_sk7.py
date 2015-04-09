@@ -83,14 +83,35 @@ class SK7(pyshake_sk_common.SHAKE):
     def read_ascii_packet(self, packet_type, packetbuf):
         packet_size, bytes_left, bytes_read = 0,0,0
         playback = False
-        timestamp_packet = None
+        timestamp = None
 
         if packet_type == SK7_DATA_TIMESTAMP:
-            # TODO
-            return SK7_ASCII_READ_ERROR
+            # this type of packet is only encountered when streaming logged
+            # data from the device to the host. it consists of a header, a
+            # timestamp, and then a normal packet body. 
+            # just extract the timestamp here and then handle the rest as if
+            # it was a normal packet (the data is written to file elsewhere)
+            
+            # read the remainder of the timestamp packet (still have to read
+            # the content of the packet afterwards)
+            packetbuf += self.__shake.read_data(sk7_packet_lengths[SK7_DATA_TIMESTAMP] - SK7_HEADER_LEN)
+
+            # the format of the timestamp packet is "$TIM,1234567890," where the
+            # numbers are a 10-digit timestamp in seconds, with an implicit 
+            # decimal point between the 7th and 8th digits (so the above would
+            # be 1234567.890 seconds)
+            timestamp = float(packetbuf[5:12] + "." + packetbuf[12:15])
+
+            playback = True
+
+            packetbuf = self.__shake.read_data(SK7_HEADER_LEN)
+            packet_type = self.classify_packet_header(packetbuf, True)
         elif packet_type == SK7_DATA_PLAYBACK_COMPLETE:
             packetbuf += self.__shake.read_data(sk7_packet_lengths[packet_type] - SK7_HEADER_LEN)
-            
+            playback = False
+            if self.__shake.logfp:
+                self.__shake.logfp.close()
+
             if self.__shake.navcb != None:
                 self.__shake.lastevent = SHAKE_PLAYBACK_COMPLETE
                 self.__shake.navcb(self.__shake.lastevent)
@@ -121,8 +142,10 @@ class SK7(pyshake_sk_common.SHAKE):
             return SK7_ASCII_READ_ERROR
 
         if playback:
+            # bit of a workaround to make recorded packets conform to the 
+            # format of normal packets
             offset = bytes_read + SK7_HEADER_LEN - 2
-            # TODO
+            packetbuf = packetbuf[:offset] + ',00\r\n'
             bytes_read += 3
 
         if sk7_packet_has_checksum[packet_type] and ord(packetbuf[bytes_read + SK7_HEADER_LEN - 1]) != 0xA:
@@ -134,7 +157,7 @@ class SK7(pyshake_sk_common.SHAKE):
         elif sk7_packet_has_checksum[packet_type] and ord(packetbuf[bytes_read + SK7_HEADER_LEN - 1]) == 0xA and self.__shake.checksum:
             self.__shake.checksum = False
 
-        return self.parse_ascii_packet(packet_type, packetbuf, playback, timestamp_packet)
+        return self.parse_ascii_packet(packet_type, packetbuf, playback, timestamp)
 
     def parse_raw_packet(self, packet_type, packetbuf, has_seq):
         self.extract_raw_packet(packet_type, packetbuf, has_seq)
@@ -190,6 +213,9 @@ class SK7(pyshake_sk_common.SHAKE):
             elif packetbuf[0] == '$' or packetbuf[0] == '\n':
                 packetbuf += self.__shake.read_data(1)
                 packet_type = self.classify_packet_header(packetbuf, True)
+            elif packetbuf.startswith("Log"):
+                packetbuf += self.__shake.read_data(1)
+                packet_type = self.classify_packet_header(packetbuf, True)
 
         if packet_type == SHAKE_BAD_PACKET:
             read_count = 50
@@ -229,7 +255,7 @@ class SK7(pyshake_sk_common.SHAKE):
         self.val = string.atoi(packetbuf[10:12], 16)
 
     # TODO checksums?
-    def extract_ascii_packet(self, packet_type, packetbuf, playback, timestamp_packet):
+    def extract_ascii_packet(self, packet_type, packetbuf, playback, timestamp):
         if packet_type == SK7_DATA_ACC:
             # fmt: $ACC,+dddd,+dddd,+dddd,ss*CS\r\n
             self.data.accx = int(packetbuf[5:10])
@@ -238,6 +264,9 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.internal_timestamps[SHAKE_SENSOR_ACC] = int(packetbuf[23:25])
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_ACC, [self.data.accx, self.data.accy, self.data.accz], self.data.internal_timestamps[SHAKE_SENSOR_ACC])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,ACC,%d,%d,%d,%d\n' % (timestamp, SHAKE_SENSOR_ACC, self.data.accx, self.data.accy, self.data.accz))
         elif packet_type == SK7_DATA_GYRO:
             # fmt: $ARS,+dddd,+dddd,+dddd,ss*CS\r\n
             self.data.gyrx = int(packetbuf[5:10])
@@ -246,6 +275,9 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.internal_timestamps[SHAKE_SENSOR_GYRO] = int(packetbuf[23:25])
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_GYRO, [self.data.gyrx, self.data.gyry, self.data.gyrz], self.data.internal_timestamps[SHAKE_SENSOR_GYRO])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,GYR,%d,%d,%d,%d\n' % (timestamp, SHAKE_SENSOR_GYRO, self.data.gyrx, self.data.gyry, self.data.gyrz))
         elif packet_type == SK7_DATA_MAG:
             # fmt: $MAG,+dddd,+dddd,+dddd,ss*CS\r\n
             self.data.magx = int(packetbuf[5:10])
@@ -254,12 +286,18 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.internal_timestamps[SHAKE_SENSOR_MAG] = int(packetbuf[23:25])
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_MAG, [self.data.magx, self.data.magy, self.data.magz], self.data.internal_timestamps[SHAKE_SENSOR_MAG])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,MAG,%d,%d,%d,%d\n' % (timestamp, SHAKE_SENSOR_MAG, self.data.magx, self.data.magy, self.data.magz))
         elif packet_type == SK7_DATA_HEADING:
             # $HED,dddd,dd*CS
             self.data.heading = int(packetbuf[5:9])
             self.data.internal_timestamps[SHAKE_SENSOR_HEADING] = int(packetbuf[10:12])
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_HEADING, [self.data.heading], self.data.internal_timestamps[SHAKE_SENSOR_HEADING])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,HED,%d,%d\n' % (timestamp, SHAKE_SENSOR_HEADING, self.data.heading))
         elif packet_type == SK7_DATA_CAP:
             # $CSA,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
             for i in range(12):
@@ -273,6 +311,11 @@ class SK7(pyshake_sk_common.SHAKE):
 
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_CAP, [self.data.cap_sk7[0], 0], self.data.internal_timestamps[SHAKE_SENSOR_CAP])
+
+            if playback and self.__shake.logfp:
+                s = '%.3f,CAP,%d,\n' % (timestamp, SHAKE_SENSOR_CAP)
+                s += '%d' * 12 % tuple(self.data.cap_sk7[0])
+                self.__shake.logfp.write(s + '\n')
         elif packet_type == SK7_DATA_CAP_B:
             # $CSB,aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,dd*CS[CR][LF] 
             for i in range(12):
@@ -305,16 +348,41 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.internal_timestamps[SHAKE_SENSOR_ANA0] = int(packetbuf[10:12])
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_ANA0, [self.data.ana0], self.data.internal_timestamps[SHAKE_SENSOR_ANA0])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,AI0,%d,%d\n' % (timestamp, SHAKE_SENSOR_ANA0, self.data.ana0))
         elif packet_type == SK7_DATA_ANA1:
             # $AI1,dddd,dd*CS
             self.data.ana1 = int(packetbuf[5:9])
             self.data.internal_timestamps[SHAKE_SENSOR_ANA1] = int(packetbuf[10:12])
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_ANA1, [self.data.ana1], self.data.internal_timestamps[SHAKE_SENSOR_ANA1])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,AI1,%d,%d\n' % (timestamp, SHAKE_SENSOR_ANA1, self.data.ana1))
         elif packet_type == SK7_DATA_RPH:
             self.data.rph[0] = int(packetbuf[5:10])
             self.data.rph[1] = int(packetbuf[11:16])
             self.data.rph[2] = int(packetbuf[17:22])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,RPH,%d,%d,%d,%d\n' % (timestamp, SHAKE_SENSOR_HEADING, self.data.rph[0], self.data.rph[1], self.data.rph[2]))
+        elif packet_type == SK7_DATA_RPH_QUATERNION:
+            self.data.rphq[0] = float(packetbuf[5:13])
+            self.data.rphq[1] = float(packetbuf[14:22])
+            self.data.rphq[2] = float(packetbuf[23:31])
+            self.data.rphq[3] = float(packetbuf[32:40])
+
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,QTN,%d,%f,%f,%f,%f\n' % (timestamp, SHAKE_SENSOR_HEADING, self.data.rphq[0], self.data.rphq[1], self.data.rphq[2], self.data.rphq[3]))
+        elif packet_type == SK7_DATA_GYRO_TEMP:
+            self.data.temps[0] = int(packetbuf[5:10])
+            self.data.temps[1] = int(packetbuf[11:16])
+            self.data.temps[2] = int(packetbuf[17:22])
+    
+            if playback and self.__shake.logfp:
+                self.__shake.logfp.write('%.3f,GOT,%d,%f,%f,%f\n' % (timestamp, SHAKE_SENSOR_GYRO_TEMPS, self.data.temps[0], self.data.temps[1], self.data.temps[2]))
+
         elif packet_type >= SK7_DATA_NVU and packet_type <= SK7_DATA_NVN:
             if self.__shake.navcb != None:
                 event = -1
