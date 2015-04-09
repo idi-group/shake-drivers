@@ -77,7 +77,7 @@ class SK6(pyshake_sk_common.SHAKE):
             else:
                 self.__shake.lastack = False
 
-            self.parse_ack_packet(packetbuf, self.__shake.lastaddr, self.__shake.lastval)
+            self.parse_ack_packet(packetbuf)
 
             self.__shake.waiting_for_ack_signal = False
 
@@ -227,12 +227,12 @@ class SK6(pyshake_sk_common.SHAKE):
             return True
         return False
 
-    def parse_ack_packet(self, packetbuf, addr, val):
+    def parse_ack_packet(self, packetbuf):
         try:
-            addr = string.atoi(packetbuf[5:9], 16)
+            self.__shake.lastaddr = string.atoi(packetbuf[5:9], 16)
         except:
-            addr = 100
-        self.val = string.atoi(packetbuf[10:12], 16)
+            self.__shake.lastaddr = -1
+        self.__shake.lastval = string.atoi(packetbuf[10:12], 16)
 
     # TODO checksums?
     def extract_ascii_packet(self, packet_type, packetbuf, playback, timestamp_packet):
