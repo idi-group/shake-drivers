@@ -1,4 +1,4 @@
-# Copyright (c) 2006-2009, University of Glasgow
+# Copyright (c) 2006-2015, University of Glasgow
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification, are
@@ -107,8 +107,6 @@ class serial_port(base_serial_port):
 	def write(self, bytes):
 		if not self.sock:
 			return 0
-		sentbytes = 0
-		bytes_to_send = len(bytes)
 
 		sentbytes = self.sock.send(bytes)
 		return sentbytes

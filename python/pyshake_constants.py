@@ -1,4 +1,4 @@
-# Copyright (c) 2006-2009, University of Glasgow
+# Copyright (c) 2006-2015, University of Glasgow
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification, are
