@@ -55,8 +55,8 @@ For the C++/Python bindings:
 **Python / pyserial**
 
 ```python
-from pyshake import *
-sd = shake_device()
+import pyshake
+sd = pyshake.shake_device()
 
 # connection details depend on platform
 # Windows (virtual COM port number)
@@ -71,10 +71,10 @@ print sd.gyro() # current gyroscope output (if HW module installed)
 sd.close()
 ```
 
-**Python/C++ bindings**
+**Python / C++ bindings**
 ```python
-from shake import *
-sd = shake_device()
+import shake
+sd = shake.shake_device()
 
 # Windows: for non-Microsoft Bluetooth stacks, or if you're using USB connection, supply a COM port number
 sd.connect(10) 
