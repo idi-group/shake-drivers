@@ -26,7 +26,6 @@
 
 import atexit, thread, re, string, os
 from time import sleep
-from serial import SerialException
 
 from pyshake_constants import *
 import pyshake_sk6 
