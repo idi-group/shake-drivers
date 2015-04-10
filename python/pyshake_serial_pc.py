@@ -63,16 +63,10 @@ class serial_port(base_serial_port):
     def open(self, baud=230400):
         if self.connected:
             return False
-            
         # open port with parameters required for the SHAKE
         # SK7 requires rate 460800, SK6 requires 230400
         try:
-            #check if underlying system is mac
-            if platform.mac_ver()[0]=='':
-                self.port = serial.Serial(self.target, baudrate=baud, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
-            else:
-            #on a mac the system automatically sets correct baudrate
-                self.port = serial.Serial(self.target, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
+            self.port = serial.Serial(self.target, baudrate=baud, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
         except:
             import sys, traceback
             print("\n".join(traceback.format_exception(*sys.exc_info())))

@@ -74,14 +74,14 @@ class shake_device:
 
     #       2nd parameter indicates type of device (SK6 or SK7). Default is SK6
     def __init__(self, type = SHAKE_SK7):
-            
+
         self.handle = shake_device.shake_handle_count
         shake_device.shake_handle_count += 1
 
         self.device_type = type
         self.port = None
         self.thread = None
-        
+
         self.waiting_for_ack = False
         self.waiting_for_ack_signal = False
         self.serial = "missing"
@@ -89,7 +89,7 @@ class shake_device:
         self.hwrev = -1
         self.lastfid = ""
         self.bluetoothfwrev = -1
-        
+
         if type == SHAKE_SK6:
             self.modules = [SK6_MODULE_NONE for x in range(2)]
             self.SHAKE = pyshake_sk6.SK6(self, type)
@@ -129,9 +129,12 @@ class shake_device:
         if not self.thread_done or addr == None:
             return False
 
+        self.device_address = addr
+        if self.port_setup() == SHAKE_ERROR:
+            return False
+
         self.thread_done = False
         self.thread_exit = False
-        self.device_address = addr
         thread.start_new_thread(self.run, ())
         #self.run()
 
@@ -148,7 +151,7 @@ class shake_device:
     #       Closes the connection associated with the instance
     def close(self):
         self.thread_done = True
-    
+
         try:
             shake_device.instances.remove(self)
         except:
@@ -176,12 +179,12 @@ class shake_device:
 
     def port_setup(self):
         # create the port (this is done inside the thread started by connect())
-        try:    
+        try:
             self.port = pyshake_serial.serial_port(self.device_address)
             baud = 230400
             if self.device_type == SHAKE_SK7:
                 baud = 460800
-            
+
             if not self.port.open(baud):
                 debug("port creation failed")
                 self.thread_done = True
@@ -196,9 +199,6 @@ class shake_device:
     #       Thread function
     def run(self):
         try:
-            if self.port_setup() == SHAKE_ERROR:
-                return 
-
             self.thread_done = False
 
             while not self.thread_done:
@@ -259,7 +259,7 @@ class shake_device:
         x = self.SHAKE.data.gyrx
         self.SHAKE.data.timestamps[SHAKE_SENSOR_GYRO] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_GYRO]
         return x
-    
+
     #       Returns y-axis gyro reading
     def gyry(self):
         y = self.SHAKE.data.gyry
@@ -277,7 +277,7 @@ class shake_device:
         xyz = [self.SHAKE.data.gyrx, self.SHAKE.data.gyry, self.SHAKE.data.gyrz]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_GYRO] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_GYRO]
         return xyz
-            
+
     #       Returns x-axis mag reading
     def magx(self):
         x = self.SHAKE.data.magx
@@ -388,13 +388,13 @@ class shake_device:
     #
     #       Device information
     #
-    
+
     def info_retrieve(self):
         if self.fwrev == None:
             if self.write_data_request(1) == SHAKE_ERROR:
                 return SHAKE_ERROR
             count = 0
-            
+
             while count < 1000 and self.fwrev == None:
                 count+=1
                 sleep(0.001)
@@ -411,13 +411,13 @@ class shake_device:
     def info_serial_number(self):
         self.info_retrieve()
         return self.serial
-    
+
     def info_module(self, slotnumber):
         self.info_retrieve()
         if slotnumber < 0 or slotnumber > len(self.modules):
             return None
         return self.modules[slotnumber]
-    
+
     def info_module_name(self, module):
         # TODO supposed to receive an int enum value, but haven't got
         # that enum completed yet so just return raw string from device 
@@ -452,22 +452,22 @@ class shake_device:
 
         self.write_to_port(scp)
         debug("SENT: " + scp)
-        
+
         self.waiting_for_ack_signal = True
         self.waiting_for_ack = True
-        
+
         timeout = self.ack_timeout_ms
         while self.waiting_for_ack_signal:
             sleep(0.001)
             timeout -= 1
             if timeout == 0:
                 break
-            
+
         self.waiting_for_ack = False
-        
+
         if not self.lastack:
             return (SHAKE_ERROR, 0)
-        
+
         self.lastack = False
 
         return (SHAKE_SUCCESS, self.lastval)
@@ -476,29 +476,29 @@ class shake_device:
     #       SHAKE_SUCCESS to indicate the result.
     def write(self, address, value):
         scp = '$WRI,%04X,%02X' % (address, value)
-        
+
         if self.waiting_for_ack:
             debug("write() already waiting for ack")
             return SHAKE_ERROR
-        
+
         self.write_to_port(scp)
         debug("+++ SENT: " + scp)
-        
+
         self.waiting_for_ack_signal = True
         self.waiting_for_ack = True
-        
+
         timeout = self.ack_timeout_ms
         while timeout != 0 and self.waiting_for_ack_signal:
             sleep(0.001)
             timeout -= 1
-            
+
         debug("+++ ACK WAIT OVER timeout = " + str(timeout))
-            
+
         self.waiting_for_ack = False
         if not self.lastack:
             debug("write() failed to get ACK")
             return SHAKE_ERROR
-        
+
         self.lastack = False
 
         return SHAKE_SUCCESS
@@ -579,7 +579,7 @@ class shake_device:
     def write_sample_rate(self, sensor, value):
         if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
             return SHAKE_ERROR
-    
+
         return self.write(SHAKE_NV_REG_ACCOUT + sensor, value)
 
     def read_digital_filter(self, sensor):
@@ -591,7 +591,7 @@ class shake_device:
     def write_digital_filter(self, sensor, value):
         if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
             return SHAKE_ERROR
-        
+
         return self.write(SHAKE_NV_REG_DIGFIL_ACC + sensor, value)
 
     def read_calib_bypass(self):
@@ -638,7 +638,7 @@ class shake_device:
 
     def sk6_read_cs0_dec_profile(self):
         return self.read(SK6_NV_REG_CS0_DEC_PROFILE)
-    
+
     def sk6_write_cs0_dec_profile(self, value):
         return self.write(SK6_NV_REG_CS0_DEC_PROFILE, value)
 
@@ -656,7 +656,7 @@ class shake_device:
 
     def sk6_read_cs1_inc_profile(self):
         return self.read(SK6_NV_REG_CS1_INC_PROFILE)
-    
+
     def sk6_write_cs1_inc_profile(self, value):
         return self.write(SK6_NV_REG_CS1_INC_PROFILE, value)
 
@@ -665,7 +665,7 @@ class shake_device:
 
     def sk6_write_cs1_dec_profile(self, value):
         return self.write(SK6_NV_REG_CS1_DEC_PROFILE, value)
-    
+
     def read_audio_config(self):
         return self.read(SHAKE_NV_REG_AUDIO_CONFIG)
 
@@ -766,7 +766,7 @@ class shake_device:
         msb = ret[1]
 
         return 100 * ((msb << 8) + lsb)
-    
+
     # Shaking configuration
     def read_shaking_config(self):
         return self.read(SHAKE_NV_REG_SHAKING_CONFIG)
@@ -814,13 +814,13 @@ class shake_device:
 
     def read_heart_rate_config(self):
         return self.read(SHAKE_NV_REG_HEART_RATE_CONFIG)
-    
+
     def write_heart_rate_config(self, value):
         return self.write(SHAKE_NV_REG_HEART_RATE_CONFIG, value)
 
     def read_expansion_config(self):
         return self.read(SHAKE_NV_REG_EXPANSION_CONFIG)
-    
+
     def write_expansion_config(self, value):
         return self.write(SHAKE_NV_REG_EXPANSION_CONFIG, value)
 
@@ -838,7 +838,7 @@ class shake_device:
 
     def heart_rate(self):
         return self.SHAKE.data.hrbpm
-    
+
     def rfid_tid(self):
         return self.SHAKE.lasttid
 
@@ -919,7 +919,7 @@ class shake_device:
             self.write_to_port(buf)
 
         return SHAKE_SUCCESS
-    
+
     #       [SK6] continuous vibration support
     def sk6_playvib_continuous(self, channel, amplitude, time):
         if channel != SHAKE_VIB_LEFT or channel != SHAKE_VIB_RIGHT:
@@ -940,7 +940,7 @@ class shake_device:
             vibbyte = 0x80;
         elif amplitude == 100:
             vibbyte = 0xc0;
-        
+
         vibbyte += time;
 
         vibaddr = SHAKE_VO_REG_VIB_LEFT_CONTINUOUS;
@@ -977,14 +977,14 @@ class shake_device:
         self.lastaddr = -1
 
         self.write_to_port(svp)
-        
+
         elapsed = 0
         while self.waiting_for_ack and elapsed < 2000:
             sleep(0.01)
             elapsed += 10 
-                            
+
         self.waiting_for_ack = False
-    
+
         if not self.lastack or self.lastaddr == -1:
             return SHAKE_ERROR
 
@@ -1005,20 +1005,20 @@ class shake_device:
         buf = ""
         while pos < 512:
             tmp = self.read_data(1)
-            
+
             # skip nulls (some SHAKEs output stray nulls in the startup text)
             if ord(tmp) == 0:
                 continue
-        
+
             buf += tmp
-        
+
             if len(buf) > 0 and (ord(buf[pos]) == 0xD or ord(buf[pos]) == 0xA):
                 # compare last 2 bytes to delimiter
                 if pos >= 1:
                     i = pos - 1
                     if (ord(buf[i]) == 0xA and ord(buf[i+1]) == 0xD) or (ord(buf[i]) == 0xD and ord(buf[i+1]) == 0xA):
                         return buf
-                    
+
             pos += 1
-        
+
         return None
