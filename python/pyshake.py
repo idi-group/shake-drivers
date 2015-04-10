@@ -136,18 +136,10 @@ class shake_device:
     #       Closes the connection associated with the instance
     def close(self):
         self.thread_done = True
-<<<<<<< HEAD
-
-        try:
-            shake_device.instances.remove(self)
-        except:
-            pass
-=======
         sleep(0)  # let the thread close itself.
         self.port.close()
         self.instances.remove(self)
         return True
->>>>>>> 1215bf8... - added test_pyshakes to be used with `nosetests` or `nosetests -s test_pyshake.py`
 
     #
     #       Read/parse data 
