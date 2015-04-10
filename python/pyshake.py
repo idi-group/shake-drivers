@@ -65,19 +65,10 @@ atexit.register(cleanup)
 
 # an instance of this class represents a single SHAKE device
 class shake_device:
-    shake_handle_count      = 0
     instances = []
 
-    #
-    #       Constructor
-    #
-
-    #       2nd parameter indicates type of device (SK6 or SK7). Default is SK6
+    # 2nd parameter indicates type of device (SK6 or SK7). Default is SK6
     def __init__(self, type = SHAKE_SK7):
-
-        self.handle = shake_device.shake_handle_count
-        shake_device.shake_handle_count += 1
-
         self.device_type = type
         self.port = None
         self.thread = None
@@ -117,10 +108,9 @@ class shake_device:
         self.device_address = None
         self.write_to_port = None
         self.thread_done = True
-        self.thread_exit = False
         self.synced = False
 
-        shake_device.instances.append(self)
+        self.instances.append(self)
 
     #
     #       Connect/disconnect functions
@@ -134,28 +124,22 @@ class shake_device:
             return False
 
         self.thread_done = False
-        self.thread_exit = False
         thread.start_new_thread(self.run, ())
-        #self.run()
 
         elapsed = 0
         while elapsed < 10.0 and not self.synced:
             sleep(0.01)
             elapsed += 0.01
 
-        if self.thread_done:
-            return False
-
         return self.synced
 
     #       Closes the connection associated with the instance
     def close(self):
         self.thread_done = True
-
-        try:
-            shake_device.instances.remove(self)
-        except:
-            pass
+        sleep(0)  # let the thread close itself.
+        self.port.close()
+        self.instances.remove(self)
+        return True
 
     #
     #       Read/parse data 
@@ -200,7 +184,6 @@ class shake_device:
     def run(self):
         try:
             self.thread_done = False
-
             while not self.thread_done:
                 packet_type = SHAKE_BAD_PACKET
 
@@ -212,9 +195,6 @@ class shake_device:
 
                 self.SHAKE.parse_packet(packet, packet_type)
 
-            if self.port != None:
-                self.port.close()
-            self.thread_exit = True
         except:
             import sys, traceback
             print("\n".join(traceback.format_exception(*sys.exc_info())))
