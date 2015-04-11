@@ -262,7 +262,6 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.accy = int(packetbuf[11:16])
             self.data.accz = int(packetbuf[17:22])
             self.data.internal_timestamps[SHAKE_SENSOR_ACC] = int(packetbuf[23:25])
-            print packetbuf
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_ACC, [self.data.accx, self.data.accy, self.data.accz], self.data.internal_timestamps[SHAKE_SENSOR_ACC])
 
