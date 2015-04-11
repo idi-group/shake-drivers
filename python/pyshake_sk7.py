@@ -94,7 +94,7 @@ class SK7(pyshake_sk_common.SHAKE):
             
             # read the remainder of the timestamp packet (still have to read
             # the content of the packet afterwards)
-            packetbuf += self.__shake.read_data(sk7_packet_lengths[SK7_DATA_TIMESTAMP] - SK7_HEADER_LEN)
+            packetbuf += self.read_data(sk7_packet_lengths[SK7_DATA_TIMESTAMP] - SK7_HEADER_LEN)
 
             # the format of the timestamp packet is "$TIM,1234567890," where the
             # numbers are a 10-digit timestamp in seconds, with an implicit 
@@ -104,10 +104,10 @@ class SK7(pyshake_sk_common.SHAKE):
 
             playback = True
 
-            packetbuf = self.__shake.read_data(SK7_HEADER_LEN)
+            packetbuf = self.read_data(SK7_HEADER_LEN)
             packet_type = self.classify_packet_header(packetbuf, True)
         elif packet_type == SK7_DATA_PLAYBACK_COMPLETE:
-            packetbuf += self.__shake.read_data(sk7_packet_lengths[packet_type] - SK7_HEADER_LEN)
+            packetbuf += self.read_data(sk7_packet_lengths[packet_type] - SK7_HEADER_LEN)
             playback = False
             if self.__shake.logfp:
                 self.__shake.logfp.close()
@@ -118,7 +118,7 @@ class SK7(pyshake_sk_common.SHAKE):
 
             return SK7_ASCII_READ_CONTINUE
         elif packet_type == SK7_DATA_RFID_TID:
-            packetbuf += self.__shake.read_data(sk7_packet_lengths[packet_type] - SK7_HEADER_LEN)
+            packetbuf += self.read_data(sk7_packet_lengths[packet_type] - SK7_HEADER_LEN)
             self.__shake.lastrfid = packetbuf[SK7_HEADER_LEN+1:]
 
             if self.__shake.navcv != None:
@@ -135,7 +135,7 @@ class SK7(pyshake_sk_common.SHAKE):
         if playback:
             bytes_left -= 3
 
-        tmp = self.__shake.read_data(bytes_left)
+        tmp = self.read_data(bytes_left)
         bytes_read = len(tmp)
         packetbuf += tmp
         if bytes_read != bytes_left:
@@ -152,7 +152,7 @@ class SK7(pyshake_sk_common.SHAKE):
             if not self.__shake.checksum:
                 self.__shake.checksum = True
 
-            packetbuf += self.__shake.read_data(SHAKE_CHECKSUM_LENGTH)
+            packetbuf += self.read_data(SHAKE_CHECKSUM_LENGTH)
             bytes_read += 3
         elif sk7_packet_has_checksum[packet_type] and ord(packetbuf[bytes_read + SK7_HEADER_LEN - 1]) == 0xA and self.__shake.checksum:
             self.__shake.checksum = False
@@ -168,7 +168,7 @@ class SK7(pyshake_sk_common.SHAKE):
         packet_size, bytes_left, bytes_read = 0,0,0
 
         bytes_left = sk7_packet_lengths[packet_type] - SK7_RAW_HEADER_LEN
-        tmp = self.__shake.read_data(bytes_left)
+        tmp = self.read_data(bytes_left)
         bytes_read = len(tmp)
         packetbuf += tmp
 
@@ -203,7 +203,7 @@ class SK7(pyshake_sk_common.SHAKE):
     def get_next_packet(self):
         packetbuf = ""
         bytes_read, packet_type = 0, SHAKE_BAD_PACKET
-        tmp = self.__shake.read_data(3)
+        tmp = self.read_data(3)
         bytes_read = len(tmp)
         packetbuf += tmp
 
@@ -211,10 +211,10 @@ class SK7(pyshake_sk_common.SHAKE):
             if ord(packetbuf[0]) == 0x7F and ord(packetbuf[1]) == 0x7F:
                 packet_type = self.classify_packet_header(packetbuf, False)
             elif packetbuf[0] == '$' or packetbuf[0] == '\n':
-                packetbuf += self.__shake.read_data(1)
+                packetbuf += self.read_data(1)
                 packet_type = self.classify_packet_header(packetbuf, True)
             elif packetbuf.startswith("Log"):
-                packetbuf += self.__shake.read_data(1)
+                packetbuf += self.read_data(1)
                 packet_type = self.classify_packet_header(packetbuf, True)
 
         if packet_type == SHAKE_BAD_PACKET:
@@ -222,14 +222,14 @@ class SK7(pyshake_sk_common.SHAKE):
             c = " "
             while read_count >= 0 and (c != '$' and ord(c) != 0x7F):
                 read_count -= 1
-                c = self.__shake.read_data(1)
+                c = self.read_data(1)
 
             packetbuf = c
             if c == '$':
-                packetbuf += self.__shake.read_data(SK7_HEADER_LEN - 1)
+                packetbuf += self.read_data(SK7_HEADER_LEN - 1)
                 packet_type = self.classify_packet_header(packetbuf, True)
             elif len(c) != 0 and ord(c) == 0x7F:
-                packetbuf += self.__shake.read_data(SK7_RAW_HEADER_LEN - 1)
+                packetbuf += self.read_data(SK7_RAW_HEADER_LEN - 1)
                 packet_type = self.classify_packet_header(packetbuf, False)
 
         return (packet_type, packetbuf)
@@ -262,6 +262,7 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.accy = int(packetbuf[11:16])
             self.data.accz = int(packetbuf[17:22])
             self.data.internal_timestamps[SHAKE_SENSOR_ACC] = int(packetbuf[23:25])
+            print packetbuf
             if self.__shake.data_callback:
                 self.__shake.data_callback(SHAKE_SENSOR_ACC, [self.data.accx, self.data.accy, self.data.accz], self.data.internal_timestamps[SHAKE_SENSOR_ACC])
 
@@ -537,7 +538,7 @@ class SK7(pyshake_sk_common.SHAKE):
 
     def read_device_info(self):
         for i in range(SK7_NUM_INFO_LINES):
-            line = self.__shake.read_info_line()
+            line = self.read_info_line()
             if line == None:
                 return False
             
@@ -570,7 +571,7 @@ class SK7(pyshake_sk_common.SHAKE):
             elif i == SK7_SLOT4:
                 self.__shake.modules[4] = line.strip()
     
-        self.__shake.read_data(1)
-        self.__shake.synced = True
+        self.read_data(1)
+        self.synced = True
         return True
 

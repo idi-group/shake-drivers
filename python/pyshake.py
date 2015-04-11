@@ -23,8 +23,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+"""
+Top-level module for the Python SHAKE driver implementation.
 
-import atexit, thread, re, string, os
+It supports both SK6 and SK7 SHAKEs. 
+"""
+
+import atexit, thread
 from time import sleep
 
 from pyshake_constants import *
@@ -32,13 +37,7 @@ import pyshake_sk6
 import pyshake_sk7
 import pyshake_serial_pc as pyshake_serial
 
-class shake_error(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-#       Debugging stuff
+# only enable this if you are debugging the driver itself... 
 debugging = False
 def debug(str, opennew=False):
     if not debugging:
@@ -46,29 +45,44 @@ def debug(str, opennew=False):
 
     f = None
     if opennew:
-        f = open("c:/debug.txt", "w")
+        f = open("debug.txt", "w")
     else:
-        f = open("c:/debug.txt", "a")
+        f = open("debug.txt", "a")
 
     f.write(str + "\n")
     f.close()
 
-# this function is registered to be called on exit from a Python 
-# shell, and just calls the close method of any active shake_device
-# instances
 def cleanup():
+    """
+    This function is registered to be called on exit from a Python
+    shell, and just calls the close method of any active shake_devices
+    objects.
+
+    TODO: is this really needed? Might be a historical leftover
+    """
     for i in shake_device.instances:
         if i != None:
             i.close()
 
 atexit.register(cleanup)
 
-# an instance of this class represents a single SHAKE device
 class shake_device:
+    """
+    Objects of this class represent a single SHAKE device and the current
+    connection (if any) to the host device. It contains methods to configure
+    the device, query the current configuration and receive sensor data and
+    events.
+    """
     instances = []
 
     # 2nd parameter indicates type of device (SK6 or SK7). Default is SK6
     def __init__(self, type = SHAKE_SK7):
+        """
+        Create a new shake_device object.
+
+        :param type: the model of SHAKE that this object will be used to
+            control. Defaults to the newer SK7 model. 
+        """
         self.device_type = type
         self.port = None
         self.thread = None
@@ -102,69 +116,70 @@ class shake_device:
         self.lastevent = 0
         self.logfp = None
         self.packets_read = 0L
-        self.peek_flag = False
-        self.peek = 0
 
         self.device_address = None
         self.write_to_port = None
         self.thread_done = True
-        self.synced = False
 
         self.instances.append(self)
 
-    #
-    #       Connect/disconnect functions
-    #
     def connect(self, addr):
-        if not self.thread_done or addr == None:
+        """
+        Connect to a SHAKE identified by an address (which may be a COM port
+        number or a character device filename depending on the current 
+        platform). 
+
+        :param addr: the address of the device. For Windows users this should 
+            be a COM port identifier, either as a plain integer or a string such
+            as 'COM9:' (basically any valid pyserial identifier should work). For
+            OSX/Linux it will typically be a character device filename, eg 
+            '/dev/tty.SHAKESK7SN0077-SPPDev'
+        :returns: True if connection succeeded, False otherwise
+        """
+
+        if self.port or not self.thread_done or addr == None:
             return False
 
         self.device_address = addr
-        if self.port_setup() == SHAKE_ERROR:
+        if self._open_port(addr) == SHAKE_ERROR:
             return False
 
         self.thread_done = False
-        thread.start_new_thread(self.run, ())
+        thread.start_new_thread(self._reader_thread, ())
 
         elapsed = 0
-        while elapsed < 10.0 and not self.synced:
+        while elapsed < 5.0 and not self.SHAKE.synced:
             sleep(0.01)
             elapsed += 0.01
 
-        return self.synced
+        return self.SHAKE.synced
 
-    #       Closes the connection associated with the instance
     def close(self):
+        """
+        Closes an active connection to a device.
+
+        :returns: True if the connection was successfully closed or was closed
+            already, False if an active connection failed to close.
+        """
+        if not self.port or self.thread_done:
+            return True
+
         self.thread_done = True
         sleep(0)  # let the thread close itself.
-        self.port.close()
+        self.port.close() 
+        self.port = None
         self.instances.remove(self)
         return True
 
-    #
-    #       Read/parse data 
-    #
-    def read_data(self, num_bytes):
-        if self.port == None:
-            return None
+    def _open_port(self, addr):
+        """
+        Attempt to open a connection to the SHAKE with the given address.
 
-        bytes = ""
-        if self.peek_flag:
-            bytes += chr(self.peek)
-            num_bytes -= 1
-            self.peek_flag = False
-
-            if num_bytes == 0:
-                return bytes
-
-        self.synced = True
-        allbytes = bytes + self.port.read(num_bytes)
-        return allbytes
-
-    def port_setup(self):
-        # create the port (this is done inside the thread started by connect())
+        :param addr: the port identifier (COM port number, char device filename)
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR (TODO getlasterror type func?)
+        """
         try:
-            self.port = pyshake_serial.serial_port(self.device_address)
+            self.port = pyshake_serial.serial_port(addr)
             baud = 230400
             if self.device_type == SHAKE_SK7:
                 baud = 460800
@@ -180,8 +195,13 @@ class shake_device:
             self.thread_done = True
             return SHAKE_ERROR
 
-    #       Thread function
-    def run(self):
+        return SHAKE_SUCCESS
+
+    def _reader_thread(self):
+        """
+        Runs in a thread, continually parsing packets as they arrive on the
+        the serial port. 
+        """
         try:
             self.thread_done = False
             while not self.thread_done:
@@ -200,109 +220,152 @@ class shake_device:
             print("\n".join(traceback.format_exception(*sys.exc_info())))
             return
 
-    #
-    #       Data access functions
-    #
-
     def data_timestamp(self, sensor):
+        """
+        Used to obtain the latest sequence number for the data stream of
+        a given sensor. These sequence numbers can be used to check for
+        missing packets in the data stream, or to perform some action
+        when new data arrives. Note that the value of the timestamp will
+        depend on the output format that the device is configured to use. In 
+        ASCII mode, the output will range from 0-99 and then wrap back to 0. 
+        In basic raw mode, there are no sequence numbers. In raw mode with 
+        serial numbers enabled, the values range from 0-255 before wrapping,
+        but the value 127 is always skipped due to it being used as a header
+        identifier in the data stream.
+
+        :param sensor: the sensor identifier (eg SHAKE_SENSOR_ACC)
+        :returns: -1 if an invalid sensor selected, otherwise the last
+            available timestamp for the selected sensor. 
+        """
         if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
             return -1
 
         return self.SHAKE.data.timestamps[sensor]
 
-    #       Returns x-axis accelerometer reading
     def accx(self):
+        """Return latest x-axis accelerometer value"""
         x = self.SHAKE.data.accx
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ACC] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ACC]
         return x
 
-    #       Returns y-axis accelerometer reading
     def accy(self):
+        """Return latest y-axis accelerometer value"""
         y = self.SHAKE.data.accy
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ACC] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ACC]
         return y
 
-    #       Returns z-axis accelerometer reading
     def accz(self):
+        """Return latest z-axis accelerometer value"""
         z = self.SHAKE.data.accz
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ACC] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ACC]
         return z
 
-    #       Returns accelerometer readings in a list: [x, y, z]
     def acc(self):
+        """
+        Return latest accelerometer values as a list.
+
+        :returns: accelerometer values in a 3 element list ([x, y, z])
+        """
         xyz = [self.SHAKE.data.accx, self.SHAKE.data.accy, self.SHAKE.data.accz]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ACC] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ACC]
         return xyz
 
-    #       Returns x-axis gyro reading
     def gyrx(self):
+        """Return latest x-axis gyro value"""
         x = self.SHAKE.data.gyrx
         self.SHAKE.data.timestamps[SHAKE_SENSOR_GYRO] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_GYRO]
         return x
 
-    #       Returns y-axis gyro reading
     def gyry(self):
+        """Return latest y-axis gyro value"""
         y = self.SHAKE.data.gyry
         self.SHAKE.data.timestamps[SHAKE_SENSOR_GYRO] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_GYRO]
         return y
 
-    #       Returns z-axis gyro reading
     def gyrz(self):
+        """Return latest z-axis gyro value"""
         z = self.SHAKE.data.gyrz
         self.SHAKE.data.timestamps[SHAKE_SENSOR_GYRO] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_GYRO]
         return z
 
-    #       Returns gyro readings in a list: [x, y, z]
     def gyro(self):
+        """
+        Return latest gyroscope values as a list.
+
+        :returns: gyroscope values in a 3 element list ([x, y, z])
+        """
         xyz = [self.SHAKE.data.gyrx, self.SHAKE.data.gyry, self.SHAKE.data.gyrz]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_GYRO] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_GYRO]
         return xyz
 
-    #       Returns x-axis mag reading
     def magx(self):
+        """Return latest x-axis magnetometer value"""
         x = self.SHAKE.data.magx
         self.SHAKE.data.timestamps[SHAKE_SENSOR_MAG] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_MAG]
         return x
 
-    #       Returns y-axis mag reading
     def magy(self):
+        """Return latest y-axis magnetometer value"""
         y = self.SHAKE.data.magy
         self.SHAKE.data.timestamps[SHAKE_SENSOR_MAG] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_MAG]
         return y
 
-    #       Returns z-axis mag reading
     def magz(self):
+        """Return latest z-axis magnetometer value"""
         z = self.SHAKE.data.magz
         self.SHAKE.data.timestamps[SHAKE_SENSOR_MAG] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_MAG]
         return z
 
-    #       Returns mag readings in a list: [x, y, z]
     def mag(self):
+        """
+        Return latest magnetometer values as a list.
+
+        :returns: magnetometer values in a 3 element list ([x, y, z])
+        """
         xyz = [self.SHAKE.data.magx, self.SHAKE.data.magy, self.SHAKE.data.magz]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_MAG] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_MAG]
         return xyz
 
-    #       Returns heading
     def heading(self):
+        """
+        Return latest heading (note that this only applies to the basic 
+        builtin heading calculation algorithm, not the more complex
+        'roll-pitch-heading' functionality detailed in the manual. 
+
+        :returns: latest heading value (tenths of a degree, 0-3599)
+        """
         heading = self.SHAKE.data.heading
         self.SHAKE.data.timestamps[SHAKE_SENSOR_HEADING] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_HEADING]
         return heading
 
-    #       [SK6] Returns proximity value for cap switch 0
     def sk6_cap0(self):
+        """
+        (SK6 only) Return the value of the first capacitive sensor
+
+        :returns: latest capacitive sensor value (0-255)
+        """
         c = self.SHAKE.data.cap_sk6[0]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_CAP0] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_CAP0]
         return c
 
-    #       [SK6] Returns proximity value for cap switch 1
     def sk6_cap1(self):
+        """
+        (SK6 only) Return the value of the second capacitive sensor
+
+        :returns: latest capacitive sensor value (0-255)
+        """
         c = self.SHAKE.data.cap_sk6[1]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_CAP1] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_CAP1]
         return c
 
-    #       [SK6] Returns proximity values for cap switch [0, 1]
-    #       [SK7] Returns proximity values for cap switches [0, 1, ..., 11]
     def cap(self):
+        """
+        (SK6 only) Returns the values of both capacitive sensors as a list
+        (SK7 only) Returns the values of the standard 12 capacitive sensors 
+        as a list.
+
+        :returns: (SK6) 2-element list, (SK7) 12-element list
+        """
         if self.device_type == SHAKE_SK6:
             cap = self.SHAKE.data.cap_sk6
             self.SHAKE.data.timestamps[SHAKE_SENSOR_CAP0] = self.SHAKE.data.cap0seq
@@ -312,9 +375,17 @@ class shake_device:
             self.SHAKE.data.timestamps[SHAKE_SENSOR_CAP] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_CAP]
         return cap
 
-    #       [SK7] Returns proximity values for external capacitive board attached to an SK7
-    #           Blocks parameter can be 0, 1 or 2. 0 = return first 12 values, 1 = return second 12 values, 2 = return all 24 values
     def cap_ext(self, blocks):
+        """
+        (SK7 only) Returns the capacitive sensor values for an SK7-ExtCs1 board
+        attached to an SK7.
+
+        :param blocks: selects the board(s) to return values from. 0 = first 
+            block of 12 sensors only, 1 = second block of 12 sensors only, 3 = 
+            all 24 sensors.
+        :returns: the selected capacitive sensor values as a list, or None if
+            an invalid blocks parameter is supplied.
+        """
         if blocks == 0:
             return self.SHAKE.data.cap_sk7[1]
         elif blocks == 1:
@@ -324,81 +395,187 @@ class shake_device:
         else:
             return None
 
-    #       Returns value of analog input 0
     def analog0(self):
+        """
+        Returns the latest value from the first analogue input channel.
+
+        :returns: latest value from analogue channel 0
+        """
         a = self.SHAKE.data.ana0
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ANA0] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ANA0]
         return a
 
-    #       Returns value of analog input 1
     def analog1(self):
+        """
+        Returns the latest value from the second analogue input channel.
+
+        :returns: latest value from analogue channel 1
+        """
         a = self.SHAKE.data.ana1
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ANA1] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ANA1]
         return a
 
-    #       Returns value of both analog inputs as [analog0, analog1]
     def analog(self):
+        """
+        Returns the latest values from both analogue inputs.
+
+        :returns: latest values from both analogue inputs as a 2-element list.
+        """
         ana = [self.SHAKE.data.ana0, self.SHAKE.data.ana1]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ANA0] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ANA0]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ANA1] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ANA1]
         return ana
 
-    def shaking_peakaccel(self):
-        return self.SHAKE.data.peakaccel
-
-    def shaking_direction(self):
-        return self.SHAKE.data.direction
-
-    def shaking_timestamp(self):
-        return self.SHAKE.data.timestamp
+    # TODO: do these functions actually still work? They used to, but the latest
+    # manual doesn't mention this functionality at all...
+    #def shaking_peakaccel(self):
+    #    return self.SHAKE.data.peakaccel
+    #
+    #def shaking_direction(self):
+    #    return self.SHAKE.data.direction
+    #
+    #def shaking_timestamp(self):
+    #    return self.SHAKE.data.timestamp
 
     #       [SK7] return [roll, pitch, heading] data 
     def sk7_roll_pitch_heading(self):
+        """
+        (SK7 only) Return latest roll-pitch-heading (RPH) data
+
+        :returns: RPH data as a 3-element list ([roll, pitch, heading]). All 3
+            are in units of tenths of a degree. Roll and pitch range between 
+            -1800 and 1799, heading between 0 and 3599. 
+        """
         return self.SHAKE.data.rph
 
     def sk7_roll_pitch_heading_quaternions(self):
+        """
+        (SK7 only) Return latest roll-pitch-heading (RPH) data in quaternion
+        format, as a list. 
+
+        :returns: the quaternion parameters A,B,C and D in a 4-element list 
+           ([A, B, C, D])
+        """
         return self.SHAKE.data.rphq
 
     def sk7_configure_roll_pitch_heading(self, val):
+        """
+        Update the current roll-pitch-heading (RPH) data output settings. 
+
+        :param val: For complete details, see the section of the user manual
+            called "AHRS Configuration Register 0x0046". Common values would be: 
+            0 (disable RPH functionality and fall back to simple heading output), 
+            3 (enable RPH functionality and standard output mode)
+            7 (enable RPH functionality and quaternion output mode)
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         return self.write(SK7_NV_REG_RPH_CONFIG, val)
 
     def register_data_callback(self, callback):
+        """
+        Register a callback function which will be called each time a new
+        data packet arrives from the device. The function should expect 3
+        parameters: (sensor_id, sensor_data, sensor_timestamp). 
+        
+        sensor_id identifies the sensor (eg SHAKE_SENSOR_ACC).
+
+        sensor_data contains the sensor data in a list, the contents of which
+        will vary depending on the sensor (eg a 3-element list for the 
+        accelerometer). 
+
+        sensor_timestamp contains the corresponding sequence number for the
+        sensor data (if available). 
+
+        :param callback: callable object
+        """
         self.data_callback = callback
 
-    #
-    #       Device information
-    #
-
     def info_retrieve(self):
-        if self.fwrev == None:
+        """
+        Attempts to retrieve information about the SHAKE, which can then be
+        accessed by the other info functions. Does nothing if the data is
+        already available (which it usually will be as the driver attempts
+        to parse it immediately after the connection is first opened). 
+
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
+        if self.fwrev == -1:
             if self.write_data_request(1) == SHAKE_ERROR:
                 return SHAKE_ERROR
-            count = 0
 
-            while count < 1000 and self.fwrev == None:
-                count+=1
-                sleep(0.001)
+            count = 0
+            while count < 1000 and self.fwrev == -1:
+                count += 10
+                sleep(0.01)
+
+        if self.fwrev == -1:
+            return SHAKE_ERROR
+
         return SHAKE_SUCCESS
 
     def info_firmware_revision(self):
+        """
+        Returns the device firmware revision number.
+
+        :returns: The revision number as a floating point value (with 2 
+            significant digits). Returns -1 if an error occurred.
+        """
         self.info_retrieve()
         return self.fwrev
 
     def info_hardware_revision(self):
+        """
+        Returns the device hardware revision number.
+
+        :returns: The revision number as a floating point value (with 2 
+            significant digits). Returns -1 if an error occurred.
+        """
         self.info_retrieve()
         return self.hwrev
 
     def info_serial_number(self):
+        """
+        Returns the device serial number.
+
+        :returns: The serial number as a string, format will be 'SN<number>',
+            eg 'SN0077'. Returns 'missing' if an error occurred. 
+        """
         self.info_retrieve()
         return self.serial
 
+    def info_num_slot(self):
+        """
+        Returns the number of hardware expansion slots the device contains.
+
+        :returns: number of hardware expansion slots
+        """
+        return len(self.modules)
+
     def info_module(self, slotnumber):
+        """
+        TODO: doesn't work for SK7s, need a list of available modules!
+        
+        Return an identifier for the type of extension module installed
+        in the connected SHAKE device (if any)
+
+        :param slotnumber: the slot number, 0-based (the SK6 has 2 slots, the
+            SK7 has 5).
+        :returns: module ID (which may be SK7_MODULE_NONE/SK6_MODULE_NONE) 
+            or None if an error occurred:
+        """
         self.info_retrieve()
         if slotnumber < 0 or slotnumber > len(self.modules):
             return None
         return self.modules[slotnumber]
 
     def info_module_name(self, module):
+        """
+        Returns a string identifier for a given expansion module ID.
+
+        :param module: an integer module identifier 
+        :returns: a string describing the module, or an empty string if an 
+            error occurred.
+        """
         # TODO supposed to receive an int enum value, but haven't got
         # that enum completed yet so just return raw string from device 
         if isinstance(module, str):
@@ -410,21 +587,28 @@ class shake_device:
         for i in range(SK7_MODULE_NONE, SK7_MODULE_LAST, 1):
             if module == i:
                 return pyshake_sk7.SK7_modules[i-SK7_MODULE_NONE]
-        return "unknown module type"
+        return ''
 
     def info_bluetooth_firmware_revision(self):
+        """
+        Returns the device Bluetooth firmware revision number. 
+
+        :returns: The revision number as a floating point value (with 2 
+            significant digits). Returns -1 if an error occurred.
+        """
         self.info_retrieve()
         return self.bluetoothfwrev
 
-    #
-    #       Register access
-    #
-
-    #       Reads register <address> and returns a 2-tuple: (success/error, value), where
-    #       the first item in the tuple is SHAKE_SUCCESS or SHAKE_ERROR depending on the
-    #       result of the operation. value will be 0 on error, otherwise it will be the
-    #       current contents of the specified register.
     def read(self, address):
+        """
+        Reads a register on the device.
+
+        :param address: the register address to read from (see the user manual
+            for a full list of available register addresses)
+        :returns: a 2-tuple (result, value). On success, result will be set to
+            SHAKE_SUCCESS and value to the register content. On error, result 
+            will be SHAKE_ERROR and value zeroed.
+        """
         scp = '$REA,%04X,00' % (address)
 
         if self.waiting_for_ack:
@@ -438,8 +622,8 @@ class shake_device:
 
         timeout = self.ack_timeout_ms
         while self.waiting_for_ack_signal:
-            sleep(0.001)
-            timeout -= 1
+            sleep(0.01)
+            timeout -= 10
             if timeout == 0:
                 break
 
@@ -452,9 +636,19 @@ class shake_device:
 
         return (SHAKE_SUCCESS, self.lastval)
 
-    #       Writes <value> into register <address> and returns either SHAKE_ERROR or
-    #       SHAKE_SUCCESS to indicate the result.
     def write(self, address, value):
+        """
+        Write a new value into a register on the device.
+
+        :param address: the register address to write to (see the user manual
+            for a full list of the available register addresses)
+        :param value: the new value (0-255)
+        :returns: SHAKE_SUCCESS if the value was successfully written, or
+            SHAKE_ERROR if an error occurred. 
+        """
+        if not isinstance(value, int) or value < 0 or value > 255:
+            return SHAKE_ERROR
+
         scp = '$WRI,%04X,%02X' % (address, value)
 
         if self.waiting_for_ack:
@@ -469,8 +663,8 @@ class shake_device:
 
         timeout = self.ack_timeout_ms
         while timeout != 0 and self.waiting_for_ack_signal:
-            sleep(0.001)
-            timeout -= 1
+            sleep(0.01)
+            timeout -= 10
 
         debug("+++ ACK WAIT OVER timeout = " + str(timeout))
 
@@ -484,52 +678,83 @@ class shake_device:
         return SHAKE_SUCCESS
 
     def register_event_callback(self, callback):
+        """
+        Register a callback function to be called when events are received
+        from the SHAKE (as opposed to streaming sensor data). The function
+        should expect a single parameter, which will be an integer identifying
+        the event type (eg SHAKE_NAV_UP).
+
+        :param callback: callable object
+        """
         self.navcb = callback
 
-    #       All functions below here are used to read/write the configuration
-    #       registers on the SHAKE. The constants referred to in the comments
-    #       can all be found in the pyshake_constants.py file.
-
-    #       Read or write the SHAKE_NV_REG_POWER1 register. This controls power to the
-    #       various sensors on the device. When writing a value, use a logical
-    #       OR of one or more of the SHAKE_POWER_* constants. Eg to turn on the
-    #       accelerometers and gyros and disable everything else, use:
-    #       SHAKE_POWER_ACC | SHAKE_POWER_GYR
-    # 
-    #       Reading from the register will return a 2-tuple consisting of a 
-    #       return code (either SHAKE_SUCCESS or SHAKE_ERROR) followed by
-    #       the current value of the register.
     def read_power_state(self):
+        """
+        Read the main power state configuration register. 
+
+        :returns: a 2-tuple (result, value). On success, result will be set to
+            SHAKE_SUCCESS and value to the register content. On error, result 
+            will be SHAKE_ERROR and value zeroed.
+        """
         return self.read(SHAKE_NV_REG_POWER1)
 
     def write_power_state(self, value):
-        if value < 0 or value > 255:
-            return SHAKE_ERROR
+        """
+        Write to the main power state configuration register. You can use this
+        to enable/disable the main onboard sensors. For example, to enable
+        the accelerometer and magnetometer only:
+
+        write_power_state(SHAKE_POWER_ACC | SHAKE_POWER_MAG)
+
+        See the user manual for more details.
+
+        :param value: new register value. (0-255). 
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         return self.write(SHAKE_NV_REG_POWER1, value)
 
     def read_power_state_2(self):
+        """
+        Read the secondary power state configuration register.
+
+        :returns: a 2-tuple (result, value). On success, result will be set to
+            SHAKE_SUCCESS and value to the register content. On error, result 
+            will be SHAKE_ERROR and value zeroed.
+        """
         return self.read(SHAKE_NV_REG_POWER1)
 
     def write_power_state_2(self, value):
-        if value < 0 or value > 255:
-            return SHAKE_ERROR
+        """
+        Write to the main power state configuration register. This controls
+        some optional/extra sensors. See the user manual for more details.
+
+        :param value: new register value (0-255).
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         return self.write(SHAKE_NV_REG_POWER2, value)
 
-    #       Read or write the SHAKE_NV_REG_DATAFMT register. This controls the output
-    #       format of the sensor data (either ASCII (default) or raw mode
-    #
-    #       When writing to the register, the value should either be 
-    #       SHAKE_DATAFMT_ASCII or SHAKE_DATAFMT_RAW, other values will be
-    #       rejected. 
-    #       
-    #       Reading from the register will return a 2-tuple consisting of a 
-    #       return code (either SHAKE_SUCCESS or SHAKE_ERROR) followed by
-    #       the current value of the register, which will be one of the two
-    #       values detailed above. 
     def read_data_format(self):
+        """
+        Read the data output format register. 
+
+        :returns: a 2-tuple (result, value). On success, result will be set to
+            SHAKE_SUCCESS and value to the register content. On error, result 
+            will be SHAKE_ERROR and value zeroed.
+        """
         return self.read(SHAKE_NV_REG_DATAFMT)
 
     def write_data_format(self, value):
+        """
+        Write the the data output format register. This controls the packet 
+        format generated by the SHAKE. The main use for this function is to
+        switch between ASCII output (verbose but human readable) and raw binary
+        output (much more bandwidth efficient). 
+
+        :param value: the new register value. 0 enables ASCII mode, 2 enables
+            raw/binary output mode, 6 enables raw/binary output with packet 
+            sequence numbering.
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         return self.write(SHAKE_NV_REG_DATAFMT, value)
 
     def read_acc_config(self):
@@ -538,25 +763,29 @@ class shake_device:
     def write_acc_config(self, value):
         return self.write(SHAKE_NV_REG_ACCCONFIG, value)
 
-    #       Read or write the registers which control output sample rates for the
-    #       different sensors on the SHAKE. In both cases, the <sensor> parameter
-    #       should be set to one of the SHAKE_SENSOR_* constants (eg SHAKE_SENSOR_ACC) 
-    #
-    #       When writing to the register for a particular sensor, <value> must be
-    #       between 0 and the corresponding SHAKE_<sensor>_MAX_RATE limit. For example
-    #       the accelerometer sampling range is between 0 and SHAKE_ACC_MAX_RATE. Values
-    #       outside this range will be rejected.
-    #       
-    #       Reading from the register will return a 2-tuple consisting of a 
-    #       return code (either SHAKE_SUCCESS or SHAKE_ERROR) followed by
-    #       the current sample rate for the selected sensor.
     def read_sample_rate(self, sensor):
+        """
+        Read one of the registers that control the sample rate for the main
+        onboard sensors. 
+
+        :param sensor: one of the SHAKE_SENSO constants.
+        :returns: a 2-tuple (result, value). On success, result will be set to
+            SHAKE_SUCCESS and value to the register content. On error, result 
+            will be SHAKE_ERROR and value zeroed. The sample rate is given in Hz. 
+        """
         if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
             return SHAKE_ERROR
 
         return self.read(SHAKE_NV_REG_ACCOUT + sensor)
 
     def write_sample_rate(self, sensor, value):
+        """
+        Write to one of the registers that control the sample rate for the main
+        onboard sensors. 
+
+        :param sensor: one of the SHAKE_SENSOR constants.
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         if sensor < SHAKE_SENSOR_ACC or sensor > SHAKE_SENSOR_ANA1:
             return SHAKE_ERROR
 
@@ -706,28 +935,72 @@ class shake_device:
 
         return SHAKE_SUCCESS
 
-    # Logging...
     def logging_pause(self):
+        """
+        Pauses any current logging operation (playback or recording). 
+
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_PAUSE)
 
     def logging_stop(self):
+        """
+        Stops any current logging operation (playback or recording), and moves
+        the internal R/W pointer to the beginning of the memory space. 
+
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         if self.logfp:
             self.logfp.close()
+        self.logfp = None
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_STOP)
 
     def logging_record(self):
+        """
+        Starts logging data to the internal memory from current R/W position.
+
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         if self.logfp:
             self.logfp.close()
+        self.logfp = None
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RECORD)
 
     def logging_reset(self):
+        """
+        Zeroes the internal clock used to timestamp data logged to the internal
+        memory space. Normally called just before recording is started.
+
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_RESET)
 
     def logging_play(self, filename):
+        """
+        Begins playback of logged data to a local file. Note that this function
+        will always return immediately - this does NOT mean that playback has
+        completed. To ensure you receive all of the data, register an event
+        callback function before calling this function, and wait for the 
+        SHAKE_PLAYBACK_COMPLETE event to be received. 
+
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         self.logfp = open(filename, 'w')
         return self.write(SHAKE_VO_REG_LOGGING_CTRL, SHAKE_LOGGING_PLAY)
 
     def logging_status(self):
+        """
+        Read the register containing the current state of the logging system.
+
+        :returns: SHAKE_ERROR if an error occurred. Otherwise the value 
+            returned indicates the state of the logging system as follows:
+
+            value & SHAKE_LOGGING_RECORDING != 0 # recording in progress
+            value & SHAKE_LOGGING_PLAYING != 0 # playback in progress
+            value & SHAKE_LOGGING_MEMORYFULL != 0 # memory almost full
+        
+            If value is 0, logging is not active.
+        """
         ret = self.read(SHAKE_VO_REG_LOGGING_STATUS)
         if ret[0] == SHAKE_ERROR:
             return SHAKE_ERROR
@@ -735,6 +1008,12 @@ class shake_device:
         return ret[1]
 
     def logging_packet_count(self):
+        """
+        Returns the number of packets logged to internal memory (not an exact
+        count).
+
+        :returns: number of packets logged to internal memory. 
+        """
         ret = self.read(SHAKE_NV_REG_LOGGING_PKT_LSB)
         if ret[0] == SHAKE_ERROR:
             return SHAKE_ERROR
@@ -747,50 +1026,50 @@ class shake_device:
 
         return 100 * ((msb << 8) + lsb)
 
-    # Shaking configuration
-    def read_shaking_config(self):
-        return self.read(SHAKE_NV_REG_SHAKING_CONFIG)
-
-    def write_shaking_config(self, value):
-        return self.write(SHAKE_NV_REG_SHAKING_CONFIG, value)
-
-    def read_shaking_accel_threshold(self):
-        return self.read(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD)
-
-    def write_shaking_accel_threshold(self, value):
-        return self.write(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD, value)
-
-    def read_shaking_holdoff_time(self):
-        return self.read(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME)
-
-    def write_shaking_holdoff_time(self, value):
-        return self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, value)
-
-    def read_shaking_vibration_profile(self):
-        return self.read(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE)
-
-    def write_shaking_vibration_profile(self, value):
-        return self.write(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE, value)
-
-    def read_shaking_hpf_constant(self):
-        return self.read(SHAKE_NV_REG_SHAKING_HPF_CONSTANT)
-
-    def write_shaking_hpf_constant(self, value):
-        return self.write(SHAKE_NV_REG_SHAKING_HPF_CONSTANT, value)
-
-    def read_shaking_lpf_constant(self):
-        return self.read(SHAKE_NV_REG_SHAKING_LPF_CONSTANT)
-
-    def write_shaking_lpf_constant(self, value):
-        return self.write(SHAKE_NV_REG_SHAKING_LPF_CONSTANT, value)
-
-    def reset_shaking_detection(self):
-        return self.write(SHAKE_NV_REG_SHAKING_CONFIG, 0xFF)
-        return self.write(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD, 0x0A)
-        return self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, 0x06)
-        return self.write(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE, 0x00)
-        return self.write(SHAKE_NV_REG_SHAKING_HPF_CONSTANT, 0x20)
-        return self.write(SHAKE_NV_REG_SHAKING_LPF_CONSTANT, 0x06)
+    # TODO: is this still available?? (see above)
+    #def read_shaking_config(self):
+    #    return self.read(SHAKE_NV_REG_SHAKING_CONFIG)
+    #
+    #def write_shaking_config(self, value):
+    #    return self.write(SHAKE_NV_REG_SHAKING_CONFIG, value)
+    #
+    #def read_shaking_accel_threshold(self):
+    #    return self.read(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD)
+    #
+    #def write_shaking_accel_threshold(self, value):
+    #    return self.write(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD, value)
+    #
+    #def read_shaking_holdoff_time(self):
+    #    return self.read(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME)
+    #
+    #def write_shaking_holdoff_time(self, value):
+    #    return self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, value)
+    #
+    #def read_shaking_vibration_profile(self):
+    #    return self.read(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE)
+    #
+    #def write_shaking_vibration_profile(self, value):
+    #    return self.write(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE, value)
+    #
+    #def read_shaking_hpf_constant(self):
+    #    return self.read(SHAKE_NV_REG_SHAKING_HPF_CONSTANT)
+    #
+    #def write_shaking_hpf_constant(self, value):
+    #    return self.write(SHAKE_NV_REG_SHAKING_HPF_CONSTANT, value)
+    #
+    #def read_shaking_lpf_constant(self):
+    #    return self.read(SHAKE_NV_REG_SHAKING_LPF_CONSTANT)
+    #
+    #def write_shaking_lpf_constant(self, value):
+    #    return self.write(SHAKE_NV_REG_SHAKING_LPF_CONSTANT, value)
+    #
+    #def reset_shaking_detection(self):
+    #    return self.write(SHAKE_NV_REG_SHAKING_CONFIG, 0xFF)
+    #    return self.write(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD, 0x0A)
+    #    return self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, 0x06)
+    #    return self.write(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE, 0x00)
+    #    return self.write(SHAKE_NV_REG_SHAKING_HPF_CONSTANT, 0x20)
+    #    return self.write(SHAKE_NV_REG_SHAKING_LPF_CONSTANT, 0x06)
 
     def read_heart_rate_config(self):
         return self.read(SHAKE_NV_REG_HEART_RATE_CONFIG)
@@ -823,53 +1102,84 @@ class shake_device:
         return self.SHAKE.lasttid
 
     def read_temperature(self):
+        """
+        Read the temperature sensor register on the device.
+
+        :returns: -1.0 on error, otherwise a floating point value in the range
+            0-64 (in degrees Celsius)
+        """
         ret = self.read(SHAKE_VO_REG_TEMPERATURE)
         if ret[0] == SHAKE_ERROR:
             return -1.0
 
         return ret[1] / 4.0
 
-    #       Writes a value to the SHAKE_VO_REG_PKTREQ register (write-only). This register 
-    #       allows you to request a set of data from one or more sensors (in addition
-    #       to or instead of the usual data stream from the device). 
-    #
-    #       When writing to the register, the value you use should be a logical OR of
-    #       one or more SHAKE_REQ_<sensor> constants, eg SHAKE_REQ_ACC | SHAKE_REQ_GYR
-    #       to request both accelerometer and gyro packets.
-    #
-    #       The data will be sent and processed in the usual way, so you should use the
-    #       data access functions above to read it.
     def write_packet_request(self, value):
+        """
+        Write to the 'packet request' register on the device. This allows you
+        to request that the device immediately send a single set of data 
+        from one or more sensors. This is probably only useful if you don't 
+        want to be continually streaming data from these sensors. The returned
+        data can be accessed using the the standard functions.
+
+        :param value: a logical OR of one or more SHAKE_REQ_<sensor> constants.
+            For example, SHAKE_REQ_ACC | SHAKE_REQ_GYRO would request a set of data
+            from both the accelerometer and gyroscope. 
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         return self.write(SHAKE_VO_REG_PKTREQ, value)
 
     def write_data_request(self, value):
         return self.write(SHAKE_VO_REG_DATAREQ, value)
 
     def read_battery_level(self):
-        return self.read(SHAKE_VO_REG_BATTERY)
+        """
+        Retrieve the current battery level of the device.
 
-    #       Reads from the SHAKE_VO_REG_PWRSTA register (read-only). 
-    #       This register contains the power status of the SHAKE device, made up from 
-    #       three different values:
-    #           1. External power on/off (AC adapter)
-    #           2. Battery charging/not charging
-    #           3. Battery charged/not fully charged
-    #       The value returned from the function will be a logical OR of one or more
-    #       of the following three constants, corresponding to the list above:
-    #           1. SHAKE_EXT_POWER
-    #           2. SHAKE_BAT_CHARGING
-    #           3. SHAKE_BAT_FULL
-    #       To test for each condition, simply use a logical AND with the appropriate
-    #       constant. For example, to test for external power:
-    #           val = shake.read_power_status()
-    #           if val & SHAKE_EXT_POWER:
-    #               print "external power on"
+        :returns: SHAKE_ERROR or battery level remaining (0-255).
+        """
+        (result, bat_level) = self.read(SHAKE_VO_REG_BATTERY)
+        if result == SHAKE_ERROR:
+            return SHAKE_ERROR
+        return bat_level
+
     def read_power_status(self):
-        return self.read(SHAKE_VO_REG_PWRSTA)
+        """
+        Retrieve the current power status of the device. This allows you to 
+        check if the battery is full, if it is charging and if external power
+        is connected. 
 
-    #
-    #       Vibration playback + upload
-    #
+        :returns: SHAKE_ERROR if an error occurred. Otherwise the value 
+            indicates the power status as follows:
+
+            status & SHAKE_EXT_POWER != 0 # external power connected
+            status & SHAKE_BAT_CHARGING != 0 # battery is charging
+            status & SHAKE_BAT_FULL != 0 # battery is fully charged
+        """
+        (result, status) = self.read(SHAKE_VO_REG_PWRSTA)
+        if result == SHAKE_ERROR:
+            return SHAKE_ERROR
+        return status
+
+    def get_ack_timeout_ms(self):
+        """
+        Get the current time in milliseconds the driver will wait for responses
+        to read/write commands. 
+
+        :returns: the current timeout in milliseconds
+        """
+        return self.ack_timeout_ms
+
+    def set_ack_timeout_ms(self, new_timeout_ms):
+        """
+        Set the time in milliseconds the driver will wait for responses to 
+        read/write commands. Try increasing this if read/write commands seem
+        to return errors for no reason, especially if you're streaming a lot of
+        sensor data from the device. 
+
+        :param new_timeout_ms: the new timeout in milliseconds
+        """
+        self.ack_timeout_ms = new_timeout_ms
 
     def playvib(self, channel, profile):
         if profile < 0 or profile > SHAKE_VIB_PROFILE_MAX:
@@ -970,35 +1280,3 @@ class shake_device:
 
         return SHAKE_SUCCESS
 
-    #
-    #       Miscellaneous functions
-    #
-
-    def get_ack_timeout_ms(self):
-        return self.ack_timeout_ms
-
-    def set_ack_timeout_ms(self, new_timeout_ms):
-        self.ack_timeout_ms = new_timeout_ms
-
-    def read_info_line(self):
-        pos = 0
-        buf = ""
-        while pos < 512:
-            tmp = self.read_data(1)
-
-            # skip nulls (some SHAKEs output stray nulls in the startup text)
-            if ord(tmp) == 0:
-                continue
-
-            buf += tmp
-
-            if len(buf) > 0 and (ord(buf[pos]) == 0xD or ord(buf[pos]) == 0xA):
-                # compare last 2 bytes to delimiter
-                if pos >= 1:
-                    i = pos - 1
-                    if (ord(buf[i]) == 0xA and ord(buf[i+1]) == 0xD) or (ord(buf[i]) == 0xD and ord(buf[i+1]) == 0xA):
-                        return buf
-
-            pos += 1
-
-        return None

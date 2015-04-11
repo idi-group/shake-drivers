@@ -92,7 +92,7 @@ class SK6(pyshake_sk_common.SHAKE):
             # TODO
             return SK6_ASCII_READ_ERROR
         elif packet_type == SK6_DATA_PLAYBACK_COMPLETE:
-            packetbuf += self.__shake.read_data(sk6_packet_lengths[packet_type] - SK6_HEADER_LEN)
+            packetbuf += self.read_data(sk6_packet_lengths[packet_type] - SK6_HEADER_LEN)
             
             if self.__shake.navcb != None:
                 self.__shake.lastevent = SHAKE_PLAYBACK_COMPLETE
@@ -100,7 +100,7 @@ class SK6(pyshake_sk_common.SHAKE):
 
             return SK6_ASCII_READ_CONTINUE
         elif packet_type == SK6_DATA_RFID_TID:
-            packetbuf += self.__shake.read_data(sk6_packet_lengths[packet_type] - SK6_HEADER_LEN)
+            packetbuf += self.read_data(sk6_packet_lengths[packet_type] - SK6_HEADER_LEN)
             self.__shake.lastrfid = packetbuf[SK6_HEADER_LEN+1:]
 
             if self.__shake.navcv != None:
@@ -117,7 +117,7 @@ class SK6(pyshake_sk_common.SHAKE):
         if playback:
             bytes_left -= 3
 
-        tmp = self.__shake.read_data(bytes_left)
+        tmp = self.read_data(bytes_left)
         bytes_read = len(tmp)
         packetbuf += tmp
         if bytes_read != bytes_left:
@@ -132,7 +132,7 @@ class SK6(pyshake_sk_common.SHAKE):
             if not self.__shake.checksum:
                 self.__shake.checksum = True
 
-            packetbuf += self.__shake.read_data(SHAKE_CHECKSUM_LENGTH)
+            packetbuf += self.read_data(SHAKE_CHECKSUM_LENGTH)
             bytes_read += 3
         elif sk6_packet_has_checksum[packet_type] and ord(packetbuf[bytes_read + SK6_HEADER_LEN - 1]) == 0xA and self.__shake.checksum:
             self.__shake.checksum = False
@@ -151,7 +151,7 @@ class SK6(pyshake_sk_common.SHAKE):
         packet_size, bytes_left, bytes_read = 0,0,0
 
         bytes_left = sk6_packet_lengths[packet_type] - SK6_RAW_HEADER_LEN
-        tmp = self.__shake.read_data(bytes_left)
+        tmp = self.read_data(bytes_left)
         bytes_read = len(tmp)
         packetbuf += tmp
 
@@ -186,7 +186,7 @@ class SK6(pyshake_sk_common.SHAKE):
     def get_next_packet(self):
         packetbuf = ""
         bytes_read, packet_type = 0, SHAKE_BAD_PACKET
-        tmp = self.__shake.read_data(3)
+        tmp = self.read_data(3)
         bytes_read = len(tmp)
         packetbuf += tmp
 
@@ -194,7 +194,7 @@ class SK6(pyshake_sk_common.SHAKE):
             if ord(packetbuf[0]) == 0x7F and ord(packetbuf[1]) == 0x7F:
                 packet_type = self.classify_packet_header(packetbuf, False)
             elif packetbuf[0] == '$' or packetbuf[0] == '\n':
-                packetbuf += self.__shake.read_data(1)
+                packetbuf += self.read_data(1)
                 packet_type = self.classify_packet_header(packetbuf, True)
 
         if packet_type == SHAKE_BAD_PACKET:
@@ -202,14 +202,14 @@ class SK6(pyshake_sk_common.SHAKE):
             c = " "
             while read_count < 50 and (c != '$' and ord(c) != 0x7F):
                 read_count -= 1
-                c = self.__shake.read_data(1)
+                c = self.read_data(1)
 
             packetbuf = c
             if c == '$':
-                packetbuf += self.__shake.read_data( SK6_HEADER_LEN - 1)
+                packetbuf += self.read_data( SK6_HEADER_LEN - 1)
                 packet_type = self.classify_packet_header(packetbuf, True)
             elif len(c) != 0 and ord(c) == 0x7F:
-                packetbuf += self.__shake.read_data(SK6_RAW_HEADER_LEN -1)
+                packetbuf += self.read_data(SK6_RAW_HEADER_LEN -1)
                 packet_type = self.classify_packet_header(packetbuf, False)
 
         return (packet_type, packetbuf)
@@ -438,7 +438,7 @@ class SK6(pyshake_sk_common.SHAKE):
 
     def read_device_info(self):
         for i in range(7):
-            line = self.__shake.read_info_line()
+            line = self.read_info_line()
             if line == None:
                 return False
             
@@ -492,6 +492,6 @@ class SK6(pyshake_sk_common.SHAKE):
                         self.__shake.modules[1] = i
                         break
     
-        self.__shake.read_data(1)
-        self.__shake.synced = True
+        self.read_data(1)
+        self.synced = True
         return True

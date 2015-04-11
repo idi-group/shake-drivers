@@ -61,6 +61,9 @@ class SHAKE:
         self.__shake = shakedev
         self.device_type = devtype
         self.data = sk_sensor_data()
+        self.peek_flag = False
+        self.peek = 0
+        self.synced = False
 
     def parse_ascii_packet(self, packet_type, packetbuf, playback, timestamp_packet):
         pass
@@ -97,3 +100,44 @@ class SHAKE:
 
     def read_device_info(self):
         pass
+
+    def read_data(self, num_bytes):
+        
+        if self.__shake.port == None:
+            return None
+
+        bytes = ""
+        if self.peek_flag:
+            bytes += chr(self.peek)
+            num_bytes -= 1
+            self.peek_flag = False
+
+            if num_bytes == 0:
+                return bytes
+
+        self.synced = True
+        allbytes = bytes + self.__shake.port.read(num_bytes)
+        return allbytes
+
+    def read_info_line(self):
+        pos = 0
+        buf = ""
+        while pos < 512:
+            tmp = self.read_data(1)
+
+            # skip nulls (some SHAKEs output stray nulls in the startup text)
+            if ord(tmp) == 0:
+                continue
+
+            buf += tmp
+
+            if len(buf) > 0 and (ord(buf[pos]) == 0xD or ord(buf[pos]) == 0xA):
+                # compare last 2 bytes to delimiter
+                if pos >= 1:
+                    i = pos - 1
+                    if (ord(buf[i]) == 0xA and ord(buf[i+1]) == 0xD) or (ord(buf[i]) == 0xD and ord(buf[i+1]) == 0xA):
+                        return buf
+
+            pos += 1
+
+        return None
