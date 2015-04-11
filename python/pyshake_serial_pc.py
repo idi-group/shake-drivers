@@ -25,16 +25,7 @@
 
 
 # SHAKE serial port wrapper class for systems that support pyserial
-import os
-import platform
 
-class pyshake_serial_error(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-# pyserial
 import serial
 
 class base_serial_port:
@@ -91,10 +82,13 @@ class serial_port(base_serial_port):
             return ""
         bytes_read = 0
         data = ""
-        while bytes_read < bytes_to_read:
-            newdata = self.port.read(bytes_to_read - bytes_read)
-            bytes_read += len(newdata)
-            data += newdata
+        try:
+            while bytes_read < bytes_to_read:
+                newdata = self.port.read(bytes_to_read - bytes_read)
+                bytes_read += len(newdata)
+                data += newdata
+        except serial.SerialException:
+            print '[pyshake_serial_pc] exception reading serial port!'
         return data
 
     def write(self, bytes):
