@@ -146,6 +146,14 @@ SHAKE_SENSOR_ANA0       = 6
 SHAKE_SENSOR_ANA1       = 7
 SHAKE_SENSOR_CAP    = 4
 
+SHAKE_REQ_ACC       = 1
+SHAKE_REQ_GYRO      = 2
+SHAKE_REQ_MAG       = 4
+SHAKE_REQ_HEADING   = 8
+SHAKE_REQ_CAP       = 16
+SHAKE_REQ_ANA0      = 64
+SHAKE_REQ_ANA1      = 128
+
 #       Maximum sensor output rate (Hz)
 SHAKE_MAX_OUTPUT_RATE =     0xFF
 
