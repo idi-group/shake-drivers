@@ -24,9 +24,10 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-Top-level module for the Python SHAKE driver implementation.
+pyshake
 
-It supports both SK6 and SK7 SHAKEs. 
+Top-level module for the Python SHAKE driver implementation. Supports both 
+SK6 and SK7 SHAKEs. 
 """
 
 import atexit, thread
