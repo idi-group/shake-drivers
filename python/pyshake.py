@@ -622,11 +622,9 @@ class shake_device:
         self.waiting_for_ack = True
 
         timeout = self.ack_timeout_ms
-        while self.waiting_for_ack_signal:
+        while self.waiting_for_ack_signal and timeout > 0:
             sleep(0.01)
             timeout -= 10
-            if timeout == 0:
-                break
 
         self.waiting_for_ack = False
 
@@ -663,7 +661,7 @@ class shake_device:
         self.waiting_for_ack = True
 
         timeout = self.ack_timeout_ms
-        while timeout != 0 and self.waiting_for_ack_signal:
+        while self.waiting_for_ack_signal and timeout > 0:
             sleep(0.01)
             timeout -= 10
 
@@ -1183,6 +1181,18 @@ class shake_device:
         self.ack_timeout_ms = new_timeout_ms
 
     def playvib(self, channel, profile):
+        """
+        Plays a stored vibration profile on a selected channel. 
+
+        :param channel: the channel to play the vibration on. For most standard
+            SHAKEs, this should be SHAKE_VIB_MAIN. If your SHAKE has the 
+            ForceReactor module installed, you can also use the channel
+            SHAKE_VIB_FORCEREACTOR to play vibrations through it. If your SHAKE
+            has an external vibration module attached (SK7-VO1), its two 
+            channels are identified by SHAKE_VIB_LEFT and SHAKE_VIB_RIGHT.
+        :param profile: the number of the vibration profile to activate
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         if profile < 0 or profile > SHAKE_VIB_PROFILE_MAX:
             return SHAKE_ERROR
 
@@ -1190,7 +1200,6 @@ class shake_device:
             return SHAKE_ERROR
 
         if self.device_type == SHAKE_SK6:
-            addr = SHAKE_VO_REG_VIB_MAIN + channel
             return self.write(SHAKE_VO_REG_VIB_MAIN + channel, profile)
         else:
             buf = None
@@ -1211,8 +1220,23 @@ class shake_device:
 
         return SHAKE_SUCCESS
 
-    #       [SK6] continuous vibration support
     def sk6_playvib_continuous(self, channel, amplitude, time):
+        """
+        (SK6 only) Play a continuous vibration profile on a selected channel. 
+        This functionality requires the SK6-VO1 external module and a firmware
+        version of 2.60 or later. 
+
+        :param channel: must be either SHAKE_VIB_LEFT or SHAKE_VIB_RIGHT, 
+            corresponding to the two channels of the external module.
+        :param amplitude: amplitude of the vibration. This must be either 0, 33,
+            66 or 100 (percentages of maximum available amplitude). 
+        :param time: length of the vibration profile in units of 26ms, allowable
+            range is 0-64 (ie 0-1.66s)
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
+        if self.device_type != SHAKE_SK6:
+            return SHAKE_ERROR
+
         if channel != SHAKE_VIB_LEFT or channel != SHAKE_VIB_RIGHT:
             return SHAKE_ERROR
 
@@ -1239,12 +1263,51 @@ class shake_device:
             vibaddr = SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS;
         return self.write(vibaddr, vibbyte)
 
-    #       [SK6] simple vib upload for SK6s
     def sk6_upload_vib_sample(self, profile, samples):
+        """
+        (SK6 only) Uploads vibration samples to a selected profile slot.
+
+        :param profile: the profile slot number. This should be a number in the
+            range SHAKE_VIB_PROFILE_MIN to SHAKE_VIB_PROFILE_MAX (inclusive). 
+        :param samples: a list of integers containing the sample data. The list
+            should contain successive pairs of amplitude/time values. 
+            For example: samples = [amp1, time1, amp2, time2]
+            The amplitudes should be values in the range 0-SHAKE_VIB_SPEED_MAX
+            (inclusive), while the time values are in units of 10 milliseconds
+            and should be in the range 0-SHAKE_VIB_TIME_MAX (inclusive). 
+            The maximum number of amplitude/time pairs that can be used is 
+            given by SHAKE_VIB_SAMPLE_MAX_LENGTH.
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
+        if self.device_type != SHAKE_SK6:
+            return SHAKE_ERROR
+
         return self.upload_vib_sample_extended(profile, samples, 0, 0, 0)
 
-    #       [SK7] full vib upload function for SK7s
+
     def upload_vib_sample_extended(self, profile, samples, mode, freq, duty):
+        """
+        (SK6 with SK6-V01 module, SK7) Uploads extended vibration samples to
+        a selected profile slot.
+
+        :param profile: the profile slot number. This should be a number in the
+            range SHAKE_VIB_PROFILE_MIN to SHAKE_VIB_PROFILE_MAX (inclusive).
+        :param samples: a list of integers containing the sample data. The list
+            should contain successive pairs of amplitude/time values. 
+            For example: samples = [amp1, time1, amp2, time2]
+            The amplitudes should be values in the range 0-SHAKE_VIB_SPEED_MAX
+            (inclusive), while the time values are in units of 10 milliseconds
+            and should be in the range 0-SHAKE_VIB_TIME_MAX (inclusive). 
+            The maximum number of amplitude/time pairs that can be used is 
+            given by SHAKE_VIB_SAMPLE_MAX_LENGTH.
+        :param mode: the mode to be used when the vibration is played back. This
+            should be set to 2 for pulse drive, otherwise 0. 
+        :param freq: frequency of the pulsed waveform, 0 if not using pulsed
+            vibration playback.
+        :param duty: duty ratio for pulsed playback, 1-9 (10-90%) inclusive. Set
+            to 0 if not using pulsed vibration playback.
+        :returns: SHAKE_SUCCESS or SHAKE_ERROR
+        """
         if profile < 0 or profile > SHAKE_VIB_PROFILE_MAX:
             return SHAKE_ERROR
 
@@ -1269,10 +1332,10 @@ class shake_device:
 
         self.write_to_port(svp)
 
-        elapsed = 0
-        while self.waiting_for_ack and elapsed < 2000:
+        timeout = self.ack_timeout_ms
+        while self.waiting_for_ack and timeout > 0:
             sleep(0.01)
-            elapsed += 10 
+            timeout -= 10 
 
         self.waiting_for_ack = False
 
