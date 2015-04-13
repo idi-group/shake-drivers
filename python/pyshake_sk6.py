@@ -200,7 +200,7 @@ class SK6(pyshake_sk_common.SHAKE):
         if packet_type == SHAKE_BAD_PACKET:
             read_count = 50
             c = " "
-            while read_count < 50 and (c != '$' and ord(c) != 0x7F):
+            while read_count < 50 and len(c) == 1 and (c != '$' and ord(c) != 0x7F):
                 read_count -= 1
                 c = self.read_data(1)
 
