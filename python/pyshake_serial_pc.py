@@ -58,10 +58,8 @@ class serial_port(base_serial_port):
         # SK7 requires rate 460800, SK6 requires 230400
         try:
             self.port = serial.Serial(self.target, baudrate=baud, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
-        except:
-            import sys, traceback
-            print("\n".join(traceback.format_exception(*sys.exc_info())))
-            print "exception opening port"
+        except Exception, e:
+            # TODO save exception info somewhere (for a getlasterror() function)
             return False
 
         self.connected = True
@@ -73,7 +71,7 @@ class serial_port(base_serial_port):
 
         self.port.close()
         self.port = None
-
+        
         self.target = None
         return True
 
@@ -87,8 +85,9 @@ class serial_port(base_serial_port):
                 newdata = self.port.read(bytes_to_read - bytes_read)
                 bytes_read += len(newdata)
                 data += newdata
-        except serial.SerialException:
-            print '[pyshake_serial_pc] exception reading serial port!'
+        except:
+            # TODO save exception info somewhere (for a getlasterror() function)
+            pass
         return data
 
     def write(self, bytes):
