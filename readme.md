@@ -56,7 +56,7 @@ For the C++/Python bindings:
 
 ```python
 import pyshake
-sd = pyshake.shake_device()
+sd = pyshake.ShakeDevice()
 
 # connection details depend on platform
 # Windows (virtual COM port number)

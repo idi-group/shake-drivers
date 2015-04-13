@@ -29,7 +29,7 @@
 import time
 import pyshake as ps
 
-dev = ps.shake_device()
+dev = ps.ShakeDevice()
 adr_usb = '/dev/tty.usbserial-SHAKESK7'
 
 

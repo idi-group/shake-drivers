@@ -61,13 +61,13 @@ def cleanup():
 
     TODO: is this really needed? Might be a historical leftover
     """
-    for i in shake_device.instances:
+    for i in ShakeDevice.instances:
         if i != None:
             i.close()
 
 atexit.register(cleanup)
 
-class shake_device:
+class ShakeDevice:
     """
     Objects of this class represent a single SHAKE device and the current
     connection (if any) to the host device. It contains methods to configure
@@ -79,7 +79,7 @@ class shake_device:
     # 2nd parameter indicates type of device (SK6 or SK7). Default is SK6
     def __init__(self, type = SHAKE_SK7):
         """
-        Create a new shake_device object.
+        Create a new ShakeDevice object.
 
         :param type: the model of SHAKE that this object will be used to
             control. Defaults to the newer SK7 model. 
