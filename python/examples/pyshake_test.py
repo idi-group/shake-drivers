@@ -23,10 +23,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Demonstrates various features of the SHAKE SK7
+
 import time, sys, platform
 from pyshake import *
 
-# define an callback function for events from the SHAKE
+# a callback function for events from the SHAKE
 def eventcallback(event_type):
     if event_type == SHAKE_NAV_UP:
         print "Button UP"
@@ -38,6 +40,53 @@ def eventcallback(event_type):
         print "Button RELEASE"
     else:
         print "Event type =", event_type
+
+# a callback function for data being streamed from the SHAKE
+def datacallback(sensor_id, sensor_data, sensor_sequence_number):
+    print 'Sensor ID:', sensor_id,
+    if sensor_id == SHAKE_SENSOR_ACC:
+        print '(Acc.)'
+    elif sensor_id == SHAKE_SENSOR_MAG:
+        print '(Mag.)'
+    else:
+        print '(Other)'
+    print '\tData:', sensor_data
+    print '\tSequence:', sensor_sequence_number
+
+def configure_device(sd):
+    # Usually the first thing you'll want to do is pick the data packet format.
+    # Here we're using SK7_DATA_RAW_SEQ, which means "send data in a binary 
+    # format, with sequence numbers in each packet". 
+    # The other common choices here would be:
+    # - SK7_DATA_ASCII (ASCII format, useful for debugging)
+    # - SK7_DATA_RAW (same as SK7_DATA_RAW_SEQ but without sequence numbers)
+    sd.write_data_format(SK7_DATA_RAW_SEQ)
+
+    # Next, you'll need to make sure the sensors you want to use are powered 
+    # on. The main sensors (accelerometer, gyro, magnetometer, capacitive, 
+    # temperature, physical button and analog inputs, plus vibration feedback)
+    # are all controlled by register 0x0000, which can be accessed either
+    # using the basic write() function or the shortcut function called 
+    # write_power_state(). In this case we're powering on the accelerometer,
+    # magnetometer and physical button. You can use the value 0xFF to enable
+    # everything, but this may have an impact on battery life!
+    sd.write_power_state(SHAKE_POWER_ACC | SHAKE_POWER_MAG | SHAKE_POWER_NAV)
+
+    # Once you've powered on the sensors, you should set a sample rate for them.
+    # This does NOT affect the rate at which the sensors are sampled on the 
+    # device itself as detailed in the user manual, it simply determines how
+    # rapidly the data from each sensor is streamed to the host. The values
+    # are given in Hz and can range from 0-255. The code below sets both the
+    # accelerometer and magnetometer to 25Hz output (the physical button 
+    # produces discrete events rather than a stream of data, see below).
+    sd.write_sample_rate(SHAKE_SENSOR_ACC, 25)
+    sd.write_sample_rate(SHAKE_SENSOR_MAG, 25)
+
+    # To get events from the button (and some other sources), you need to 
+    # register a callback with the driver. The function you supply will be 
+    # called each time one of the supported events occurred, and should expect
+    # a single parameter containing an integer event ID. 
+    sd.register_event_callback(eventcallback)
 
 if __name__ == "__main__":
 
@@ -61,47 +110,59 @@ if __name__ == "__main__":
         print "Failed to connect!"
         sys.exit(-1)
 
-    # ensure data is being streamed in the more efficient binary format
-    sd.write_data_format(2)
+    
+    # Set up the device (power state, sensor parameters, ...)
+    configure_device(sd)
 
-    # turn on the accelerometer, capacitive sensors and button
-    if sd.write_power_state(SHAKE_POWER_ACC | SHAKE_POWER_MAG | SHAKE_POWER_NAV) != SHAKE_SUCCESS:
-        print "Failed to set power state"
-
-    # set accelerometer sample rate to 20Hz
-    if sd.write_sample_rate(SHAKE_SENSOR_ACC, 20) != SHAKE_SUCCESS:
-        print "Failed to set sample rate (ACC)"
-
-    # set magnetometer sensor sample rate to 20Hz
-    if sd.write_sample_rate(SHAKE_SENSOR_MAG, 20) != SHAKE_SUCCESS:
-        print "Failed to set sample rate (MAG)"
-
-    # display some accelerometer readings
-    for i in range(200):
-        x, y, z = sd.acc()
-        print "Accelerometer: %04d %04d %04d \r" % (x, y, z), 
-        time.sleep(0.01)
-    print "\n"
-
-    # display some magnetometer readings
-    for i in range(200):
-        x, y, z = sd.mag()
-        print "Magnetometer: %04d %04d %04d \r" % (x, y, z),
-        time.sleep(0.01)
-    print "\n"
-
-    # display information about the connected SHAKE
+    # You can retreive information about the connected SHAKE like this:
+    print "Device info"
+    print "==========="
     print "Serial number:", sd.info_serial_number()
     print "Firmware version:", sd.info_firmware_revision()
     print "Hardware version:", sd.info_hardware_revision()
-    for i in range(5):
+    for i in range(sd.info_num_slots()):
        print "Expansion module %d: %s" % (i+1, sd.info_module_name(sd.info_module(i)))
 
-    # register event callback
-    sd.register_event_callback(eventcallback)
+    print "\nDisplaying some data..."
+    # display some sensor readings...
+    for i in range(500):
+        ax, ay, az = sd.acc()
+        mx, my, mz = sd.mag()
+        print "Acc: %d %d %d | Mag: %d %d %d" % (ax, ay, az, mx, my, mz)
+        time.sleep(0.01)
+    print "\n"
 
+    # Alternatively, register a callback for new data packets and display
+    # some data that way
+    print "Registering data callback..."
+    time.sleep(1)
+    sd.register_data_callback(datacallback)
+    time.sleep(2)
+    # remove the callback
+    sd.register_data_callback(None)
+
+    # Test that button movements trigger the event callback
     print "Try moving the button on the SHAKE..."
     time.sleep(5)
+
+    # A basic example of defining, uploading and playing a vibration sample
+    # using the standard builtin actuator on the SK7
+    print "Uploading and playing a vibration sample..."
+
+    # turn off all other sensors and turn on the vibrator motor (this isn't
+    # required, you can enable sensors and the actuator at the same time if 
+    # you want to!)
+    sd.write_power_state(SHAKE_POWER_VIB)
+
+    # upload the samples to profile location 20. The sample list is made up of 
+    # pairs of (amplitude, time) values which are passed to the actuator one
+    # after the other. For details of the values see the documentation. This 
+    # set of samples simply uses the maximum amplitude and time for each pair.
+    samples = [SHAKE_VIB_SPEED_MAX, SHAKE_VIB_TIME_MAX] * 10
+    sd.upload_vib_sample_extended(20, samples, 0, 0, 0)
+
+    # playback the samples through the main onboard actuator
+    sd.playvib(SHAKE_VIB_MAIN, 20)
 
     print "Closing the connection..."
     sd.close()
