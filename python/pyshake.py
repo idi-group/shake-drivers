@@ -556,7 +556,7 @@ class shake_device:
         self.info_retrieve()
         return self.serial
 
-    def info_num_slot(self):
+    def info_num_slots(self):
         """
         Returns the number of hardware expansion slots the device contains.
 
