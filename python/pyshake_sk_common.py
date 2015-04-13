@@ -102,9 +102,8 @@ class SHAKE:
         pass
 
     def read_data(self, num_bytes):
-        
         if self.__shake.port == None:
-            return None
+            return ""
 
         bytes = ""
         if self.peek_flag:
