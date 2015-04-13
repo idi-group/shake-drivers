@@ -86,14 +86,13 @@ class shake_device:
         """
         self.device_type = type
         self.port = None
-        self.thread = None
+        self.port_lock = None
 
         self.waiting_for_ack = False
         self.waiting_for_ack_signal = False
         self.serial = "missing"
         self.fwrev = -1
         self.hwrev = -1
-        self.lastfid = ""
         self.bluetoothfwrev = -1
 
         if type == SHAKE_SK6:
@@ -122,7 +121,6 @@ class shake_device:
         self.write_to_port = None
         self.thread_done = True
 
-        self.instances.append(self)
 
     def connect(self, addr):
         """
@@ -153,6 +151,8 @@ class shake_device:
             sleep(0.01)
             elapsed += 0.01
 
+        self.instances.append(self)
+
         return self.SHAKE.synced
 
     def close(self):
@@ -167,8 +167,16 @@ class shake_device:
 
         self.thread_done = True
         sleep(0)  # let the thread close itself.
+
         self.port.close() 
         self.port = None
+
+        # avoids intermittent exceptions that seem to occur when the thread
+        # reading from the serial port hasn't completely finished by the time
+        # the main thread is exiting
+        if self.port_lock.acquire():
+            self.port_lock.release()
+
         self.instances.remove(self)
         return True
 
@@ -191,7 +199,7 @@ class shake_device:
                 return SHAKE_ERROR
 
             self.write_to_port = self.port.write
-        except pyshake_serial.pyshake_serial_error:
+        except:
             debug('error; port creation failed')
             self.thread_done = True
             return SHAKE_ERROR
@@ -203,23 +211,27 @@ class shake_device:
         Runs in a thread, continually parsing packets as they arrive on the
         the serial port. 
         """
-        try:
-            self.thread_done = False
-            while not self.thread_done:
-                packet_type = SHAKE_BAD_PACKET
+        if self.port_lock and self.port_lock.locked():
+            self.port_lock.release()
 
-                while not self.thread_done and packet_type == SHAKE_BAD_PACKET:
-                    (packet_type, packet) = self.SHAKE.get_next_packet()
+        self.port_lock = thread.allocate_lock()
+        with self.port_lock: # acquires the lock
+            try:
+                self.thread_done = False
+                while not self.thread_done:
+                    packet_type = SHAKE_BAD_PACKET
 
-                if self.thread_done:
-                    break
+                    while not self.thread_done and packet_type == SHAKE_BAD_PACKET:
+                        (packet_type, packet) = self.SHAKE.get_next_packet()
 
-                self.SHAKE.parse_packet(packet, packet_type)
+                    if self.thread_done:
+                        break
 
-        except:
-            import sys, traceback
-            print("\n".join(traceback.format_exception(*sys.exc_info())))
-            return
+                    self.SHAKE.parse_packet(packet, packet_type)
+            except Exception, e:
+                # TODO do something more sensible with exception info, eg use 
+                # it for a getlasterror() function
+                pass
 
     def data_timestamp(self, sensor):
         """
