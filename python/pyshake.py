@@ -30,7 +30,7 @@ Top-level module for the Python SHAKE driver implementation. Supports both
 SK6 and SK7 SHAKEs. 
 """
 
-import atexit, thread
+import thread
 from time import sleep
 
 from pyshake_constants import *
@@ -53,20 +53,6 @@ def debug(str, opennew=False):
     f.write(str + "\n")
     f.close()
 
-def cleanup():
-    """
-    This function is registered to be called on exit from a Python
-    shell, and just calls the close method of any active shake_devices
-    objects.
-
-    TODO: is this really needed? Might be a historical leftover
-    """
-    for i in ShakeDevice.instances:
-        if i != None:
-            i.close()
-
-atexit.register(cleanup)
-
 class ShakeDevice:
     """
     Objects of this class represent a single SHAKE device and the current
@@ -74,7 +60,6 @@ class ShakeDevice:
     the device, query the current configuration and receive sensor data and
     events.
     """
-    instances = []
 
     # 2nd parameter indicates type of device (SK6 or SK7). Default is SK6
     def __init__(self, type = SHAKE_SK7):
@@ -151,8 +136,6 @@ class ShakeDevice:
             sleep(0.01)
             elapsed += 0.01
 
-        self.instances.append(self)
-
         return self.SHAKE.synced
 
     def close(self):
@@ -177,7 +160,6 @@ class ShakeDevice:
         if self.port_lock.acquire():
             self.port_lock.release()
 
-        self.instances.remove(self)
         return True
 
     def _open_port(self, addr):
