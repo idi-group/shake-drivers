@@ -36,33 +36,33 @@ def eventcallback(event_type):
     global done
 
     if event_type == SHAKE_NAV_UP:
-        print "Button UP"
+        print("Button UP")
     elif event_type == SHAKE_NAV_DOWN:
-        print "Button DOWN"
+        print("Button DOWN")
     elif event_type == SHAKE_NAV_CENTRE:
-        print "Button CENTRE"
+        print("Button CENTRE")
     elif event_type == SHAKE_NAV_NORMAL:
-        print "Button RELEASE"
+        print("Button RELEASE")
     elif event_type == SHAKE_PLAYBACK_COMPLETE:
         # this event signals that the log data playback
         # has been completed and the output file is closed
-        print 'streaming completed'
+        print('streaming completed')
         done = True
     else:
-        print "Event type =", event_type
+        print("Event type =", event_type)
 
 if __name__ == "__main__":
 
     if len(sys.argv) != 2:
-        print "pyshake_test.py <device address>"
-        print ""
-        print "Examples:"
-        print "pyshake_test.py 4 (connect to COM port 5 on Windows (pyserial port numbers are 0-based))"
-        print "pyshake_test.py /dev/tty.SHAKESK7SN0077-SPPDev (connect to a specific device on OSX"
+        print("pyshake_test.py <device address>")
+        print("")
+        print("Examples:")
+        print("pyshake_test.py 4 (connect to COM port 5 on Windows (pyserial port numbers are 0-based))")
+        print("pyshake_test.py /dev/tty.SHAKESK7SN0077-SPPDev (connect to a specific device on OSX")
         sys.exit(-1)
 
     # create a shake_device object and attempt to create the connection
-    sd = shake_device(SHAKE_SK7)
+    sd = ShakeDevice(SHAKE_SK7)
 
     try:
         param = int(sys.argv[1])
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         param = sys.argv[1]
 
     if not sd.connect(param):
-        print "Failed to connect!"
+        print("Failed to connect!")
         sys.exit(-1)
 
     sd.write_data_format(2)
@@ -85,20 +85,20 @@ if __name__ == "__main__":
     sd.register_event_callback(eventcallback)
 
     sd.logging_stop()
-    print "stop"
+    print("stop")
     sd.logging_reset()
-    print "reset"
+    print("reset")
     sd.logging_record()
-    print "record"
+    print("record")
     time.sleep(3) # record for a few seconds
     sd.logging_stop()
-    print "stop"
+    print("stop")
     sd.logging_play('log.txt')
-    print "play"
+    print("play")
 
     while not done:
         time.sleep(0.1)
     
-    print "done"
+    print("done")
     sd.close()
 
