@@ -58,7 +58,7 @@ class serial_port(base_serial_port):
         # SK7 requires rate 460800, SK6 requires 230400
         try:
             self.port = serial.Serial(self.target, baudrate=baud, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
-        except Exception, e:
+        except Exception as e:
             # TODO save exception info somewhere (for a getlasterror() function)
             return False
 

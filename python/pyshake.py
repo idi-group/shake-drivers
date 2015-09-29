@@ -91,7 +91,7 @@ class ShakeDevice:
         self.navcb = None
         self.data_callback = None
 
-        self.data_recv = 0L
+        self.data_recv = 0
         self.wait_for_acks = True
 
         self.lastack = False
@@ -100,7 +100,7 @@ class ShakeDevice:
 
         self.lastevent = 0
         self.logfp = None
-        self.packets_read = 0L
+        self.packets_read = 0
 
         self.device_address = None
         self.write_to_port = None
@@ -210,7 +210,7 @@ class ShakeDevice:
                         break
 
                     self.SHAKE.parse_packet(packet, packet_type)
-            except Exception, e:
+            except Exception as e:
                 # TODO do something more sensible with exception info, eg use 
                 # it for a getlasterror() function
                 pass
