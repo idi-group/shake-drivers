@@ -36,6 +36,17 @@ def convert_raw_data_value(bytes):
     else:
         return lsb + (msb << 8)
 
+class sk_imu_data:
+    def __init__(self):
+        self.acc = [0,0,0]
+        self.gyro = [0,0,0]
+        self.mag = [0,0,0]
+        self.temp = 0
+        self.seq = 0
+
+    def __repr__(self):
+        return 'Acc: {}, Gyro: {}, Mag: {}, Temp: {}, Seq: {}'.format(self.acc, self.gyro, self.mag, self.temp, self.seq)
+
 class sk_sensor_data:
     def __init__(self):
         self.accx, self.accy, self.accz = 0,0,0
@@ -55,6 +66,7 @@ class sk_sensor_data:
         self.sk6seq = 0
         self.sk7seq = 0
         self.hrseq = 0
+        self.imudata = [sk_imu_data() for x in range(5)]
 
 class SHAKE:
     def __init__(self, shakedev, devtype):

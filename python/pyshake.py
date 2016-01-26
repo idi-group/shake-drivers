@@ -61,7 +61,7 @@ class ShakeDevice:
     events.
     """
 
-    # 2nd parameter indicates type of device (SK6 or SK7). Default is SK6
+    # 2nd parameter indicates type of device. Default is SK7.
     def __init__(self, type = SHAKE_SK7):
         """
         Create a new ShakeDevice object.
@@ -83,9 +83,14 @@ class ShakeDevice:
         if type == SHAKE_SK6:
             self.modules = [SK6_MODULE_NONE for x in range(2)]
             self.SHAKE = pyshake_sk6.SK6(self, type)
-        else:
+        elif type == SHAKE_SK7:
             self.modules = [SK7_MODULE_NONE for x in range(5)]
             self.SHAKE = pyshake_sk7.SK7(self, type)
+        elif type == SHAKE_SK7_IMU:
+            self.modules = [SK7_MODULE_NONE for x in range(5)]
+            self.SHAKE = pyshake_sk7.SK7(self, type)
+        else:
+            raise Exception("Unknown device type")
 
         self.checksum = False
         self.navcb = None
@@ -105,7 +110,6 @@ class ShakeDevice:
         self.device_address = None
         self.write_to_port = None
         self.thread_done = True
-
 
     def connect(self, addr):
         """
@@ -129,13 +133,43 @@ class ShakeDevice:
             return False
 
         self.thread_done = False
-        thread.start_new_thread(self._reader_thread, ())
+
+        # normal devices
+        if self.device_type == SHAKE_SK6 or self.device_type == SHAKE_SK7:
+            thread.start_new_thread(self._reader_thread, ())
+        else:
+            thread.start_new_thread(self._imu_thread, ())
 
         elapsed = 0
         while elapsed < 5.0 and not self.SHAKE.synced:
             sleep(0.01)
             elapsed += 0.01
 
+        return self.SHAKE.synced
+
+    def connect_debug(self, filename):
+        """
+        (debugging use only) This function can be used to force the driver to 
+        read data from a local file rather than a seriald device.
+
+        :param filename: name of the file containing data to parse 
+        :returns: True if opening the file succeeded, False otherwise
+        """
+
+        if self.port or not self.thread_done or filename == None:
+            return False
+
+        self.device_address = filename
+        try:
+            self.port = open(filename, 'rb')
+        except:
+            return False
+
+        self.thread_done = False
+
+        thread.start_new_thread(self._reader_thread, ())
+
+        self.SHAKE.synced = True
         return self.SHAKE.synced
 
     def close(self):
@@ -420,6 +454,25 @@ class ShakeDevice:
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ANA0] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ANA0]
         self.SHAKE.data.timestamps[SHAKE_SENSOR_ANA1] = self.SHAKE.data.internal_timestamps[SHAKE_SENSOR_ANA1]
         return ana
+
+    def sk7_imus(self):
+        """
+        Returns the latest values from all SK7 IMUs.
+
+        :returns: latest values from all SK7 IMUs.
+        """
+        return self.SHAKE.data.imudata 
+
+    def sk7_imu(self, index):
+        """
+        Returns the latest values from a selected IMU (index 0-4).
+
+        :returns: latest values from the selected IMU.
+        """
+        if index < 0 or index > 4:
+            return None
+        
+        return self.SHAKE.data.imudata[index]
 
     # TODO: do these functions actually still work? They used to, but the latest
     # manual doesn't mention this functionality at all...

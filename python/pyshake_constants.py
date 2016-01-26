@@ -101,6 +101,7 @@ SK7_CSB_LOWER = 36
 # Device types
 SHAKE_SK6 = 0
 SHAKE_SK7 = 1
+SHAKE_SK7_IMU = 2
 
 # SK6 option modules
 # slot 1

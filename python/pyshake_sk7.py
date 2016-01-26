@@ -179,7 +179,6 @@ class SK7(pyshake_sk_common.SHAKE):
         self.__shake.peek_flag = False
 
         if bytes_left == bytes_read:
-            packet_len = sk7_packet_lengths[packet_type]
             trailing_byte = packetbuf[len(packetbuf)-1]
 
             if ord(trailing_byte) == 0x7F:
@@ -503,6 +502,13 @@ class SK7(pyshake_sk_common.SHAKE):
         elif packet_type == SK7_RAW_DATA_SHAKING:
             if self.__shake.navcb != None:
                 self.__shake.navcb(SHAKE_SHAKING_EVENT)
+        elif packet_type >= SK7_RAW_DATA_IMU0 and packet_type <= SK7_RAW_DATA_IMU4:
+            imu = packet_type - SK7_RAW_DATA_IMU0
+            self.data.imudata[imu].acc = [pyshake_sk_common.convert_raw_data_value(packetbuf[3+(i*2):5+(i*2)]) for i in range(3)]
+            self.data.imudata[imu].gyro = [pyshake_sk_common.convert_raw_data_value(packetbuf[9+(i*2):11+(i*2)]) for i in range(3)]
+            self.data.imudata[imu].mag = [pyshake_sk_common.convert_raw_data_value(packetbuf[15+(i*2):17+(i*2)]) for i in range(3)]
+            self.data.imudata[imu].temp = pyshake_sk_common.convert_raw_data_value(packetbuf[21:23])
+            self.data.imudata[imu].seq = ord(packetbuf[23])
         else:
             return SHAKE_ERROR
 

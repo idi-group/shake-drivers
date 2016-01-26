@@ -28,7 +28,7 @@
 
 SK7_DEFAULT_CHECKSUM    = 0x00
 SK7_MAX_PACKET_SIZE = 64
-SK7_NUM_PACKET_TYPES = 64
+SK7_NUM_PACKET_TYPES = 69
 SK7_HEADER_LEN = 4
 SK7_RAW_HEADER_LEN = 3
 SK7_PACKET_IID_LEN = 3
@@ -38,6 +38,8 @@ SK7_DATA_RAW     = 0x02
 SK7_DATA_RAW_SEQ = 0x06
 
 SK7_NV_REG_RPH_CONFIG = 0x0046
+
+# TODO this packet type stuff has grown into a complete mess, do something about it
 
 #       Packet types enumeration
 (SK7_DATA_ACC, 
@@ -113,7 +115,14 @@ SK7_RAW_DATA_EVENT,
 SK7_RAW_DATA_SHAKING, 
 SK7_RAW_DATA_RPH,
 SK7_RAW_DATA_RPH_QUATERNION,
-SK7_RAW_DATA_GYRO_TEMP
+SK7_RAW_DATA_GYRO_TEMP,
+
+SK7_RAW_DATA_IMU0,
+SK7_RAW_DATA_IMU1,
+SK7_RAW_DATA_IMU2,
+SK7_RAW_DATA_IMU3,
+SK7_RAW_DATA_IMU4,
+
 ) = range(SK7_NUM_PACKET_TYPES)
 
 # variables
@@ -194,6 +203,12 @@ sk7_raw_packet_headers = [
                                 116,    # rph
                                 110,    # rph quaternion
                                 111,    # gyro temps
+
+                                80,     # imu #0
+                                81,     # imu #1
+                                82,     # imu #2
+                                83,     # imu #3
+                                84,     # imu #4
                             ]
 
 sk7_packet_lengths = [ 
@@ -271,6 +286,12 @@ sk7_packet_lengths = [
         10,
         12,
         12,
+
+        24,
+        24,
+        24,
+        24,
+        24
     ]
 
 sk7_packet_has_checksum = [ 
@@ -286,6 +307,6 @@ sk7_packet_has_checksum = [
     0,0,                    # commands
     1,1,                    # acks
     0,                          # startup info
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0       # raw data packets
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0       # raw data packets
 ]           
 
