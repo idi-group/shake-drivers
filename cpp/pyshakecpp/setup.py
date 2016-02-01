@@ -15,7 +15,6 @@ os = system()
 is_64bits = maxsize > 2 ** 32
 
 if os == 'Windows':
-    libs = ['bluetooth', 'shake_driver']
     libs = ['shake_driver']
     if is_64bits:
         lib_dirs = ['../shake_driver/x64/Release']
