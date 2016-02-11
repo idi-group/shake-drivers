@@ -173,7 +173,9 @@ class SK7(pyshake_sk_common.SHAKE):
         packetbuf += tmp
 
         if bytes_left != bytes_read:
-            return SHAKE_RAW_READ_ERROR
+            return SHAKE_ERROR
+
+        self.synced = True
 
         has_seq = False
         self.__shake.peek_flag = False
@@ -186,7 +188,7 @@ class SK7(pyshake_sk_common.SHAKE):
                 self.__shake.peek_flag = True
             elif trailing_byte == '$' or trailing_byte == '\n':
                 adjtype = packet_type - SK7_RAW_DATA_ACC
-                
+
                 if (ord(trailing_byte) == self.data.internal_timestamps[adjtype] + 1) or (ord(trailing_byte) == 0 and self.data.internal_timestamps[adjtype] == 255):
                     has_seq = True
                 else:
@@ -509,6 +511,9 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.imudata[imu].mag = [pyshake_sk_common.convert_raw_data_value(packetbuf[15+(i*2):17+(i*2)]) for i in range(3)]
             self.data.imudata[imu].temp = pyshake_sk_common.convert_raw_data_value(packetbuf[21:23])
             self.data.imudata[imu].seq = ord(packetbuf[23])
+            self.data.internal_timestamps[SHAKE_SENSOR_IMU0 + imu] = self.data.imudata[imu].seq
+            if self.__shake.data_callback:
+                self.__shake.data_callback(SHAKE_SENSOR_IMU0 + imu, self.data.imudata[imu], self.data.internal_timestamps[SHAKE_SENSOR_IMU0 + imu]) 
         else:
             return SHAKE_ERROR
 
@@ -576,7 +581,7 @@ class SK7(pyshake_sk_common.SHAKE):
             elif i == SK7_SLOT4:
                 self.__shake.modules[4] = line.strip()
     
-        self.read_data(1)
+        tmp = self.read_data(1)
         self.synced = True
         return True
 

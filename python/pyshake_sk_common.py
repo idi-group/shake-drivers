@@ -44,6 +44,9 @@ class sk_imu_data:
         self.temp = 0
         self.seq = 0
 
+    def raw(self):
+        return self.acc + self.gyro + self.mag + [self.temp, self.seq]
+
     def __repr__(self):
         return 'Acc: {}, Gyro: {}, Mag: {}, Temp: {}, Seq: {}'.format(self.acc, self.gyro, self.mag, self.temp, self.seq)
 
@@ -62,7 +65,7 @@ class sk_sensor_data:
         self.rphq = [0,0,0,0]
         self.temps = [0,0,0]
         self.timestamps = [0 for x in range(8)]
-        self.internal_timestamps = [0 for x in range(SK7_RAW_DATA_GYRO_TEMP - SK7_RAW_DATA_ACC)]
+        self.internal_timestamps = [0 for x in range(1 + (SK7_RAW_DATA_IMU4 - SK7_RAW_DATA_ACC))]
         self.sk6seq = 0
         self.sk7seq = 0
         self.hrseq = 0
@@ -126,7 +129,6 @@ class SHAKE:
             if num_bytes == 0:
                 return bytes
 
-        self.synced = True
         allbytes = bytes + self.__shake.port.read(num_bytes)
         return allbytes
 

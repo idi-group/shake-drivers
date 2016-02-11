@@ -86,9 +86,6 @@ class ShakeDevice:
         elif type == SHAKE_SK7:
             self.modules = [SK7_MODULE_NONE for x in range(5)]
             self.SHAKE = pyshake_sk7.SK7(self, type)
-        elif type == SHAKE_SK7_IMU:
-            self.modules = [SK7_MODULE_NONE for x in range(5)]
-            self.SHAKE = pyshake_sk7.SK7(self, type)
         else:
             raise Exception("Unknown device type")
 
@@ -134,17 +131,14 @@ class ShakeDevice:
 
         self.thread_done = False
 
-        # normal devices
-        if self.device_type == SHAKE_SK6 or self.device_type == SHAKE_SK7:
-            thread.start_new_thread(self._reader_thread, ())
-        else:
-            thread.start_new_thread(self._imu_thread, ())
+        thread.start_new_thread(self._reader_thread, ())
 
         elapsed = 0
         while elapsed < 5.0 and not self.SHAKE.synced:
             sleep(0.01)
             elapsed += 0.01
 
+        print 'SYNCED', self.SHAKE.synced
         return self.SHAKE.synced
 
     def connect_debug(self, filename):
@@ -206,7 +200,7 @@ class ShakeDevice:
         try:
             self.port = pyshake_serial.serial_port(addr)
             baud = 230400
-            if self.device_type == SHAKE_SK7:
+            if self.device_type != SHAKE_SK6:
                 baud = 460800
 
             if not self.port.open(baud):
@@ -245,6 +239,8 @@ class ShakeDevice:
 
                     self.SHAKE.parse_packet(packet, packet_type)
             except Exception as e:
+                import sys, traceback
+                print("\n".join(traceback.format_exception(*sys.exc_info())))
                 # TODO do something more sensible with exception info, eg use 
                 # it for a getlasterror() function
                 pass
