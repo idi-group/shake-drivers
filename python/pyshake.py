@@ -138,7 +138,6 @@ class ShakeDevice:
             sleep(0.01)
             elapsed += 0.01
 
-        print 'SYNCED', self.SHAKE.synced
         return self.SHAKE.synced
 
     def connect_debug(self, filename):
