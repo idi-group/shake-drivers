@@ -800,10 +800,10 @@ class ShakeDevice:
         return self.write(SHAKE_NV_REG_DATAFMT, value)
 
     def read_acc_config(self):
-        return self.read(SHAKE_NV_REG_ACCCONFIG)
+        return self.read(SHAKE_NV_REG_ACC_CONFIG)
 
     def write_acc_config(self, value):
-        return self.write(SHAKE_NV_REG_ACCCONFIG, value)
+        return self.write(SHAKE_NV_REG_ACC_CONFIG, value)
 
     def read_sample_rate(self, sensor):
         """
