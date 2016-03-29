@@ -148,13 +148,13 @@ class SK7(pyshake_sk_common.SHAKE):
             packetbuf = packetbuf[:offset] + ',00\r\n'
             bytes_read += 3
 
-        if SK7_PACKETS[packet_type].has_checkum and ord(packetbuf[bytes_read + SK7_HEADER_LEN - 1]) != 0xA:
+        if SK7_PACKETS[packet_type].has_checksum and ord(packetbuf[bytes_read + SK7_HEADER_LEN - 1]) != 0xA:
             if not self.__shake.checksum:
                 self.__shake.checksum = True
 
             packetbuf += self.read_data(SHAKE_CHECKSUM_LENGTH)
             bytes_read += 3
-        elif SK7_PACKETS[packet_type].has_checkum and ord(packetbuf[bytes_read + SK7_HEADER_LEN - 1]) == 0xA and self.__shake.checksum:
+        elif SK7_PACKETS[packet_type].has_checksum and ord(packetbuf[bytes_read + SK7_HEADER_LEN - 1]) == 0xA and self.__shake.checksum:
             self.__shake.checksum = False
 
         return self.parse_ascii_packet(packet_type, packetbuf, playback, timestamp)
