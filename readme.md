@@ -10,6 +10,11 @@ In addition, there are two separate implementations, one written in Python (with
 
 **NOTE 2**: If you want to use the SHAKE over a USB cable connection instead of Bluetooth, you'll need to install the [FTDI VCP Driver](http://www.ftdichip.com/Drivers/VCP.htm) for your platform.  
 
+## Simple installation
+
+If you just need the Python driver (only depends on pyserial and should work on all the major plaforms that suppprt the pyserial module), then you should now be able to install via pip:
+`pip install shake-drivers`
+ 
 ## Installation on Windows
 
 The easiest way to get up and running quickly on Windows is to use the Python implementation. Install pyserial, then run `python setup.py install` from the `shake-drivers/python` directory. 
