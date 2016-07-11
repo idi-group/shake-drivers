@@ -10,7 +10,7 @@ The other drivers are described below, but note that they have not been maintain
 
 ## Simple installation
 
-If you use the recommended Python driver (only depends on pyserial and should work on all the major plaforms that suppprt the pyserial module), then you should now be able to install via pip:
+If you use the recommended Python driver (only depends on pyserial and should work on all the major plaforms that suppprt it), then you should now be able to install via pip:
 `pip install shake-drivers`
  
 ## Installation on Windows
