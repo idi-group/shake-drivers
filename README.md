@@ -59,7 +59,7 @@ In addition, there is a basic but functional implementation written in Java (pro
 
 ## A basic example
 
-(for more examples see [the wiki page](https://github.com/andrewramsay/shake-drivers/wiki/Examples)
+(for more examples see [the wiki page](https://github.com/andrewramsay/shake-drivers/wiki/Examples))
 
 **Python / pyserial**
 
