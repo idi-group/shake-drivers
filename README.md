@@ -1,18 +1,16 @@
 # SHAKE Drivers
 
-This project contains drivers for the SHAKE SK6 and SK7 sensor packs. For more information on the devices and their capabilities, [see the wiki](https://github.com/andrewramsay/shake-drivers/wiki/Overview).
+This project contains drivers for the SHAKE SK6 and SK7 sensor packs. For more information on the devices and their capabilities, [see the wiki](https://github.com/andrewramsay/shake-drivers/wiki).
 
-This repo contains multiple drivers. The most feature complete implementation is a C++ driver that can be compiled for Windows, OSX and Linux (32/64-bit). This driver also has bindings for Python, C# and Java, although in some cases functionality supported by the C++ code has not yet been exposed through these bindings.
+This repo contains multiple drivers. The most up to date and recommended implementation is in Python (under /python) and should run on any of the 3 major desktop operating systems, and on any other platform that supports serial port access via the [pyserial](http://pyserial.sourceforge.net/) module. It should also support both Python 2 and Python 3.
 
-In addition, there are two separate implementations, one written in Python (with a dependency on [pyserial](http://pyserial.sourceforge.net/)) and one written in Java (probably most useful in that it supports Android). 
+The other drivers are described below, but note that they have not been maintained for some time and may have various issues on newer systems.
 
-**NOTE 1**: If you install both the Python/C++ bindings and the pure Python implementation in the same Python environment you may encounter naming conflicts, as both include a module called "pyshake".
-
-**NOTE 2**: If you want to use the SHAKE over a USB cable connection instead of Bluetooth, you'll need to install the [FTDI VCP Driver](http://www.ftdichip.com/Drivers/VCP.htm) for your platform.  
+**NOTE**: If you want to use the SHAKE over a USB cable connection instead of Bluetooth, you'll need to install the [FTDI VCP Driver](http://www.ftdichip.com/Drivers/VCP.htm) for your platform. See the [user manual](http://www.dcs.gla.ac.uk/~adr/SHAKE%20SK7%20User%20Manual%20Rev%2007.pdf) for details.
 
 ## Simple installation
 
-If you just need the Python driver (only depends on pyserial and should work on all the major plaforms that suppprt the pyserial module), then you should now be able to install via pip:
+If you use the recommended Python driver (only depends on pyserial and should work on all the major plaforms that suppprt the pyserial module), then you should now be able to install via pip:
 `pip install shake-drivers`
  
 ## Installation on Windows
@@ -52,6 +50,12 @@ For the C++/Python bindings:
 
  * Run `sh build.sh` from `shake-drivers/cpp/shake_driver`
  * Run `python setup.py install` from `shake-drivers/cpp/pyshake`
+
+## Other drivers
+
+An alternative to the Python implementation is a C++ driver that can be compiled for Windows, OSX and Linux (32/64-bit). This driver also comes with bindings for Python, C# and Java, although in some cases functionality supported by the C++ code has not yet been exposed through these bindings, and the code in this package is often outdated compared to the pure Python implementation/
+
+In addition, there is a basic but functional implementation written in Java (probably only useful in that it supports Android). 
 
 ## A basic example
 
