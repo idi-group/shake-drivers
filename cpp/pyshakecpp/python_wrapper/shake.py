@@ -11,11 +11,11 @@ major, minor = sys.version_info[0], sys.version_info[1]
 if major == 2 and minor == 4:
     import pyshake
 elif major == 2 and minor >= 5:
-    import pyshakecpp
+    import pyshakecpp as pyshake
 else:
-    print "shake.py: Warning, unsupported Python version (%d.%d)"%(major, minor)
+    print("shake.py: Warning, unsupported Python version (%d.%d)"%(major, minor))
     # attempt to import the pyshake module anyway
-    import pyshakecpp
+    import pyshakecpp as pyshake
 
 # SHAKE driver constants
 
