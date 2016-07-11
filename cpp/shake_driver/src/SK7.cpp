@@ -509,9 +509,9 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 		case SK7_DATA_GYRO_TEMP: {
 			sk7_data_gyro_temp_packet* datagyro = (sk7_data_gyro_temp_packet*)rawpacket;
 			int seq;
-			data.temps[0] = dec_ascii_to_int(datagyro->pitchtemp.data, 5, 4) / 100.0;
-			data.temps[1] = dec_ascii_to_int(datagyro->rolltemp.data, 5, 4) / 100.0;
-			data.temps[2] = dec_ascii_to_int(datagyro->yawtemp.data, 5, 4) / 100.0;
+			data.temps[0] = dec_ascii_to_int(datagyro->pitchtemp.data, 5, 4) / 100.0f;
+			data.temps[1] = dec_ascii_to_int(datagyro->rolltemp.data, 5, 4) / 100.0f;
+			data.temps[2] = dec_ascii_to_int(datagyro->yawtemp.data, 5, 4) / 100.0f;
 			seq = dec_ascii_to_int(datagyro->seq.data, 2, 2);
 			// TODO data.internal_timestamps[SHAKE_SENSOR_MAG] = seq;
 			
@@ -603,8 +603,6 @@ int SK7::extract_ascii_packet(int packet_type, char* rawpacket, int playback, vo
 int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 	sk7_raw_packet_long* srpl;
 	sk7_raw_packet_short* srps;
-	sk7_raw_packet_audio* saud;
-	int ev;
 	int len = sk7_packet_lengths[packet_type];
 
 	switch(packet_type) {
@@ -715,19 +713,19 @@ int SK7::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 		}
 		case SK7_RAW_DATA_RPH_QUATERNION: {
 			sk7_raw_packet_extra_long* srpel = (sk7_raw_packet_extra_long*)rawpacket;
-			data.rphq[0] = ((short)(srpel->data[0] + (srpel->data[1] << 8))) / 16384.0;
-			data.rphq[1] = ((short)(srpel->data[2] + (srpel->data[3] << 8))) / 16384.0;
-			data.rphq[2] = ((short)(srpel->data[4] + (srpel->data[5] << 8))) / 16384.0;
-			data.rphq[3] = ((short)(srpel->data[6] + (srpel->data[7] << 8))) / 16384.0;
+			data.rphq[0] = ((short)(srpel->data[0] + (srpel->data[1] << 8))) / 16384.0f;
+			data.rphq[1] = ((short)(srpel->data[2] + (srpel->data[3] << 8))) / 16384.0f;
+			data.rphq[2] = ((short)(srpel->data[4] + (srpel->data[5] << 8))) / 16384.0f;
+			data.rphq[3] = ((short)(srpel->data[6] + (srpel->data[7] << 8))) / 16384.0f;
 			if(has_seq) data.internal_timestamps[SHAKE_SENSOR_HEADING] = srpel->seq;
 			break;
 		}
 		case SK7_RAW_DATA_GYRO_TEMP: {
 			sk7_raw_packet_extra_long* srpel = (sk7_raw_packet_extra_long*)rawpacket;
-			data.temps[0] = (srpel->data[0] + (srpel->data[1] << 8)) / 100.0;
-			data.temps[1] = (srpel->data[2] + (srpel->data[3] << 8)) / 100.0;
-			data.temps[2] = (srpel->data[4] + (srpel->data[5] << 8)) / 100.0;
-			data.temps[3] = (srpel->data[6] + (srpel->data[7] << 8)) / 100.0;
+			data.temps[0] = (srpel->data[0] + (srpel->data[1] << 8)) / 100.0f;
+			data.temps[1] = (srpel->data[2] + (srpel->data[3] << 8)) / 100.0f;
+			data.temps[2] = (srpel->data[4] + (srpel->data[5] << 8)) / 100.0f;
+			data.temps[3] = (srpel->data[6] + (srpel->data[7] << 8)) / 100.0f;
 	
 		}
 	}
@@ -808,7 +806,7 @@ int SK7::read_device_info() {
 				len++;
 			}
 			//sscanf(ptr, "%f", &(devpriv->fwrev));
-			devpriv->fwrev = atof(ptr);
+			devpriv->fwrev = (float)atof(ptr);
 			SHAKE_DBG("Got fwrev: %.2f\n", devpriv->fwrev);
 		} else if(linecount == SK7_HARDWARE_REV) {
 
@@ -817,7 +815,7 @@ int SK7::read_device_info() {
 			while(*ptr < '0' || *ptr > '9')
 				ptr++;
 			//sscanf(ptr, "%f", &(devpriv->hwrev));
-			devpriv->hwrev = atof(ptr);
+			devpriv->hwrev = (float)atof(ptr);
 			SHAKE_DBG("Got hwrev: %.2f\n", devpriv->hwrev);
 		} else if(linecount == SK7_SERIAL_NUMBER) {
 			int spacecount = 0, i;
@@ -851,7 +849,7 @@ int SK7::read_device_info() {
 			char* ptr = buf[linecount];
 			ptr += 28;
 			//sscanf(ptr, "%f", &(devpriv->bluetoothfwrev));
-			devpriv->bluetoothfwrev = atof(ptr);
+			devpriv->bluetoothfwrev = (float)atof(ptr);
 		}
 
 	}

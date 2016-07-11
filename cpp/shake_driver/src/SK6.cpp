@@ -536,7 +536,6 @@ int SK6::extract_raw_packet(int packet_type, char* rawpacket, int has_seq) {
 	sk6_raw_packet_long* srpl;
 	sk6_raw_packet_short* srps;
 	sk6_raw_packet_audio* saud;
-	int ev;
 	int len = sk6_packet_lengths[packet_type];
 
 	switch(packet_type) {

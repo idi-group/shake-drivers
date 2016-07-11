@@ -1243,7 +1243,7 @@ SHAKE_API float shake_read_temperature(shake_device* sh) {
 	if(ret == SHAKE_ERROR)
 		return -1.0f;
 
-	ret = value / 4.0;
+	ret = value / 4.0f;
 
 	return ret;
 }
