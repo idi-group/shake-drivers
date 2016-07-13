@@ -34,9 +34,9 @@ extern "C" {
 shake_rfcomm_socket* shake_open_rfcomm_i64(shake_rfcomm_socket* port, long long btaddr);
 shake_rfcomm_socket* shake_open_rfcomm_str(shake_rfcomm_socket* port, char* btaddr);
 
-int read_rfcomm_bytes(shake_device_private* devpriv, char* buf, int bytes_to_read);
-int write_rfcomm_bytes(shake_device_private* devpriv, char* buf, int bytes_to_write);
-int write_rfcomm_bytes_delayed(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms);
+size_t read_rfcomm_bytes(shake_device_private* devpriv, char* buf, size_t bytes_to_read);
+size_t write_rfcomm_bytes(shake_device_private* devpriv, char* buf, size_t bytes_to_write);
+size_t write_rfcomm_bytes_delayed(shake_device_private* devpriv, char* buf, size_t bytes_to_write, size_t chunk_size, int delay_ms);
 
 int shake_close_rfcomm(shake_rfcomm_socket* port);
 

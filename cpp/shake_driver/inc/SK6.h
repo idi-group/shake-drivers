@@ -30,13 +30,13 @@ public:
 	virtual ~SK6(void);
 
 	// parses a complete ASCII packet
-	virtual int parse_ascii_packet(int packet_type, char* packetbuf, int packetlen, int playback, void* timestamp_packet);
+	virtual int parse_ascii_packet(int packet_type, char* packetbuf, size_t packetlen, int playback, void* timestamp_packet);
 
 	// reads a complete ASCII packet (minus header)
 	virtual int read_ascii_packet(int packet_type, char* packetbuf);
 
 	// parses a complete raw packet
-	virtual int parse_raw_packet(int packet_type, char* packetbuf, int packetlen, int has_seq);
+	virtual int parse_raw_packet(int packet_type, char* packetbuf, size_t packetlen, int has_seq);
 
 	// reads a complete raw packet (minus header)
 	virtual int read_raw_packet(int packet_type, char* packetbuf);

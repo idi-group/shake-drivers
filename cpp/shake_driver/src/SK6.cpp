@@ -31,7 +31,7 @@ SK6::~SK6(void)
 }
 
 // parses a complete ASCII packet
-int SK6::parse_ascii_packet(int packet_type, char* packetbuf, int packetlen, int playback, void* timestamp_packet) {
+int SK6::parse_ascii_packet(int packet_type, char* packetbuf, size_t packetlen, int playback, void* timestamp_packet) {
 	if(packet_type != SK6_ACK_ACK && packet_type != SK6_ACK_NEG) {
 		if(devpriv->checksum) {
 			SHAKE_DBG("^^^ Parsing ASCII+checksum\n");
@@ -65,7 +65,7 @@ int SK6::parse_ascii_packet(int packet_type, char* packetbuf, int packetlen, int
 
 // reads a complete ASCII packet (minus header)
 int SK6::read_ascii_packet(int packet_type, char* packetbuf) {
-	int packet_size = 0, bytes_left, bytes_read = 0;
+	size_t packet_size = 0, bytes_left, bytes_read = 0;
 	BOOL playback = FALSE;
 	sk6_data_timestamp_packet timestamp_pkt;
 
@@ -133,7 +133,7 @@ int SK6::read_ascii_packet(int packet_type, char* packetbuf) {
 	if(playback) {
 		// want to change packetbuf so that the 2 bytes currently at the end of the packet "\r\n" instead
 		// become ",00\r\n"...
-		int offset = bytes_read + SK6_HEADER_LEN - 2;
+		size_t offset = bytes_read + SK6_HEADER_LEN - 2;
 		packetbuf[offset] = ',';
 		packetbuf[offset+1] = '0';
 		packetbuf[offset+2] = '0';
@@ -170,7 +170,7 @@ int SK6::read_ascii_packet(int packet_type, char* packetbuf) {
 }
 
 // parses a complete raw packet
-int SK6::parse_raw_packet(int packet_type, char* packetbuf, int packetlen, int has_seq) {
+int SK6::parse_raw_packet(int packet_type, char* packetbuf, size_t packetlen, int has_seq) {
 	SHAKE_DBG("*** Parsing raw\n");
 	extract_raw_packet(packet_type, packetbuf, has_seq);
 	// check if we need to send an audio packet back
@@ -182,7 +182,7 @@ int SK6::parse_raw_packet(int packet_type, char* packetbuf, int packetlen, int h
 
 // reads a complete raw packet (minus header)
 int SK6::read_raw_packet(int packet_type, char* packetbuf) {
-	int packet_size = 0, bytes_left, bytes_read = 0;
+	size_t packet_size = 0, bytes_left, bytes_read = 0;
 
 	/* calculate bytes remaining and read them */
 	bytes_left = sk6_packet_lengths[packet_type] - SK6_RAW_HEADER_LEN;
@@ -248,7 +248,8 @@ int SK6::read_raw_packet(int packet_type, char* packetbuf) {
 
 // finds and classifies next packet header in the data stream
 int SK6::get_next_packet(char* packetbuf, int bufsize) {
-	int bytes_read = 0, packet_type = SHAKE_BAD_PACKET;
+	size_t bytes_read = 0;
+	int packet_type = SHAKE_BAD_PACKET;
 
 	/*	start by reading 3 bytes, since raw headers are 3 bytes while ASCII headers are 4 bytes
 	*	the smaller of the two is used */

@@ -141,14 +141,15 @@ int shake_close_rfcomm(shake_rfcomm_socket* port) {
 #endif
 }
 	
-int read_rfcomm_bytes(shake_device_private* devpriv, char* buf, int bytes_to_read) {
+size_t read_rfcomm_bytes(shake_device_private* devpriv, char* buf, size_t bytes_to_read) {
 	#ifdef SHAKE_RFCOMM_SUPPORTED
-	DWORD bytes_read = 0;
+	size_t bytes_read = 0;
 	int sleepcounter = 0;
-	int remaining_bytes = bytes_to_read;
+	size_t remaining_bytes = bytes_to_read;
 
 	while(1) {
-		int len = recv(devpriv->port.rfcomm.sock, buf+bytes_read, remaining_bytes, 0);
+		int tmp = (int)remaining_bytes;
+		size_t len = recv(devpriv->port.rfcomm.sock, buf+bytes_read, tmp, 0);
 		if(len == SOCKET_ERROR) {
 			break;
 		}
@@ -178,16 +179,15 @@ int read_rfcomm_bytes(shake_device_private* devpriv, char* buf, int bytes_to_rea
 	#endif
 }
 
-int write_rfcomm_bytes(shake_device_private* devpriv, char* buf, int bytes_to_write) {
+size_t write_rfcomm_bytes(shake_device_private* devpriv, char* buf, size_t bytes_to_write) {
 	#ifdef SHAKE_RFCOMM_SUPPORTED
-	DWORD bytes_written = 0;
-	int remaining_bytes = bytes_to_write;
+	size_t bytes_written = 0;
+	size_t remaining_bytes = bytes_to_write;
 
 	while(1) {
-		int len = send(devpriv->port.rfcomm.sock, buf+bytes_written, remaining_bytes, 0);
-
+		int tmp = (int)remaining_bytes;
+		size_t len = send(devpriv->port.rfcomm.sock, buf+bytes_written, tmp, 0);
 		if(len == SOCKET_ERROR) {
-
 			break;
 		}
 
@@ -210,15 +210,15 @@ int write_rfcomm_bytes(shake_device_private* devpriv, char* buf, int bytes_to_wr
 	#endif
 }
 
-int write_rfcomm_bytes_delayed(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
+size_t write_rfcomm_bytes_delayed(shake_device_private* devpriv, char* buf, size_t bytes_to_write, size_t chunk_size, int delay_ms) {
 	#ifdef SHAKE_RFCOMM_SUPPORTED
-	DWORD bytes_written = 0;
-	int remaining_bytes = bytes_to_write;
+	size_t bytes_written = 0;
+	size_t remaining_bytes = bytes_to_write;
 
 	while(1) {
-		int current_remaining_bytes = remaining_bytes;// ((chunk_size >= remaining_bytes) ? chunk_size : remaining_bytes);
+		int current_remaining_bytes = (int)remaining_bytes;// ((chunk_size >= remaining_bytes) ? chunk_size : remaining_bytes);
 		if(remaining_bytes > chunk_size)
-			current_remaining_bytes = chunk_size;
+			current_remaining_bytes = (int)chunk_size;
 		int len = send(devpriv->port.rfcomm.sock, buf+bytes_written, current_remaining_bytes, 0);
 
 		if(len == SOCKET_ERROR) {

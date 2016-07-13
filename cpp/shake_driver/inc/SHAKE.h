@@ -63,13 +63,13 @@ public:
 	shake_device_private* devpriv;
 
 	// parses a complete ASCII packet
-	virtual int parse_ascii_packet(int packet_type, char* packetbuf, int packetlen, int playback, void* timestamp_packet) = 0;
+	virtual int parse_ascii_packet(int packet_type, char* packetbuf, size_t packetlen, int playback, void* timestamp_packet) = 0;
 
 	// reads a complete ASCII packet (minus header)
 	virtual int read_ascii_packet(int packet_type, char* packetbuf) = 0;
 
 	// parses a complete raw packet
-	virtual int parse_raw_packet(int packet_type, char* packetbuf, int packetlen, int has_seq) = 0;
+	virtual int parse_raw_packet(int packet_type, char* packetbuf, size_t packetlen, int has_seq) = 0;
 
 	// reads a complete raw packet (minus header)
 	virtual int read_raw_packet(int packet_type, char* packetbuf) = 0;

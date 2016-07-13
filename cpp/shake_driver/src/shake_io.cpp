@@ -26,11 +26,11 @@
 #include "shake_s60_rfcomm.h"
 #endif
 
-int read_debug_bytes(shake_device_private* devpriv, char* buf, int bytes_to_read) {
-	DWORD bytes_read;
+size_t read_debug_bytes(shake_device_private* devpriv, char* buf, size_t bytes_to_read) {
+	size_t bytes_read;
 	int sleepcounter = 0;
 	int attempts = 0;
-	int remaining_bytes = bytes_to_read;
+	size_t remaining_bytes = bytes_to_read;
 
 	shake_sleep(10);
 
@@ -84,14 +84,14 @@ int read_debug_bytes(shake_device_private* devpriv, char* buf, int bytes_to_read
 *
 *	This requires different methods of opening the connection, so this function
 *	acts as a standard "read" interface for the rest of the code */
-int read_bytes(shake_device_private* dev, char* buf, int bytes_to_read) {
+size_t read_bytes(shake_device_private* dev, char* buf, size_t bytes_to_read) {
 	if(dev == NULL)
 		return 0;
 
 	if(dev->rthread_done)
 		shake_thread_exit(101);
 
-	int returned_bytes = 0;
+	size_t returned_bytes = 0;
 		
 	// if we've "peeked" a byte, put it back before reading any more real bytes
 	if(dev->peek_flag) {
@@ -150,7 +150,7 @@ int read_bytes(shake_device_private* dev, char* buf, int bytes_to_read) {
 	return 0;
 }
 
-int write_bytes(shake_device_private* dev, char* buf, int bytes_to_write) {
+size_t write_bytes(shake_device_private* dev, char* buf, size_t bytes_to_write) {
 	switch(dev->port.comms_type) {
 		#ifdef _WIN32
 		case SHAKE_CONN_VIRTUAL_SERIAL_WIN32:
@@ -181,7 +181,7 @@ int write_bytes(shake_device_private* dev, char* buf, int bytes_to_write) {
 *	or vibration uploads which can total 1063 bytes per packet. To avoid overflowing the receive buffer on the
 *	SHAKE, this function is used to upload packets in chunks of <chunk_size> bytes, with a gap of <delay_ms>
 *	between successive chunks */
-int write_bytes_delayed(shake_device_private* dev, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
+size_t write_bytes_delayed(shake_device_private* dev, char* buf, size_t bytes_to_write, size_t chunk_size, int delay_ms) {
 	switch(dev->port.comms_type) {
 		#ifdef _WIN32
 		case SHAKE_CONN_VIRTUAL_SERIAL_WIN32:
