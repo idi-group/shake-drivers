@@ -62,7 +62,7 @@ class ShakeDevice:
     """
 
     # 2nd parameter indicates type of device. Default is SK7.
-    def __init__(self, type = SHAKE_SK7):
+    def __init__(self, type=SHAKE_SK7):
         """
         Create a new ShakeDevice object.
 
@@ -97,7 +97,7 @@ class ShakeDevice:
         self.wait_for_acks = True
 
         self.lastack = False
-        self.lastaddr, self.lastval = 0,0
+        self.lastaddr, self.lastval = 0, 0
         self.ack_timeout_ms = 500
 
         self.lastevent = 0
@@ -122,7 +122,7 @@ class ShakeDevice:
         :returns: True if connection succeeded, False otherwise
         """
 
-        if self.port or not self.thread_done or addr == None:
+        if self.port or not self.thread_done or addr is None:
             return False
 
         self.device_address = addr
@@ -149,7 +149,7 @@ class ShakeDevice:
         :returns: True if opening the file succeeded, False otherwise
         """
 
-        if self.port or not self.thread_done or filename == None:
+        if self.port or not self.thread_done or filename is None:
             return False
 
         self.device_address = filename
@@ -471,13 +471,13 @@ class ShakeDevice:
 
     # TODO: do these functions actually still work? They used to, but the latest
     # manual doesn't mention this functionality at all...
-    #def shaking_peakaccel(self):
+    # def shaking_peakaccel(self):
     #    return self.SHAKE.data.peakaccel
     #
-    #def shaking_direction(self):
+    # def shaking_direction(self):
     #    return self.SHAKE.data.direction
     #
-    #def shaking_timestamp(self):
+    # def shaking_timestamp(self):
     #    return self.SHAKE.data.timestamp
 
     #       [SK7] return [roll, pitch, heading] data 
@@ -513,6 +513,16 @@ class ShakeDevice:
         :returns: SHAKE_SUCCESS or SHAKE_ERROR
         """
         return self.write(SK7_NV_REG_RPH_CONFIG, val)
+
+    def sk7_gyro_temperatures(self):
+        """
+        (SK7 only) Return the latest set of gyro sensor temperature readings. The
+        return value is always a 4 element list with pitch, roll, yaw axis temperatures
+        as the first 3 values. In ASCII output mode the final value is unset, but 
+        in binary output mode it will be set to the temperature from a sensor on the
+        SK7 mainboard next to the acc/mag sensors.
+        """
+        return self.SHAKE.data.gyro_temps
 
     def register_data_callback(self, callback):
         """
@@ -944,7 +954,7 @@ class ShakeDevice:
         return vals
 
     def sk6_write_cap_thresholds(self, values):
-        if values == None or len(values) != 8:
+        if values is None or len(values) != 8:
             return SHAKE_ERROR
 
         self.write(SK6_NV_REG_CS0_INC, values[0])
@@ -975,6 +985,7 @@ class ShakeDevice:
         self.write(SK7_NV_REG_CAP_DEC_PROFILE, values[3])
 
         return SHAKE_SUCCESS
+
 
     def logging_pause(self):
         """
@@ -1068,43 +1079,43 @@ class ShakeDevice:
         return 100 * ((msb << 8) + lsb)
 
     # TODO: is this still available?? (see above)
-    #def read_shaking_config(self):
+    # def read_shaking_config(self):
     #    return self.read(SHAKE_NV_REG_SHAKING_CONFIG)
     #
-    #def write_shaking_config(self, value):
+    # def write_shaking_config(self, value):
     #    return self.write(SHAKE_NV_REG_SHAKING_CONFIG, value)
     #
-    #def read_shaking_accel_threshold(self):
+    # def read_shaking_accel_threshold(self):
     #    return self.read(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD)
     #
-    #def write_shaking_accel_threshold(self, value):
+    # def write_shaking_accel_threshold(self, value):
     #    return self.write(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD, value)
     #
-    #def read_shaking_holdoff_time(self):
+    # def read_shaking_holdoff_time(self):
     #    return self.read(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME)
     #
-    #def write_shaking_holdoff_time(self, value):
+    # def write_shaking_holdoff_time(self, value):
     #    return self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, value)
     #
-    #def read_shaking_vibration_profile(self):
+    # def read_shaking_vibration_profile(self):
     #    return self.read(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE)
     #
-    #def write_shaking_vibration_profile(self, value):
+    # def write_shaking_vibration_profile(self, value):
     #    return self.write(SHAKE_NV_REG_SHAKING_VIBRATION_PROFILE, value)
     #
-    #def read_shaking_hpf_constant(self):
+    # def read_shaking_hpf_constant(self):
     #    return self.read(SHAKE_NV_REG_SHAKING_HPF_CONSTANT)
     #
-    #def write_shaking_hpf_constant(self, value):
+    # def write_shaking_hpf_constant(self, value):
     #    return self.write(SHAKE_NV_REG_SHAKING_HPF_CONSTANT, value)
     #
-    #def read_shaking_lpf_constant(self):
+    # def read_shaking_lpf_constant(self):
     #    return self.read(SHAKE_NV_REG_SHAKING_LPF_CONSTANT)
     #
-    #def write_shaking_lpf_constant(self, value):
+    # def write_shaking_lpf_constant(self, value):
     #    return self.write(SHAKE_NV_REG_SHAKING_LPF_CONSTANT, value)
     #
-    #def reset_shaking_detection(self):
+    # def reset_shaking_detection(self):
     #    return self.write(SHAKE_NV_REG_SHAKING_CONFIG, 0xFF)
     #    return self.write(SHAKE_NV_REG_SHAKING_ACCEL_THRESHOLD, 0x0A)
     #    return self.write(SHAKE_NV_REG_SHAKING_HOLDOFF_TIME, 0x06)
@@ -1292,17 +1303,17 @@ class ShakeDevice:
         if amplitude == 0:
             vibbyte = 0x00
         elif amplitude == 33:
-            vibbyte = 0x40;
+            vibbyte = 0x40
         elif amplitude == 66:
-            vibbyte = 0x80;
+            vibbyte = 0x80
         elif amplitude == 100:
-            vibbyte = 0xc0;
+            vibbyte = 0xc0
 
-        vibbyte += time;
+        vibbyte += time
 
-        vibaddr = SHAKE_VO_REG_VIB_LEFT_CONTINUOUS;
+        vibaddr = SHAKE_VO_REG_VIB_LEFT_CONTINUOUS
         if(channel == SHAKE_VIB_RIGHT):
-            vibaddr = SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS;
+            vibaddr = SHAKE_VO_REG_VIB_RIGHT_CONTINUOUS
         return self.write(vibaddr, vibbyte)
 
     def sk6_upload_vib_sample(self, profile, samples):
