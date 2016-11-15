@@ -4,16 +4,16 @@
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
 #
-#    * Redistributions of source code must retain the above copyright notice, this list of 
+#    * Redistributions of source code must retain the above copyright notice, this list of
 #           conditions and the following disclaimer.
 #    * Redistributions in binary form must reproduce the above copyright notice, this list
 #           of conditions and the following disclaimer in the documentation and/or other
 #           materials provided with the distribution.
-#    * Neither the name of the University of Glasgow nor the names of its contributors 
+#    * Neither the name of the University of Glasgow nor the names of its contributors
 #           may be used to endorse or promote products derived from this software without
 #           specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -30,7 +30,7 @@ from pyshake_sk7_constants import *
 def convert_raw_data_value(bytes):
     lsb = ord(bytes[0])
     msb = ord(bytes[1])
-    
+
     if msb & 0x80:
         return (lsb + (msb << 8)) - 65536
     else:
@@ -38,9 +38,9 @@ def convert_raw_data_value(bytes):
 
 class sk_imu_data:
     def __init__(self):
-        self.acc = [0,0,0]
-        self.gyro = [0,0,0]
-        self.mag = [0,0,0]
+        self.acc = [0, 0, 0]
+        self.gyro = [0, 0, 0]
+        self.mag = [0, 0, 0]
         self.temp = 0
         self.seq = 0
 
@@ -52,24 +52,25 @@ class sk_imu_data:
 
 class sk_sensor_data:
     def __init__(self):
-        self.accx, self.accy, self.accz = 0,0,0
-        self.gyrx, self.gyry, self.gyrz = 0,0,0
-        self.magx, self.magy, self.magz = 0,0,0
+        self.accx, self.accy, self.accz = 0, 0, 0
+        self.gyrx, self.gyry, self.gyrz = 0, 0, 0
+        self.magx, self.magy, self.magz = 0, 0, 0
         self.heading = 0
         self.cap_sk6 = [0 for x in range(2)]
         self.cap_sk7 = [[0 for x in range(12)], [0 for x in range(12)], [0 for x in range(12)]]
-        self.ana0, self.ana1 = 0,0
-        self.shaking_peak_accel, self.shaking_direction, self.shaking_timestamp = 0,0,0
+        self.ana0, self.ana1 = 0, 0
+        self.shaking_peak_accel, self.shaking_direction, self.shaking_timestamp = 0, 0, 0
         self.hr_bpm = 0.0
-        self.rph = [0,0,0]
-        self.rphq = [0,0,0,0]
-        self.temps = [0,0,0]
+        self.rph = [0, 0, 0]
+        self.rphq = [0, 0, 0, 0]
+        self.temps = [0, 0, 0]
         self.timestamps = [0 for x in range(8)]
         self.internal_timestamps = [0 for x in range(1 + (SK7_RAW_DATA_IMU4 - SK7_RAW_DATA_ACC))]
         self.sk6seq = 0
         self.sk7seq = 0
         self.hrseq = 0
         self.imudata = [sk_imu_data() for x in range(5)]
+        self.gyro_temps = [0 for x in range(4)]
 
 class SHAKE:
     def __init__(self, shakedev, devtype):
@@ -117,7 +118,7 @@ class SHAKE:
         pass
 
     def read_data(self, num_bytes):
-        if self.__shake.port == None:
+        if self.__shake.port is None:
             return ""
 
         bytes = ""
@@ -148,7 +149,7 @@ class SHAKE:
                 # compare last 2 bytes to delimiter
                 if pos >= 1:
                     i = pos - 1
-                    if (ord(buf[i]) == 0xA and ord(buf[i+1]) == 0xD) or (ord(buf[i]) == 0xD and ord(buf[i+1]) == 0xA):
+                    if (ord(buf[i]) == 0xA and ord(buf[i + 1]) == 0xD) or (ord(buf[i]) == 0xD and ord(buf[i + 1]) == 0xA):
                         return buf
 
             pos += 1
