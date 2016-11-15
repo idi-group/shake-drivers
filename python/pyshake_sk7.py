@@ -52,9 +52,10 @@ SK7_RAW_READ_ERROR = -1
 ) = range(SK7_NUM_INFO_LINES)
 
 # TODO
-SK7_modules =   [
-                    "No option module",
-                ]
+SK7_modules = \
+    [
+        "No option module",
+    ]
 
 class SK7(pyshake_sk_common.SHAKE):
     def __init__(self, shakedev, devtype):
@@ -81,7 +82,7 @@ class SK7(pyshake_sk_common.SHAKE):
         return SK7_ASCII_READ_OK
 
     def read_ascii_packet(self, packet_type, packetbuf):
-        packet_size, bytes_left, bytes_read = 0,0,0
+        packet_size, bytes_left, bytes_read = 0, 0, 0
         playback = False
         timestamp = None
 
@@ -112,7 +113,7 @@ class SK7(pyshake_sk_common.SHAKE):
             if self.__shake.logfp:
                 self.__shake.logfp.close()
 
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 self.__shake.lastevent = SHAKE_PLAYBACK_COMPLETE
                 self.__shake.navcb(self.__shake.lastevent)
 
@@ -121,7 +122,7 @@ class SK7(pyshake_sk_common.SHAKE):
             packetbuf += self.read_data(SK7_PACKETS[packet_type].len_bytes - SK7_HEADER_LEN)
             self.__shake.lastrfid = packetbuf[SK7_HEADER_LEN+1:]
 
-            if self.__shake.navcv != None:
+            if self.__shake.navcv is not None:
                 self.__shake.lastevent = SHAKE_RFID_TID_EVENT
                 self.__shake.navcb(self.__shake.lastevent)
 
@@ -165,7 +166,7 @@ class SK7(pyshake_sk_common.SHAKE):
         return SK7_RAW_READ_OK
 
     def read_raw_packet(self, packet_type, packetbuf):
-        packet_size, bytes_left, bytes_read = 0,0,0
+        packet_size, bytes_left, bytes_read = 0, 0, 0
 
         bytes_left = SK7_PACKETS[packet_type].len_bytes - SK7_RAW_HEADER_LEN
         tmp = self.read_data(bytes_left)
@@ -219,7 +220,12 @@ class SK7(pyshake_sk_common.SHAKE):
                 packet_type = self.classify_packet_header(packetbuf, True)
 
         if packet_type == SHAKE_BAD_PACKET:
-            if ord(packetbuf[-1]) != 0x7F and packetbuf[-1] != '$':
+            if len(packetbuf) == 0:
+                # this can occasionally happen when an app using the driver
+                # is killed / interrupted
+                packetbuf = ""
+                c = ""
+            elif ord(packetbuf[-1]) != 0x7F and packetbuf[-1] != '$':
                 read_count = 50
                 c = " "
                 while read_count >= 0 and len(c) == 1 and (c != '$' and ord(c) != 0x7F):
@@ -389,7 +395,7 @@ class SK7(pyshake_sk_common.SHAKE):
                 self.__shake.logfp.write('%.3f,GOT,%d,%f,%f,%f\n' % (timestamp, SHAKE_SENSOR_GYRO_TEMPS, self.data.temps[0], self.data.temps[1], self.data.temps[2]))
 
         elif packet_type >= SK7_DATA_NVU and packet_type <= SK7_DATA_NVN:
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 event = -1
                 if packetbuf[3] == 'U':
                     event = SHAKE_NAV_UP
@@ -401,22 +407,22 @@ class SK7(pyshake_sk_common.SHAKE):
                     event = SHAKE_NAV_NORMAL
                 self.__shake.navcb(event)
         elif packet_type >= SK7_DATA_CU0 and packet_type <= SK7_DATA_CLB:
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 event = SK7_CS0_UPPER + (packet_type - SK7_DATA_CU0)
                 self.__shake.navcb(event)
         elif packet_type == SK7_DATA_SHAKING:
             self.data.shaking_peakaccel = int(packetbuf[5:10])
             self.data.shaking_direction = int(packetbuf[11:16])
             self.data.shaking_timestamp = int(packetbuf[17:22])
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 self.__shake.navcb(SHAKE_SHAKING_EVENT)
         elif packet_type == SK7_DATA_HEART_RATE:
             self.data.hr_bpm = int(packetbuf[5:9])
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 self.__shake.navcb(SHAKE_HEART_RATE_EVENT)
         elif packet_type == SK7_DATA_RFID_TID:
             self.data.tid = packetbuf[5:21]
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 self.__shake.navcb(SHAKE_RFID_TID_EVENT)
         else:
             return SHAKE_ERROR
@@ -490,8 +496,14 @@ class SK7(pyshake_sk_common.SHAKE):
             self.data.rphq[1] = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
             self.data.rphq[2] = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
             self.data.rphq[3] = pyshake_sk_common.convert_raw_data_value(packetbuf[9:11])
+        elif packet_type == SK7_RAW_DATA_GYRO_TEMP:
+            # pitch, roll, yaw axes + acc/mag sensor temperature
+            self.data.gyro_temps[0] = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
+            self.data.gyro_temps[1] = pyshake_sk_common.convert_raw_data_value(packetbuf[5:7])
+            self.data.gyro_temps[2] = pyshake_sk_common.convert_raw_data_value(packetbuf[7:9])
+            self.data.gyro_temps[3] = pyshake_sk_common.convert_raw_data_value(packetbuf[9:11])
         elif packet_type == SK7_RAW_DATA_EVENT:
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 event = -1
                 val = pyshake_sk_common.convert_raw_data_value(packetbuf[3:5])
                 if val == 1:
@@ -506,7 +518,7 @@ class SK7(pyshake_sk_common.SHAKE):
                     event = SK7_CS0_UPPER + (val - SK7_DATA_CU0)
                 self.__shake.navcb(event)
         elif packet_type == SK7_RAW_DATA_SHAKING:
-            if self.__shake.navcb != None:
+            if self.__shake.navcb is not None:
                 self.__shake.navcb(SHAKE_SHAKING_EVENT)
         elif packet_type >= SK7_RAW_DATA_IMU0 and packet_type <= SK7_RAW_DATA_IMU4:
             imu = packet_type - SK7_RAW_DATA_IMU0
@@ -526,9 +538,9 @@ class SK7(pyshake_sk_common.SHAKE):
     def classify_packet_header(self, packetbuf, ascii_packet):
         type = SHAKE_BAD_PACKET
 
-        if ascii_packet and (packetbuf == None or len(packetbuf) != SK7_HEADER_LEN):
+        if ascii_packet and (packetbuf is None or len(packetbuf) != SK7_HEADER_LEN):
             return type
-        if not ascii_packet and (packetbuf == None or len(packetbuf) != SK7_RAW_HEADER_LEN or ord(packetbuf[0]) != 0x7F or ord(packetbuf[1]) != 0x7F):
+        if not ascii_packet and (packetbuf is None or len(packetbuf) != SK7_RAW_HEADER_LEN or ord(packetbuf[0]) != 0x7F or ord(packetbuf[1]) != 0x7F):
             return type
 
         i = 0
@@ -551,7 +563,7 @@ class SK7(pyshake_sk_common.SHAKE):
     def read_device_info(self):
         for i in range(SK7_NUM_INFO_LINES):
             line = self.read_info_line()
-            if line == None:
+            if line is None:
                 return False
             
             if i == SK7_FIRMWARE_REV:   
