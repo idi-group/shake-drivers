@@ -1236,7 +1236,8 @@ static PyObject* pyshakecpp_exp_upload_vib_sample(PyObject* self, PyObject* args
 	}
 
 	if(devicelist[id] != NULL) {
-		int ret, pos = 0;
+		int ret;
+		unsigned pos = 0;
 
 		sample_length = PyList_GET_SIZE(list);
 		/* size is already checked in shake.py */

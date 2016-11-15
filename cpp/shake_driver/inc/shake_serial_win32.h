@@ -68,11 +68,11 @@ static unsigned sk7_serial_params[] = {
 *	Returns the <port> pointer on success, NULL on failure. */
 shake_serial_port_win32* shake_open_serial_win32(shake_serial_port_win32* port, int number, int device_type);
 
-int read_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes_to_read);
+size_t read_serial_bytes_win32(shake_device_private* devpriv, char* buf, size_t bytes_to_read);
 
-int write_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes_to_write);
+size_t write_serial_bytes_win32(shake_device_private* devpriv, char* buf, size_t bytes_to_write);
 
-int write_serial_bytes_delayed_win32(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms);
+size_t write_serial_bytes_delayed_win32(shake_device_private* devpriv, char* buf, size_t bytes_to_write, size_t chunk_size, int delay_ms);
 
 /*	Closes the indicated serial port
 *	<port is a pointer to a populated shake_serial_port_win32 structure.

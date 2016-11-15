@@ -126,7 +126,6 @@ void* shake_read_thread(void *shakedev) {
 shake_device* shake_init_internal(shake_conn_data* scd) {
 	shake_device* dev;
 	shake_device_private* devpriv;
-	int elapsed;
 	TCHAR eventname[20], eventname2[20], eventname3[20];
 
 	if(scd->devtype != SHAKE_SK7 && scd->devtype != SHAKE_SK6)
@@ -500,7 +499,6 @@ SHAKE_API int shake_info_retrieve(shake_device* sh) {
 }
 
 SHAKE_API int shake_factory_reset(shake_device* sh, int repeat) {
-	shake_device_private* devpriv;
 	int i, repeat_count = 1;
 
 	if(!sh) return SHAKE_ERROR;
@@ -1234,7 +1232,8 @@ SHAKE_API int shake_read_power_status(shake_device* sh, unsigned char* value) {
 }
 
 SHAKE_API float shake_read_temperature(shake_device* sh) {
-	float ret;
+	float temp;
+	int ret;
 	unsigned char value = 0;
 
 	if(!sh) return -1.0f;
@@ -1243,9 +1242,8 @@ SHAKE_API float shake_read_temperature(shake_device* sh) {
 	if(ret == SHAKE_ERROR)
 		return -1.0f;
 
-	ret = value / 4.0f;
-
-	return ret;
+	temp = value / 4.0f;
+	return temp;
 }
 
 int shake_accx(shake_device* sh) {

@@ -214,12 +214,12 @@ int shake_close_serial_win32(shake_serial_port_win32* port) {
 /*	utility func, reads <bytes_to_read> bytes from the port associated with <devpriv> 
 *	into <buf>, handling any timeouts that occur during this operation.
 *	Returns number of bytes read. */
-int read_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes_to_read) {
+size_t read_serial_bytes_win32(shake_device_private* devpriv, char* buf, size_t bytes_to_read) {
 #ifdef _WIN32
 	DWORD bytes_read;
 	int sleepcounter = 0;
 	int attempts = 0;
-	int remaining_bytes = bytes_to_read;
+	DWORD remaining_bytes = (DWORD)bytes_to_read;
 
 	/* read the port in a loop to deal with timeouts */
 	while(1) {
@@ -262,10 +262,10 @@ int read_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes_
 /*	utility func, writes <bytes_to_write> bytes to the port associated with <devpriv>
 *	from <buf>, handling any timeouts that occur during this operation.
 *	Returns number of bytes written. */
-int write_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes_to_write) {
+size_t write_serial_bytes_win32(shake_device_private* devpriv, char* buf, size_t bytes_to_write) {
 #ifdef _WIN32
 	DWORD bytes_written;
-	int remaining_bytes = bytes_to_write;
+	DWORD remaining_bytes = (DWORD)bytes_to_write;
 
 	/* write the port in a loop to deal with timeouts */
 	while(1) {
@@ -289,17 +289,17 @@ int write_serial_bytes_win32(shake_device_private* devpriv, char* buf, int bytes
 #endif
 }
 
-int write_serial_bytes_delayed_win32(shake_device_private* devpriv, char* buf, int bytes_to_write, int chunk_size, int delay_ms) {
+size_t write_serial_bytes_delayed_win32(shake_device_private* devpriv, char* buf, size_t bytes_to_write, size_t chunk_size, int delay_ms) {
 #ifdef _WIN32
 	DWORD bytes_written;
-	int remaining_bytes = bytes_to_write;
+	size_t remaining_bytes = bytes_to_write;
 
 	#ifdef _WIN32
 	/* write the port in a loop to deal with timeouts */
 	while(1) {
- 		int current_remaining_bytes = remaining_bytes;// ((chunk_size >= remaining_bytes) ? chunk_size : remaining_bytes);
+ 		int current_remaining_bytes = (int)remaining_bytes;// ((chunk_size >= remaining_bytes) ? chunk_size : remaining_bytes);
 		if(remaining_bytes > chunk_size)
-			current_remaining_bytes = chunk_size;
+			current_remaining_bytes = (int)chunk_size;
 		if(!WriteFile(devpriv->port.serial_win32.port, buf + (bytes_to_write - remaining_bytes), current_remaining_bytes, &bytes_written, NULL))
 			return bytes_to_write - remaining_bytes;
 
