@@ -61,7 +61,7 @@ SK6_CS1_UPPER = 7
 # Event produced when cap switch 1 lower threshold reached
 SK6_CS1_LOWER = 8
 
-## Event produced when data logging playback is completed
+# Event produced when data logging playback is completed
 SHAKE_PLAYBACK_COMPLETE = 9
 
 # Event produced when a shaking event detected
@@ -183,7 +183,7 @@ SHAKE_EXT_POWER         = 0x01      # external power on
 SHAKE_BAT_CHARGING          = 0x02      # battery charging
 SHAKE_BAT_FULL          = 0x04      # battery fully charged
 
-## The contents of the SHAKE_NV_REG_RFID_CONFIG register should be a combination of zero or more of these values
+# The contents of the SHAKE_NV_REG_RFID_CONFIG register should be a combination of zero or more of these values
 SHAKE_RFID_POWER_ON     = 0x01
 SHAKE_RFID_VISUAL_FEEDBACK = 0x02
 SHAKE_RFID_AUTO_SCAN    = 0x04
@@ -206,7 +206,7 @@ SHAKE_LOGGING_RECORDING =       0x01
 SHAKE_LOGGING_PLAYING   =       0x02
 SHAKE_LOGGING_MEMORYFULL =      0x04
 
-## RFID TID tag length
+# RFID TID tag length
 SHAKE_RFID_TAG_LENGTH = 32
 
 #       Max value returned by the read_battery_level function
@@ -250,10 +250,10 @@ SHAKE_UPLOAD_MIN_PAGE = 0
 # Audio sample upload maximum address 
 SHAKE_UPLOAD_MAX_PAGE = 7999
 
-##      Vibration sample minimum amplitude for ext module 
+# Vibration sample minimum amplitude for ext module 
 SHAKE_VIB_AMPLITUDE_MIN = 0
 
-## Vibration sample maximum amplitude for ext module 
+# Vibration sample maximum amplitude for ext module 
 SHAKE_VIB_AMPLITUDE_MAX = 255
 
 SHAKE_UPLOAD_CHUNK_SIZE = 64
