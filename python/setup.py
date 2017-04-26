@@ -13,7 +13,7 @@ with open(path.join(here, '..', 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='shake-drivers',
-    version='1.0.3',
+    version='1.0.4',
     description='SHAKE sensor device driver',
     long_description=long_description,
 
