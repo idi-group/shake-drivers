@@ -49,7 +49,7 @@ SK7_RAW_READ_ERROR = -1
     SK7_SLOT3,
     SK7_BLUETOOTH_FIRMWARE,
     SK7_SLOT4
-) = range(SK7_NUM_INFO_LINES)
+) = list(range(SK7_NUM_INFO_LINES))
 
 # TODO
 SK7_modules = \

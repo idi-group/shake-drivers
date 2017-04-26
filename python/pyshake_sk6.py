@@ -44,7 +44,7 @@ SK6_RAW_READ_ERROR = -1
     SK6_SERIAL_NUMBER,
     SK6_EXPANSION_SLOT1,
     SK6_EXPANSION_SLOT2
-) = range(SK6_NUM_INFO_LINES)
+) = list(range(SK6_NUM_INFO_LINES))
 
 SK6_modules =   [
                     "No option module",

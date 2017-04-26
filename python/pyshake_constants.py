@@ -164,7 +164,7 @@ SHAKE_REQ_ANA1      = 128
 SHAKE_MAX_OUTPUT_RATE =     0xFF
 
 #       Possible values for the playvib function channel parameter
-SHAKE_VIB_MAIN, SHAKE_VIB_LEFT, SHAKE_VIB_RIGHT, SHAKE_VIB_FORCEREACTOR, SHAKE_VIB_EXT_ACTUATOR     = range(5)
+SHAKE_VIB_MAIN, SHAKE_VIB_LEFT, SHAKE_VIB_RIGHT, SHAKE_VIB_FORCEREACTOR, SHAKE_VIB_EXT_ACTUATOR     = list(range(5))
 
 #       Maximum number of speed/time pairs in a vibration profile
 SHAKE_VIB_SAMPLE_MAX_LENGTH = 32

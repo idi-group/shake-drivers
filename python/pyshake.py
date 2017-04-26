@@ -30,7 +30,7 @@ Top-level module for the Python SHAKE driver implementation. Supports both
 SK6 and SK7 SHAKEs. 
 """
 
-import thread
+import _thread
 from time import sleep
 
 from pyshake_constants import *
@@ -131,7 +131,7 @@ class ShakeDevice:
 
         self.thread_done = False
 
-        thread.start_new_thread(self._reader_thread, ())
+        _thread.start_new_thread(self._reader_thread, ())
 
         elapsed = 0
         while elapsed < 5.0 and not self.SHAKE.synced:
@@ -160,7 +160,7 @@ class ShakeDevice:
 
         self.thread_done = False
 
-        thread.start_new_thread(self._reader_thread, ())
+        _thread.start_new_thread(self._reader_thread, ())
 
         self.SHAKE.synced = True
         return self.SHAKE.synced
@@ -223,7 +223,7 @@ class ShakeDevice:
         if self.port_lock and self.port_lock.locked():
             self.port_lock.release()
 
-        self.port_lock = thread.allocate_lock()
+        self.port_lock = _thread.allocate_lock()
         with self.port_lock: # acquires the lock
             try:
                 self.thread_done = False
@@ -239,7 +239,7 @@ class ShakeDevice:
                     self.SHAKE.parse_packet(packet, packet_type)
             except Exception as e:
                 import sys, traceback
-                print("\n".join(traceback.format_exception(*sys.exc_info())))
+                print(("\n".join(traceback.format_exception(*sys.exc_info()))))
                 # TODO do something more sensible with exception info, eg use 
                 # it for a getlasterror() function
                 pass

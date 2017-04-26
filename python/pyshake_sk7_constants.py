@@ -121,7 +121,7 @@ SK7_NV_REG_RPH_CONFIG = 0x0046
     SK7_RAW_DATA_IMU2,
     SK7_RAW_DATA_IMU3,
     SK7_RAW_DATA_IMU4,
-) = range(SK7_NUM_PACKET_TYPES)
+) = list(range(SK7_NUM_PACKET_TYPES))
 
 class SK7PacketInfo(object):
 
