@@ -30,7 +30,10 @@ Top-level module for the Python SHAKE driver implementation. Supports both
 SK6 and SK7 SHAKEs. 
 """
 
-import _thread
+try:
+    import thread as _thread
+except ImportError:
+    import _thread
 from time import sleep
 
 from pyshake_constants import *
